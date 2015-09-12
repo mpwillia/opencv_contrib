@@ -318,9 +318,15 @@ static Mat spatial_histogram(InputArray _src, int numPatterns,
         for(int j = 0; j < grid_x; j++) {
             Mat src_cell = Mat(src, Range(i*height,(i+1)*height), Range(j*width,(j+1)*width));
             Mat cell_hist = histc(src_cell, 0, (numPatterns-1), true);
+
             // copy to the result matrix
             Mat result_row = result.row(resultRowIdx);
             cell_hist.reshape(1,1).convertTo(result_row, CV_32FC1);
+
+            // free memory
+            src_cell.deallocate();
+            cell_hist.deallocate();
+   
             // increase row count in result matrix
             resultRowIdx++;
         }
@@ -340,6 +346,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 }
 
 void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
+
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
         String error_message = "The images are expected as InputArray::STD_VECTOR_MAT (a std::vector<Mat>) or _InputArray::STD_VECTOR_VECTOR (a std::vector< std::vector<...> >).";
         CV_Error(Error::StsBadArg, error_message);
@@ -351,6 +358,7 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
         String error_message = format("Labels must be given as integer (CV_32SC1). Expected %d, but was %d.", CV_32SC1, _in_labels.type());
         CV_Error(Error::StsUnsupportedFormat, error_message);
     }
+
     // get the vector of matrices
     std::vector<Mat> src;
     _in_src.getMatVector(src);
@@ -361,15 +369,18 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
         String error_message = format("The number of samples (src) must equal the number of labels (labels). Was len(samples)=%d, len(labels)=%d.", src.size(), _labels.total());
         CV_Error(Error::StsBadArg, error_message);
     }
+
     // if this model should be trained without preserving old data, delete old model data
     if(!preserveData) {
         _labels.release();
         _histograms.clear();
     }
+
     // append labels to _labels matrix
     for(size_t labelIdx = 0; labelIdx < labels.total(); labelIdx++) {
         _labels.push_back(labels.at<int>((int)labelIdx));
     }
+
     // store the spatial histograms of the original data
     for(size_t sampleIdx = 0; sampleIdx < src.size(); sampleIdx++) {
         // calculate lbp image
@@ -383,7 +394,11 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
                 true);
         // add to templates
         _histograms.push_back(p);
+
+        // free memory
+        lbp_image.deallocate();
     }
+
 }
 
 void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
