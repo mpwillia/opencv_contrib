@@ -324,8 +324,8 @@ static Mat spatial_histogram(InputArray _src, int numPatterns,
             cell_hist.reshape(1,1).convertTo(result_row, CV_32FC1);
 
             // free memory
-            //src_cell.deallocate();
-            //cell_hist.deallocate();
+            src_cell.deallocate();
+            cell_hist.deallocate();
    
             // increase row count in result matrix
             resultRowIdx++;
@@ -396,7 +396,7 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
         _histograms.push_back(p);
 
         // free memory
-        lbp_image.deallocate();
+        //lbp_image.deallocate();
     }
 
 }
