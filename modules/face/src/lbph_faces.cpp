@@ -324,7 +324,7 @@ static Mat spatial_histogram(InputArray _src, int numPatterns,
             cell_hist.reshape(1,1).convertTo(result_row, CV_32FC1);
 
             // free memory
-            src_cell.deallocate();
+            //src_cell.deallocate();
             cell_hist.deallocate();
    
             // increase row count in result matrix
