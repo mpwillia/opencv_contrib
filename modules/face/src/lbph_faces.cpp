@@ -398,6 +398,8 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
         // free memory
         //lbp_image.release();
     }
+   
+   std::out << "Histograms size: " << _histograms.size() << "\n";
 
 }
 
