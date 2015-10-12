@@ -386,8 +386,7 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
         // calculate lbp image
         Mat lbp_image = elbp(src[sampleIdx], _radius, _neighbors);
 
-         if(sampleIdx == 0)
-            std::cout << "lbp_image size = " << lbp_image.cols << "x" << lbp_image.rows << " | depth = " << lbp_image.depth() << " | channels = " << lbp_image.channels() << "\n";
+        std::cout << "lbp_image size = " << lbp_image.cols << "x" << lbp_image.rows << " | depth = " << lbp_image.depth() << " | channels = " << lbp_image.channels() << "\n";
          
         // get spatial histogram from this lbp image
         Mat p = spatial_histogram(
@@ -397,8 +396,7 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
                 _grid_y, /* grid size y */
                 true);
 
-         if(sampleIdx == 0)
-            std::cout << "p size = " << p.cols << "x" << p.rows << " | depth = " << p.depth() << " | channels = " << p.channels() << "\n";
+        std::cout << "p size = " << p.cols << "x" << p.rows << " | depth = " << p.depth() << " | channels = " << p.channels() << "\n";
 
         // add to templates
         _histograms.push_back(p);
