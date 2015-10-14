@@ -347,6 +347,8 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 
 void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
 
+    std::cout << "JUST FOR TESTING\n"
+
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
         String error_message = "The images are expected as InputArray::STD_VECTOR_MAT (a std::vector<Mat>) or _InputArray::STD_VECTOR_VECTOR (a std::vector< std::vector<...> >).";
         CV_Error(Error::StsBadArg, error_message);
