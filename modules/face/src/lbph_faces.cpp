@@ -429,6 +429,7 @@ void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
             true /* normed histograms */);
     // find 1-nearest neighbor
     minDist = DBL_MAX;
+    double maxDist = 0;
     minClass = -1;
     for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
         double dist = compareHist(_histograms[sampleIdx], query, HISTCMP_CHISQR_ALT);
@@ -436,7 +437,11 @@ void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
             minDist = dist;
             minClass = _labels.at<int>((int) sampleIdx);
         }
+
+        if(dist > maxDist)
+            maxDist = dist;
     }
+    std::cout << "Max Dist = " << maxDist;
 }
 
 int LBPH::predict(InputArray _src) const {
@@ -451,6 +456,5 @@ Ptr<LBPHFaceRecognizer> createLBPHFaceRecognizer(int radius, int neighbors,
 {
     return makePtr<LBPH>(radius, neighbors, grid_x, grid_y, threshold);
 }
-
 
 }}
