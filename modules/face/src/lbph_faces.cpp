@@ -441,7 +441,7 @@ void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         if(dist > maxDist)
             maxDist = dist;
     }
-    std::cout << "\nMax Dist = " << maxDist << "  -->  ";
+    std::cout << "\n  -->  Max Dist = " << maxDist;
 }
 
 int LBPH::predict(InputArray _src) const {
