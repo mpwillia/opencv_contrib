@@ -103,6 +103,8 @@ public:
     // See FaceRecognizer::save.
     void save(FileStorage& fs) const;
 
+    void test();
+
     CV_IMPL_PROPERTY(int, GridX, _grid_x)
     CV_IMPL_PROPERTY(int, GridY, _grid_y)
     CV_IMPL_PROPERTY(int, Radius, _radius)
