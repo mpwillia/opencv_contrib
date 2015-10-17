@@ -137,12 +137,9 @@ void LBPH::load(const FileStorage& fs) {
 }
 
 void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
-
-    //String heuristics_dir(parent_dir);
-    //heuristics_dir += "/" + modelname + "-heuristics";
-
-    String filename(parent_dir);
-    filename += "/" + modelname + ".yml";
+    
+    // create our main info file
+    String filename(parent_dir + "/" + modelname + ".yml");
     FileStorage fs(filename, FileStorage::WRITE);
     if (!fs.isOpened())
         CV_Error(Error::StsError, "File can't be opened for writing!");
@@ -159,12 +156,29 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
 
     fs.release();
 
+    // create our heuristics directory
+    String histogram_dir(parent_dir + "/" + modelname + "-heuristics");
+    system(("mkdir " + histogram_dir).c_str());
 
-    String heuristics_dir(parent_dir);
-    heuristics_dir += "/" + modelname + "-heuristics";
-    
-    //string mkdircmd = "mkdir"
-    system(("mkdir " + heuristics_dir).c_str());
+    // write our heuristics
+    for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
+        
+        FileStorage histogram_file(histogram_dir + "/" + modelname + "-" + _labels.at<int>((int) sampleIdx) + ".yml");
+        if (!histogram_file.isOpened())
+            CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
+
+        heuristic_file << "histogram" << _histograms[sampleIdx];
+        heuristic_file.release();
+
+        //double dist = compareHist(_histograms[sampleIdx], query, HISTCMP_CHISQR_ALT);
+        //if((dist < minDist) && (dist < _threshold)) {
+        //    minDist = dist;
+        //    minClass = _labels.at<int>((int) sampleIdx);
+        //}
+
+        //if(dist > maxDist)
+        //    maxDist = dist;
+    }
 } 
 
 // See FaceRecognizer::save.
