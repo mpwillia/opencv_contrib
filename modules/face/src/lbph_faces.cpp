@@ -143,7 +143,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     system(("mkdir " + model_dir).c_str());
 
     // create a map between our labels and our histograms 
-    std::map<int, std::vector<Mat>> histograms_map;
+    std::map<int, std::vector<Mat> > histograms_map;
     for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
         histograms_map[sampleIdx].push_back(_histograms[sampleIdx]);
     }
@@ -158,7 +158,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     fs << "neighbors" << _neighbors;
     fs << "grid_x" << _grid_x;
     fs << "grid_y" << _grid_y;
-    fs << "numlabels" << histograms_map.size();
+    fs << "numlabels" << (int)histograms_map.size();
     fs << "labels" << _labels;
     fs << "labelsInfo" << "[";
     for (std::map<int, String>::const_iterator it = _labelsInfo.begin(); it != _labelsInfo.end(); it++)
