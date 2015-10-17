@@ -144,7 +144,7 @@ void LBPH::saveTest(const String &dirname, const String &modelname) const {
     if (!fs.isOpened())
         CV_Error(Error::StsError, "File can't be opened for writing!");
     
-    std::cout << "would write to '" << filename << "'" 
+    std::cout << "would write to '" << filename << "'";
 
     fs.release();
 } 
