@@ -18,7 +18,6 @@
 #include "precomp.hpp"
 #include "opencv2/face.hpp"
 #include "face_basic.hpp"
-#include <string>
 
 namespace cv { namespace face {
 
@@ -164,7 +163,9 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     // write our heuristics
     for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
         
-        String histogram_filename(histogram_dir + "/" + modelname + "-" + std::to_string(_labels.at<int>((int) sampleIdx)) + ".yml");
+        char label[16];
+        sprintf(label, "%d", _labels.at<int>((int) sampleIdx));
+        String histogram_filename(histogram_dir + "/" + modelname + "-" + label + ".yml");
         FileStorage histogram_file(histogram_filename, FileStorage::WRITE);
         if (!histogram_file.isOpened())
             CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
