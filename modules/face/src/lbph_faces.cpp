@@ -18,6 +18,7 @@
 #include "precomp.hpp"
 #include "opencv2/face.hpp"
 #include "face_basic.hpp"
+#include <string>
 
 namespace cv { namespace face {
 
