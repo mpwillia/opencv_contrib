@@ -124,7 +124,7 @@ public:
     CV_WRAP virtual std::vector<cv::Mat> getHistograms() const = 0;
     CV_WRAP virtual cv::Mat getLabels() const = 0;
 
-    CV_WRAP virtual void test() = 0;
+    CV_WRAP virtual void saveTest(const String &dirname, const String &modelname) const = 0;
 };
 
 /**

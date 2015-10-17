@@ -102,8 +102,8 @@ public:
 
     // See FaceRecognizer::save.
     void save(FileStorage& fs) const;
-
-    void test();
+    
+    void saveTest(const String &dirname, const String &modelname) const;
 
     CV_IMPL_PROPERTY(int, GridX, _grid_x)
     CV_IMPL_PROPERTY(int, GridY, _grid_y)
@@ -136,8 +136,17 @@ void LBPH::load(const FileStorage& fs) {
     }
 }
 
-void LBPH::test() {
-    std::cout << "yup, this is a test\n";
+void LBPH::saveTest(const String &dirname, const String &modelname) const {
+
+    String filename(dirname);
+    filename += "/" + modelname;
+    FileStorage fs(filename, FileStorage::WRITE);
+    if (!fs.isOpened())
+        CV_Error(Error::StsError, "File can't be opened for writing!");
+    
+    std::cout << "would write to '" << filename << "'" 
+
+    fs.release();
 } 
 
 // See FaceRecognizer::save.
