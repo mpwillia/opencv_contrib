@@ -163,12 +163,13 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     // write our heuristics
     for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
         
-        FileStorage histogram_file(histogram_dir + "/" + modelname + "-" + _labels.at<int>((int) sampleIdx) + ".yml");
+        String histogram_filename(histogram_dir + "/" + modelname + "-" + _labels.at<int>((int) sampleIdx) + ".yml")
+        FileStorage histogram_file(histogram_filename);
         if (!histogram_file.isOpened())
             CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
 
-        heuristic_file << "histogram" << _histograms[sampleIdx];
-        heuristic_file.release();
+        histogram_file << "histogram" << _histograms[sampleIdx];
+        histogram_file.release();
 
         //double dist = compareHist(_histograms[sampleIdx], query, HISTCMP_CHISQR_ALT);
         //if((dist < minDist) && (dist < _threshold)) {
