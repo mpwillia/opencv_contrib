@@ -137,9 +137,13 @@ void LBPH::load(const FileStorage& fs) {
 }
 
 void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
-    
+   
+    // create our model dir
+    String model_dir(parent_dir + "/" + modelname);
+    system(("mkdir " + modeldir_name).c_str());
+
     // create our main info file
-    String filename(parent_dir + "/" + modelname + ".yml");
+    String filename(model_dir + "/" + modelname + ".yml");
     FileStorage fs(filename, FileStorage::WRITE);
     if (!fs.isOpened())
         CV_Error(Error::StsError, "File can't be opened for writing!");
@@ -157,16 +161,19 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     fs.release();
 
     // create our heuristics directory
-    String histogram_dir(parent_dir + "/" + modelname + "-heuristics");
+    String histogram_dir(model_dir + "/" + modelname + "-heuristics");
     system(("mkdir " + histogram_dir).c_str());
-
-    // write our heuristics
+   
+    // write our histogram
     for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
         
         char label[16];
         sprintf(label, "%d", _labels.at<int>((int) sampleIdx));
         String histogram_filename(histogram_dir + "/" + modelname + "-" + label + ".yml");
-        FileStorage histogram_file(histogram_filename, FileStorage::WRITE);
+        
+        // check if this histogram file exists already
+
+        FileStorage histogram_file(histogram_filename, FileStorage::APPEND);
         if (!histogram_file.isOpened())
             CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
 
