@@ -164,7 +164,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
         
         String histogram_filename(histogram_dir + "/" + modelname + "-" + _labels.at<int>((int) sampleIdx) + ".yml");
-        FileStorage histogram_file(histogram_filename);
+        FileStorage histogram_file(histogram_filename, FileStorage::WRITE);
         if (!histogram_file.isOpened())
             CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
 
