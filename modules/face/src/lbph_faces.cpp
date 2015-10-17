@@ -162,14 +162,8 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
 
     String heuristics_dir(parent_dir);
     heuristics_dir += "/" + modelname + "-heuristics";
-    String testfile(heuristics_dir);
-    testfile += "/test.yml";
-
-    FileStorage test(testfile, FileStorage::WRITE);
-    if (!test.isOpened())
-        CV_Error(Error::StsError, "File can't be opened for writing!");
-
-    test.release();
+    
+    system("mkdir " + heuristics_dir);
 } 
 
 // See FaceRecognizer::save.
