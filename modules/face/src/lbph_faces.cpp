@@ -139,12 +139,20 @@ void LBPH::load(const FileStorage& fs) {
 void LBPH::saveTest(const String &dirname, const String &modelname) const {
 
     String filename(dirname);
-    filename += "/" + modelname;
+    filename += "/" + modelname + ".yml";
     FileStorage fs(filename, FileStorage::WRITE);
     if (!fs.isOpened())
         CV_Error(Error::StsError, "File can't be opened for writing!");
-    
-    std::cout << "would write to '" << filename << "'";
+
+    fs << "radius" << _radius;
+    fs << "neighbors" << _neighbors;
+    fs << "grid_x" << _grid_x;
+    fs << "grid_y" << _grid_y;
+    fs << "labels" << _labels;
+    fs << "labelsInfo" << "[";
+    for (std::map<int, String>::const_iterator it = _labelsInfo.begin(); it != _labelsInfo.end(); it++)
+        fs << LabelInfo(it->first, it->second);
+    fs << "]";
 
     fs.release();
 } 
