@@ -142,6 +142,12 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     String model_dir(parent_dir + "/" + modelname);
     system(("mkdir " + model_dir).c_str());
 
+    // create a map between our labels and our histograms 
+    std::map<int, std::vector<Mat>> histograms_map;
+    for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
+        histograms_map[sampleIdx].push_back(_histograms[sampleIdx]);
+    }
+
     // create our main info file
     String filename(model_dir + "/" + modelname + ".yml");
     FileStorage fs(filename, FileStorage::WRITE);
@@ -152,6 +158,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     fs << "neighbors" << _neighbors;
     fs << "grid_x" << _grid_x;
     fs << "grid_y" << _grid_y;
+    fs << "numlabels" << histograms_map.size();
     fs << "labels" << _labels;
     fs << "labelsInfo" << "[";
     for (std::map<int, String>::const_iterator it = _labelsInfo.begin(); it != _labelsInfo.end(); it++)
@@ -160,7 +167,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
 
     fs.release();
 
-    // create our heuristics directory
+    // create our histogram directory
     String histogram_dir(model_dir + "/" + modelname + "-heuristics");
     system(("mkdir " + histogram_dir).c_str());
    
