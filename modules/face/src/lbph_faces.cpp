@@ -136,9 +136,12 @@ void LBPH::load(const FileStorage& fs) {
     }
 }
 
-void LBPH::saveTest(const String &dirname, const String &modelname) const {
+void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
 
-    String filename(dirname);
+    //String heuristics_dir(parent_dir);
+    //heuristics_dir += "/" + modelname + "-heuristics";
+
+    String filename(parent_dir);
     filename += "/" + modelname + ".yml";
     FileStorage fs(filename, FileStorage::WRITE);
     if (!fs.isOpened())
@@ -155,6 +158,18 @@ void LBPH::saveTest(const String &dirname, const String &modelname) const {
     fs << "]";
 
     fs.release();
+
+
+    String heuristics_dir(parent_dir);
+    heuristics_dir += "/" + modelname + "-heuristics";
+    String testfile(heuristics_dir);
+    testfile += "/test.yml";
+
+    FileStorage test(testfile, FileStorage::WRITE);
+    if (!test.isOpened())
+        CV_Error(Error::StsError, "File can't be opened for writing!");
+
+    test.release();
 } 
 
 // See FaceRecognizer::save.
