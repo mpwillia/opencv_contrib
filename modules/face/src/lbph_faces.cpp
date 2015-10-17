@@ -163,7 +163,8 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     String heuristics_dir(parent_dir);
     heuristics_dir += "/" + modelname + "-heuristics";
     
-    system("mkdir " + heuristics_dir);
+    //string mkdircmd = "mkdir"
+    system(("mkdir " + heuristics_dir).c_str());
 } 
 
 // See FaceRecognizer::save.
