@@ -140,7 +140,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
    
     // create our model dir
     String model_dir(parent_dir + "/" + modelname);
-    system(("mkdir " + modeldir_name).c_str());
+    system(("mkdir " + model_dir).c_str());
 
     // create our main info file
     String filename(model_dir + "/" + modelname + ".yml");
