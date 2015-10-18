@@ -120,11 +120,13 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
     String model_dir(parent_dir + "/" + modelname);
     String filename(model_dir + "/" + modelname + ".yml");
     FileStorage infofile(filename, FileStorage::READ);
+    if (!infofile.isOpened())
+        CV_Error(Error::StsError, "File '" + filename + "' can't be opened for writing!");
     infofile["radius"] >> _radius;
     infofile["neighbors"] >> _neighbors;
     infofile["grid_x"] >> _grid_x;
     infofile["grid_y"] >> _grid_y;
-    
+
     FileNode label_info = infofile["label_info"];
     for (FileNodeIterator it = label_info.begin(); it != label_info.end(); ++it) {
         FileNode item = *it;
@@ -132,7 +134,7 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
         std::cout << " found key: " << key << "\n";
     }  
     
-    
+    infofile.release();    
     /*
     std::vector<int> labels;
     std::vector<int> numhists;
