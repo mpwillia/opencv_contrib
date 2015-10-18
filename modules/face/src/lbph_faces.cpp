@@ -118,7 +118,7 @@ public:
 void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
     
     String model_dir(parent_dir + "/" + modelname);
-    String filename(model_dir + "/" + modelname + .yml);
+    String filename(model_dir + "/" + modelname + ".yml");
     FileStorage infofile(filename, FileStorage::READ);
     infofile["radius"] >> _radius;
     infofile["neighbors"] >> _neighbors;
@@ -131,22 +131,23 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
     std::vector<int> numhists;
 
     label_info["labels"] >> labels;
-    lable_info["numhists"] >> numhists;
+    label_info["numhists"] >> numhists;
 
-    std::cout << "labels: [ "
+    std::cout << "labels: [ ";
     for(int i = 0; i < labels.size(); i++) {
         if(i != 0)
             std::cout << ", ";
         std::cout << labels.at(i);
     }
-    sdt::cout << " ]\n"
-    std::cout << "numhists: [ "
+    sdt::cout << " ]\n";
+    std::cout << "numhists: [ ";
     for(int i = 0; i < labels.size(); i++) {
         if(i != 0)
             std::cout << ", ";
         std::cout << labels.at(i);
     }
     std::cout << " ]\n";
+
 }
 
 void LBPH::load(const FileStorage& fs) {
