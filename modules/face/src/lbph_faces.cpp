@@ -175,7 +175,21 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     // create our histogram directory
     String histogram_dir(model_dir + "/" + modelname + "-heuristics");
     system(("mkdir " + histogram_dir).c_str());
-   
+
+    for(size_t idx = 0; idx < unique_labels.size(); idx++) {
+        char label[16];
+        sprintf(label, "%d", unique_labels.at(idx));
+        String histogram_filename(histogram_dir + "/" + modelname + "-" + label + ".yml");
+
+        FileStorage histogram_file(histogram_filename, FileStorage::WRITE);
+        if (!histogram_file.isOpened())
+            CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
+
+        histogram_file << "histogram" << histograms_map.at(unique_labels.at(idx));
+        histogram_file.release();
+    } 
+
+    /*
     // write our histogram
     for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
         
@@ -201,6 +215,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
         //if(dist > maxDist)
         //    maxDist = dist;
     }
+    */
 } 
 
 // See FaceRecognizer::save.
