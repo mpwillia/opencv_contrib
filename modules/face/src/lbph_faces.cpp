@@ -119,7 +119,8 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
     
     String model_dir(parent_dir + "/" + modelname);
     String filename(model_dir + "/" + modelname + ".yml");
-    FileStorage infofile(filename, FileStorage::READ);
+   
+   FileStorage infofile(filename, FileStorage::READ);
     if (!infofile.isOpened())
         CV_Error(Error::StsError, "File '" + filename + "' can't be opened for writing!");
     
