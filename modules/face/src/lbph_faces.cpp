@@ -171,7 +171,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     fs << "label info" << "[";
     fs << "labels" << unique_labels;
     fs << "numhists" << label_num_hists;
-    fs << "]"
+    fs << "]";
     //fs << "labelsInfo" << "[";
     //for (std::map<int, String>::const_iterator it = _labelsInfo.begin(); it != _labelsInfo.end(); it++)
     //    fs << LabelInfo(it->first, it->second);
