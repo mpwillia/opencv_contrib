@@ -147,6 +147,11 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
         histograms_map[_labels.at<int>((int)sampleIdx)].push_back(_histograms[sampleIdx]);
     }
+    
+    //int unique_labels[(int)histograms_map.size()];
+    std::vector<int> unique_labels;
+    for(std::map<int, std::vector<Mat> >::iterator it = histograms_map.begin(); it != histograms_map.end(); ++it)
+        unique_labels.push_back(it->first);
 
     // create our main info file
     String filename(model_dir + "/" + modelname + ".yml");
@@ -159,11 +164,11 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     fs << "grid_x" << _grid_x;
     fs << "grid_y" << _grid_y;
     fs << "numlabels" << (int)histograms_map.size();
-    fs << "labels" << _labels;
-    fs << "labelsInfo" << "[";
-    for (std::map<int, String>::const_iterator it = _labelsInfo.begin(); it != _labelsInfo.end(); it++)
-        fs << LabelInfo(it->first, it->second);
-    fs << "]";
+    fs << "labels" << unique_labels;
+    //fs << "labelsInfo" << "[";
+    //for (std::map<int, String>::const_iterator it = _labelsInfo.begin(); it != _labelsInfo.end(); it++)
+    //    fs << LabelInfo(it->first, it->second);
+    //fs << "]";
 
     fs.release();
 
