@@ -172,6 +172,8 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     fs << "labels" << unique_labels;
     fs << "numhists" << label_num_hists;
     fs << "}";
+    fs << "histogram_size" << (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
+
     //fs << "labelsInfo" << "[";
     //for (std::map<int, String>::const_iterator it = _labelsInfo.begin(); it != _labelsInfo.end(); it++)
     //    fs << LabelInfo(it->first, it->second);
