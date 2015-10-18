@@ -134,17 +134,17 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
     label_info["numhists"] >> numhists;
 
     std::cout << "labels: [ ";
-    for(int i = 0; i < labels.size(); i++) {
+    for(size_t i = 0; i < labels.size(); i++) {
         if(i != 0)
             std::cout << ", ";
-        std::cout << labels.at(i);
+        std::cout << labels.at((int)i);
     }
     sdt::cout << " ]\n";
     std::cout << "numhists: [ ";
-    for(int i = 0; i < labels.size(); i++) {
+    for(size_t i = 0; i < labels.size(); i++) {
         if(i != 0)
             std::cout << ", ";
-        std::cout << labels.at(i);
+        std::cout << labels.at((int)i);
     }
     std::cout << " ]\n";
 
