@@ -103,7 +103,8 @@ public:
     // See FaceRecognizer::save.
     void save(FileStorage& fs) const;
     
-    void saveTest(const String &dirname, const String &modelname) const;
+    void loadTest(const String &parent_dir, const String &modelname) const;
+    void saveTest(const String &parent_dir, const String &modelname) const;
 
     CV_IMPL_PROPERTY(int, GridX, _grid_x)
     CV_IMPL_PROPERTY(int, GridY, _grid_y)
@@ -114,6 +115,39 @@ public:
     CV_IMPL_PROPERTY_RO(cv::Mat, Labels, _labels)
 };
 
+void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
+    
+    String model_dir(parent_dir + "/" + modelname);
+    String filename(model_dir + "/" + modelname + .yml);
+    FileStorage infofile(filename, FileStorage::READ);
+    infofile["radius"] >> _radius;
+    infofile["neighbors"] >> _neighbors;
+    infofile["grid_x"] >> _grid_x;
+    infofile["grid_y"] >> _grid_y;
+    
+    FileNode label_info = infofile["label_info"];
+
+    std::vector<int> labels;
+    std::vector<int> numhists;
+
+    label_info["labels"] >> labels;
+    lable_info["numhists"] >> numhists;
+
+    std::cout << "labels: [ "
+    for(int i = 0; i < labels.size(); i++) {
+        if(i != 0)
+            std::cout << ", ";
+        std::cout << labels.at(i);
+    }
+    sdt::cout << " ]\n"
+    std::cout << "numhists: [ "
+    for(int i = 0; i < labels.size(); i++) {
+        if(i != 0)
+            std::cout << ", ";
+        std::cout << labels.at(i);
+    }
+    std::cout << " ]\n";
+}
 
 void LBPH::load(const FileStorage& fs) {
     fs["radius"] >> _radius;
@@ -173,12 +207,6 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     fs << "numhists" << label_num_hists;
     fs << "}";
     fs << "histogram_size" << (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
-
-    //fs << "labelsInfo" << "[";
-    //for (std::map<int, String>::const_iterator it = _labelsInfo.begin(); it != _labelsInfo.end(); it++)
-    //    fs << LabelInfo(it->first, it->second);
-    //fs << "]";
-
     fs.release();
 
     // create our histogram directory
@@ -197,34 +225,6 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
         histogram_file << "histogram" << histograms_map.at(unique_labels.at(idx));
         histogram_file.release();
     } 
-
-    /*
-    // write our histogram
-    for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
-        
-        char label[16];
-        sprintf(label, "%d", _labels.at<int>((int) sampleIdx));
-        String histogram_filename(histogram_dir + "/" + modelname + "-" + label + ".yml");
-        
-        // check if this histogram file exists already
-
-        FileStorage histogram_file(histogram_filename, FileStorage::APPEND);
-        if (!histogram_file.isOpened())
-            CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
-
-        histogram_file << "histogram" << _histograms[sampleIdx];
-        histogram_file.release();
-
-        //double dist = compareHist(_histograms[sampleIdx], query, HISTCMP_CHISQR_ALT);
-        //if((dist < minDist) && (dist < _threshold)) {
-        //    minDist = dist;
-        //    minClass = _labels.at<int>((int) sampleIdx);
-        //}
-
-        //if(dist > maxDist)
-        //    maxDist = dist;
-    }
-    */
 } 
 
 // See FaceRecognizer::save.
