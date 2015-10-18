@@ -145,7 +145,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     // create a map between our labels and our histograms 
     std::map<int, std::vector<Mat> > histograms_map;
     for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
-        histograms_map[sampleIdx].push_back(_histograms[sampleIdx]);
+        histograms_map[_labels.at<int>((int)sampleIdx)].push_back(_histograms[sampleIdx]);
     }
 
     // create our main info file
