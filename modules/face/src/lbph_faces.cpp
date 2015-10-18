@@ -126,7 +126,7 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
     infofile["grid_y"] >> _grid_y;
     
     FileNode label_info = infofile["label_info"];
-    for (FileNodeIterator it = label_info.begin(); it != label_info.end()) {
+    for (FileNodeIterator it = label_info.begin(); it != label_info.end(); ++it) {
         FileNode item = *it;
         std::string key = item.name();
         std::cout << " found key: " << key << "\n";
