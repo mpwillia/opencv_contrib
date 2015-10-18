@@ -126,7 +126,14 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
     infofile["grid_y"] >> _grid_y;
     
     FileNode label_info = infofile["label_info"];
-
+    for (FileNodeIterator it = label_info.begin(); it != label_info.end()) {
+        FileNode item = *it;
+        std::string key = item.name();
+        std::cout << " found key: " << key << "\n";
+    }  
+    
+    
+    /*
     std::vector<int> labels;
     std::vector<int> numhists;
 
@@ -139,7 +146,7 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
             std::cout << ", ";
         std::cout << labels.at((int)i);
     }
-    sdt::cout << " ]\n";
+    std::cout << " ]\n";
     std::cout << "numhists: [ ";
     for(size_t i = 0; i < labels.size(); i++) {
         if(i != 0)
@@ -147,7 +154,7 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
         std::cout << labels.at((int)i);
     }
     std::cout << " ]\n";
-
+    */
 }
 
 void LBPH::load(const FileStorage& fs) {
