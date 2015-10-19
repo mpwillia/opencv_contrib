@@ -243,8 +243,6 @@ void LBPH::load_segmented(const String &parent_dir, const String &modelname, boo
         } 
         yaml.release();
         
-        std::cout << "Finished loading " << (int)labels.size() << " label's histograms\n";
-
         /*
         std::vector<Mat> yaml_hists;
         std::vector<Mat> bin_hists;
@@ -275,6 +273,7 @@ void LBPH::load_segmented(const String &parent_dir, const String &modelname, boo
             std::cout << "NOT EQUAL!!!!\n";
         */
     }
+    std::cout << "Finished loading " << (int)labels.size() << " label's histograms\n";
 
 }
 
