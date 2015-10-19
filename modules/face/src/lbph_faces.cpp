@@ -103,7 +103,7 @@ public:
     // See FaceRecognizer::save.
     void save(FileStorage& fs) const;
     
-    void loadTest(const String &parent_dir, const String &modelname) const;
+    void loadTest(const String &parent_dir, const String &modelname);
     void saveTest(const String &parent_dir, const String &modelname) const;
 
     CV_IMPL_PROPERTY(int, GridX, _grid_x)
@@ -115,7 +115,7 @@ public:
     CV_IMPL_PROPERTY_RO(cv::Mat, Labels, _labels)
 };
 
-void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
+void LBPH::loadTest(const String &parent_dir, const String &modelname) {
     
     String model_dir(parent_dir + "/" + modelname);
     String filename(model_dir + "/" + modelname + ".yml");
@@ -124,9 +124,7 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
     if (!infofile.isOpened())
         CV_Error(Error::StsError, "File '" + filename + "' can't be opened for writing!");
     
-    int radius = 0;
-    infofile["radius"] >> radius;
-    _radius = radius;
+    infofile["radius"] >> _radius;
     /*
     infofile["neighbors"] >> _neighbors;
     infofile["grid_x"] >> _grid_x;
