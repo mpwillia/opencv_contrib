@@ -131,19 +131,21 @@ int LBPH::getHistogramSize() const {
     return (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
 }
 
-/*
 void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> histograms) {
     FILE *fp = fopen(filename.c_str(), "r");
     
-    float* buffer = malloc()
-    fread(buffer, sizeof(float), getHistogramSize(), fp);
-    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
-        Mat hist = histograms.at((int)sampleIdx);
-        fwrite(hist.data, sizeof(char), 4 * getHistogramSize(), fp);
+    float buffer[getHistogramSize()];
+    while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
+        Mat hist = Mat::create(1, getHistogramSize(), CV_32F);
+
+        for(int i = 0; i < getHistogramSize(); i++) {
+            hist.at<float>(i) = buffer[i]; 
+        }
+
+        histograms.push_back(hist);
     }
     fclose(fp);
 }
-*/
 
 void LBPH::loadTest(const String &parent_dir, const String &modelname) {
     
@@ -181,6 +183,31 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
     std::cout << " ]\n";
 
     infofile.release();    
+    
+    String histograms_dir(model_dir + "/" + modelname + "-histograms");
+    for(size_t label = 0; label < labels.size(); label++) {
+        std::cout << "loading label " << labels.at((int)label) + "\n";
+        String histfilename_base(histograms_dir + "/" + modelname + "-" + labels.at((int)label));
+        String histfilename_yaml(histfilename_base + ".yml");
+        String histfilename_bin(histfilename_base + ".bin");
+        
+        std::vector<Mat> yaml_hists;
+        std::vector<Mat> bin_hists;
+
+        FileStorage yaml(histfilename_yaml, FileStorage::READ);
+        yaml["histograms"] >> yaml_hists;
+
+        loadRawHistograms(histfilename_bin, bin_hists);
+        
+        if(matEquals(yaml_hists.at(0), bin_hists.at(0)))
+            std::cout << "FIRSTS ARE EQUAL!!!!!\n";
+        else
+            std::cout << "NOT EQUAL!!!!\n";
+
+        break;
+    }
+
+
 }
 
 void LBPH::load(const FileStorage& fs) {
@@ -253,7 +280,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     fs.release();
 
     // create our histogram directory
-    String histogram_dir(model_dir + "/" + modelname + "-heuristics");
+    String histogram_dir(model_dir + "/" + modelname + "-histograms");
     system(("mkdir " + histogram_dir).c_str());
 
     for(size_t idx = 0; idx < unique_labels.size(); idx++) {
