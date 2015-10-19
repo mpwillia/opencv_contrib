@@ -136,7 +136,7 @@ void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> histograms
     
     float buffer[getHistogramSize()];
     while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
-        Mat hist = Mat::create(1, getHistogramSize(), CV_32F);
+        Mat hist = Mat::zeros(1, getHistogramSize(), CV_32F);
 
         for(int i = 0; i < getHistogramSize(); i++) {
             hist.at<float>(i) = buffer[i]; 
@@ -199,7 +199,7 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
 
         loadRawHistograms(histfilename_bin, bin_hists);
         
-        if(matEquals(yaml_hists.at(0), bin_hists.at(0)))
+        if(matsEqual(yaml_hists.at(0), bin_hists.at(0)))
             std::cout << "FIRSTS ARE EQUAL!!!!!\n";
         else
             std::cout << "NOT EQUAL!!!!\n";
