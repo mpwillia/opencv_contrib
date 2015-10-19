@@ -148,8 +148,9 @@ void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histogram
         for(int i = 0; i < getHistogramSize(); i++) {
             hist.at<float>(0, i) = buffer[i]; 
         }
-
+        std::cout << "bin: pushing hist\n";
         histograms.push_back(hist);
+        std::cout << "bin: finished iteration\n";
     }
     fclose(fp);
 }
@@ -209,8 +210,8 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
         std::cout << "loading bin...\n";
         loadRawHistograms(histfilename_bin, bin_hists);
        
-        std::cout << "yaml hists size: " << yaml_hists.size();
-        std::cout << "bin hists size: " << bin_hists.size();
+        std::cout << "yaml hists size: " << yaml_hists.size() << "\n";
+        std::cout << "bin hists size: " << bin_hists.size() << "\n";
        
         if(matsEqual(yaml_hists.at(0), bin_hists.at(0)))
             std::cout << "FIRSTS ARE EQUAL!!!!!\n";
