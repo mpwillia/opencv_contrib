@@ -187,6 +187,7 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
     String histograms_dir(model_dir + "/" + modelname + "-histograms");
     for(size_t label = 0; label < labels.size(); label++) {
         std::cout << "loading label " << labels.at((int)label) + "\n";
+        /*
         String histfilename_base(histograms_dir + "/" + modelname + "-" + labels.at((int)label));
         String histfilename_yaml(histfilename_base + ".yml");
         String histfilename_bin(histfilename_base + ".bin");
@@ -203,7 +204,7 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
             std::cout << "FIRSTS ARE EQUAL!!!!!\n";
         else
             std::cout << "NOT EQUAL!!!!\n";
-
+        */
         break;
     }
 
