@@ -46,9 +46,12 @@ private:
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
     
-    void saveRawHistograms(const String &filename, const std::vector<Mat> &histograms) const;
-    void loadRawHistograms(const String &filename, std::vector<Mat> &histograms);
-
+    //--------------------------------------------------------------------------
+    // Additional Private Functions
+    //--------------------------------------------------------------------------
+    bool saveRawHistograms(const String &filename, const std::vector<Mat> &histograms) const;
+    bool loadRawHistograms(const String &filename, std::vector<Mat> &histograms);
+    
     int getHistogramSize() const;
     bool matsEqual(const Mat &a, const Mat &b) const;
 
@@ -111,9 +114,6 @@ public:
     // See FaceRecognizer::save.
     void save(FileStorage& fs) const;
     
-    void loadTest(const String &parent_dir, const String &modelname, bool binary_hist = false);
-    void saveTest(const String &parent_dir, const String &modelname, bool binary_hist = false) const;
-
     CV_IMPL_PROPERTY(int, GridX, _grid_x)
     CV_IMPL_PROPERTY(int, GridY, _grid_y)
     CV_IMPL_PROPERTY(int, Radius, _radius)
@@ -121,7 +121,20 @@ public:
     CV_IMPL_PROPERTY(double, Threshold, _threshold)
     CV_IMPL_PROPERTY_RO(std::vector<cv::Mat>, Histograms, _histograms)
     CV_IMPL_PROPERTY_RO(cv::Mat, Labels, _labels)
+
+
+    //--------------------------------------------------------------------------
+    // Additional Public Functions 
+    // NOTE: Remember to add header to opencv2/face/facerec.hpp
+    //--------------------------------------------------------------------------
+    void load_segmented(const String &parent_dir, const String &modelname, bool binary_hist = false);
+    void save_segmented(const String &parent_dir, const String &modelname, bool binary_hist = false) const;
 };
+
+
+//------------------------------------------------------------------------------
+// Additional Functions and File IO
+//------------------------------------------------------------------------------
 
 bool LBPH::matsEqual(const Mat &a, const Mat &b) const {
     return countNonZero(a!=b) == 0; 
@@ -131,11 +144,12 @@ int LBPH::getHistogramSize() const {
     return (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
 }
 
-void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histograms) {
+
+bool LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histograms) {
     FILE *fp = fopen(filename.c_str(), "r");
     if(fp == NULL) {
-        std::cout << "cannot open file at '" << filename << "'\n";
-        return;
+        //std::cout << "cannot open file at '" << filename << "'\n";
+        return false;
     }
     
     float buffer[getHistogramSize()];
@@ -148,14 +162,32 @@ void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histogram
         histograms.push_back(hist);
     }
     fclose(fp);
+    return true;
 }
 
-void LBPH::loadTest(const String &parent_dir, const String &modelname, bool binary_hists) {
+bool LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &histograms) const {
+    FILE *fp = fopen(filename.c_str(), "w");
+    if(fp == NULL) {
+        //std::cout << "cannot open file at '" << filename << "'\n";
+        return false;
+    }
+
+    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
+        Mat hist = histograms.at((int)sampleIdx);
+        fwrite(hist.data, sizeof(float), getHistogramSize(), fp);
+    }
+    fclose(fp);
+    return true;
+}
+
+
+
+void LBPH::load_segmented(const String &parent_dir, const String &modelname, bool binary_hists) {
     
     String model_dir(parent_dir + "/" + modelname);
     String filename(model_dir + "/" + modelname + ".yml");
    
-   FileStorage infofile(filename, FileStorage::READ);
+    FileStorage infofile(filename, FileStorage::READ);
     if (!infofile.isOpened())
         CV_Error(Error::StsError, "File '" + filename + "' can't be opened for writing!");
     
@@ -189,7 +221,8 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname, bool bina
 
     String histograms_dir(model_dir + "/" + modelname + "-histograms");
     for(size_t i = 0; i < labels.size(); i++) {
-        std::cout << "loading label '" << labels.at((int)i) << "'\n";
+        std::cout << "\r   Loading " << i << " / " << labels.size();
+        //std::cout << "loading label '" << labels.at((int)i) << "'\r";
 
         char label[16];
         sprintf(label, "%d", labels.at((int)i));
@@ -197,6 +230,22 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname, bool bina
         String histfilename_yaml(histfilename_base + ".yml");
         String histfilename_bin(histfilename_base + ".bin");
         
+        std::vector<Mat> hists;
+        FileStorage yaml(histfilename_yaml, FileStorage::READ);
+        if (yaml.isOpened()) {
+            // attempt to load yaml 
+            yaml["histograms"] >> hists;
+        } 
+        // attempt to load binary
+        else if (!loadRawHistograms(histfilename_bin, hists)) {
+            // loading binary failed
+            std::cout << "cannot load histograms for label " << label << "\n";
+        } 
+        yaml.release();
+        
+        std::cout << "\rFinished loading " << labels.size() << " label's histograms\n";
+
+        /*
         std::vector<Mat> yaml_hists;
         std::vector<Mat> bin_hists;
         
@@ -224,41 +273,14 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname, bool bina
             std::cout << "EQUAL!!!!!\n";
         else
             std::cout << "NOT EQUAL!!!!\n";
+        */
     }
 
 }
 
-void LBPH::load(const FileStorage& fs) {
-    fs["radius"] >> _radius;
-    fs["neighbors"] >> _neighbors;
-    fs["grid_x"] >> _grid_x;
-    fs["grid_y"] >> _grid_y;
-    //read matrices
-    readFileNodeList(fs["histograms"], _histograms);
-    fs["labels"] >> _labels;
-    const FileNode& fn = fs["labelsInfo"];
-    if (fn.type() == FileNode::SEQ)
-    {
-        _labelsInfo.clear();
-        for (FileNodeIterator it = fn.begin(); it != fn.end();)
-        {
-            LabelInfo item;
-            it >> item;
-            _labelsInfo.insert(std::make_pair(item.label, item.value));
-        }
-    }
-}
 
-void LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &histograms) const {
-    FILE *fp = fopen(filename.c_str(), "w");
-    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
-        Mat hist = histograms.at((int)sampleIdx);
-        fwrite(hist.data, sizeof(float), getHistogramSize(), fp);
-    }
-    fclose(fp);
-}
 
-void LBPH::saveTest(const String &parent_dir, const String &modelname, bool binary_hists) const {
+void LBPH::save_segmented(const String &parent_dir, const String &modelname, bool binary_hists) const {
    
     // create our model dir
     String model_dir(parent_dir + "/" + modelname);
@@ -300,8 +322,10 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname, bool bina
     // create our histogram directory
     String histogram_dir(model_dir + "/" + modelname + "-histograms");
     system(("mkdir " + histogram_dir).c_str());
-
+    
+    std::cout << "\n";
     for(size_t idx = 0; idx < unique_labels.size(); idx++) {
+        std::cout << "\rSaving label " << idx << " / " << unique_labels.size();
         char label[16];
         sprintf(label, "%d", unique_labels.at(idx));
         String histogram_filename(histogram_dir + "/" + modelname + "-" + label + ".yml");
@@ -319,7 +343,35 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname, bool bina
             histogram_file.release();
         }
     } 
+    std::cout << "\rFinished saving " << unique_labels.size() << "\n";
+
 } 
+
+//------------------------------------------------------------------------------
+// Standard Functions and File IO
+//------------------------------------------------------------------------------
+
+// See FaceRecognizer::load.
+void LBPH::load(const FileStorage& fs) {
+    fs["radius"] >> _radius;
+    fs["neighbors"] >> _neighbors;
+    fs["grid_x"] >> _grid_x;
+    fs["grid_y"] >> _grid_y;
+    //read matrices
+    readFileNodeList(fs["histograms"], _histograms);
+    fs["labels"] >> _labels;
+    const FileNode& fn = fs["labelsInfo"];
+    if (fn.type() == FileNode::SEQ)
+    {
+        _labelsInfo.clear();
+        for (FileNodeIterator it = fn.begin(); it != fn.end();)
+        {
+            LabelInfo item;
+            it >> item;
+            _labelsInfo.insert(std::make_pair(item.label, item.value));
+        }
+    }
+}
 
 // See FaceRecognizer::save.
 void LBPH::save(FileStorage& fs) const {

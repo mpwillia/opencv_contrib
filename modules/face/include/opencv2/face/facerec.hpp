@@ -124,8 +124,9 @@ public:
     CV_WRAP virtual std::vector<cv::Mat> getHistograms() const = 0;
     CV_WRAP virtual cv::Mat getLabels() const = 0;
 
-    CV_WRAP virtual void saveTest(const String &dirname, const String &modelname, bool binary_hists) const = 0;
-    CV_WRAP virtual void loadTest(const String &dirname, const String &modelname, bool binary_hists) = 0;
+    
+    CV_WRAP virtual void save_segmented(const String &dirname, const String &modelname, bool binary_hists) const = 0;
+    CV_WRAP virtual void load_segmented(const String &dirname, const String &modelname, bool binary_hists) = 0;
 
 };
 
