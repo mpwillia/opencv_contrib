@@ -221,7 +221,7 @@ void LBPH::load_segmented(const String &parent_dir, const String &modelname, boo
 
     String histograms_dir(model_dir + "/" + modelname + "-histograms");
     for(size_t i = 0; i < labels.size(); i++) {
-        std::cout << "Loading " << (int)i << " / " << (int)labels.size() << "\r";
+        std::cout << "Loading " << (int)i << " / " << (int)labels.size() << "\r" << std::flush;
         //std::cout << "loading label '" << labels.at((int)i) << "'\r";
 
         char label[16];
@@ -325,7 +325,7 @@ void LBPH::save_segmented(const String &parent_dir, const String &modelname, boo
     
     std::cout << "\n";
     for(size_t idx = 0; idx < unique_labels.size(); idx++) {
-        std::cout << "Saving label " << (int)idx << " / " << (int)unique_labels.size() << "\r";
+        std::cout << "Saving label " << (int)idx << " / " << (int)unique_labels.size() << "\r" << std::flush;
         char label[16];
         sprintf(label, "%d", unique_labels.at(idx));
         String histogram_filename(histogram_dir + "/" + modelname + "-" + label + ".yml");
