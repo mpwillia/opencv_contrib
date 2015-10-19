@@ -48,6 +48,8 @@ private:
     
     void saveRawHistograms(const String &filename, std::vector<Mat> histograms) const;
 
+    int getHistogramSize() const;
+
 public:
     using FaceRecognizer::save;
     using FaceRecognizer::load;
@@ -118,6 +120,10 @@ public:
     CV_IMPL_PROPERTY_RO(cv::Mat, Labels, _labels)
 };
 
+int LBPH::getHistogramSize() const {
+    return (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
+}
+
 void LBPH::loadTest(const String &parent_dir, const String &modelname) {
     
     String model_dir(parent_dir + "/" + modelname);
@@ -181,7 +187,7 @@ void LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> hist
     FILE *fp = fopen(filename.c_str(), "w");
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         Mat hist = histograms.at((int)sampleIdx);
-        fwrite(hist.data, sizeof(char), sizeof(hist.data), fp);
+        fwrite(hist.data, sizeof(char), 4 * getHistogramSize(), fp);
     }
     fclose(fp);
 }
@@ -222,7 +228,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
     fs << "labels" << unique_labels;
     fs << "numhists" << label_num_hists;
     fs << "}";
-    fs << "histogram_size" << (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
+    fs << "histogram_size" << getHistogramSize();
     fs.release();
 
     // create our histogram directory
