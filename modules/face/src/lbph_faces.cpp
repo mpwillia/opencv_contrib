@@ -131,20 +131,19 @@ int LBPH::getHistogramSize() const {
     return (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
 }
 
+/*
 void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> histograms) {
     FILE *fp = fopen(filename.c_str(), "r");
     
     float* buffer = malloc()
     fread(buffer, sizeof(float), getHistogramSize(), fp);
-    /*
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         Mat hist = histograms.at((int)sampleIdx);
         fwrite(hist.data, sizeof(char), 4 * getHistogramSize(), fp);
     }
-    */
     fclose(fp);
 }
-
+*/
 
 void LBPH::loadTest(const String &parent_dir, const String &modelname) {
     
