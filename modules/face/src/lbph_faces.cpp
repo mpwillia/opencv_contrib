@@ -175,18 +175,18 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
     }
     std::cout << " ]\n";
     std::cout << "numhists: [ ";
-    for(size_t i = 0; i < labels.size(); i++) {
+    for(size_t i = 0; i < numhists.size(); i++) {
         if(i != 0)
             std::cout << ", ";
-        std::cout << labels.at((int)i);
+        std::cout << numhists.at((int)i);
     }
     std::cout << " ]\n";
 
     infofile.release();    
     
     String histograms_dir(model_dir + "/" + modelname + "-histograms");
-    for(size_t label = 0; label < labels.size(); label++) {
-        std::cout << "loading label " << labels.at((int)label) + "\n";
+    for(size_t i = 0; i < labels.size(); i++) {
+        std::cout << "loading label " << labels.at((int)i) + "\n";
         /*
         String histfilename_base(histograms_dir + "/" + modelname + "-" + labels.at((int)label));
         String histfilename_yaml(histfilename_base + ".yml");
