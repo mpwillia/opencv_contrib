@@ -211,9 +211,17 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
        
         std::cout << "yaml hists size: " << yaml_hists.size() << "\n";
         std::cout << "bin hists size: " << bin_hists.size() << "\n";
-       
-        if(matsEqual(yaml_hists.at(0), bin_hists.at(0)))
-            std::cout << "FIRSTS ARE EQUAL!!!!!\n";
+        
+        bool equal = true;
+        for(size_t j = 0; j < yaml_hists.size() && j < bin_hists.size(); j++) {
+            if(!matsEqual(yaml_hists.at((int)j)), bin_hists.at((int)j)) {
+                equal = false;
+                break;
+            }
+        }
+
+        if(equal)
+            std::cout << "EQUAL!!!!!\n";
         else
             std::cout << "NOT EQUAL!!!!\n";
 
