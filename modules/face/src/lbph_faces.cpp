@@ -182,7 +182,6 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
     }
     std::cout << " ]\n";
 
-    infofile.release();    
     
     String histograms_dir(model_dir + "/" + modelname + "-histograms");
     for(size_t i = 0; i < labels.size(); i++) {
@@ -208,6 +207,7 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
         break;
     }
 
+    infofile.release();    
 
 }
 
