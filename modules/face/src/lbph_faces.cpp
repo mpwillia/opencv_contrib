@@ -204,7 +204,6 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
         else
             std::cout << "NOT EQUAL!!!!\n";
         */
-        break;
     }
 
     infofile.release();    
