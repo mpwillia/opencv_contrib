@@ -46,8 +46,8 @@ private:
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
     
-    void saveRawHistograms(const String &filename, const std::vector<Mat> histograms) const;
-    void loadRawHistograms(const String &filename, std::vector<Mat> histograms);
+    void saveRawHistograms(const String &filename, const std::vector<Mat> &histograms) const;
+    void loadRawHistograms(const String &filename, std::vector<Mat> &histograms);
 
     int getHistogramSize() const;
     bool matsEqual(const Mat &a, const Mat &b) const;
