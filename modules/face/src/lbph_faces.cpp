@@ -148,9 +148,7 @@ void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histogram
         for(int i = 0; i < getHistogramSize(); i++) {
             hist.at<float>(0, i) = buffer[i]; 
         }
-        std::cout << "bin: pushing hist\n";
         histograms.push_back(hist);
-        std::cout << "bin: finished iteration\n";
     }
     fclose(fp);
 }
@@ -174,6 +172,8 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
     FileNode label_info = infofile["label_info"];
     label_info["labels"] >> labels;
     label_info["numhists"] >> numhists;
+    
+    infofile.release();
 
     std::cout << "labels: [ ";
     for(size_t i = 0; i < labels.size(); i++) {
@@ -205,7 +205,8 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
         
         std::cout << "loading yaml...\n";
         FileStorage yaml(histfilename_yaml, FileStorage::READ);
-        yaml["histograms"] >> yaml_hists;
+        readFileNodeList(yaml["histograms"], yaml_hists);
+        yaml.release();
 
         std::cout << "loading bin...\n";
         loadRawHistograms(histfilename_bin, bin_hists);
@@ -220,8 +221,6 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
 
         break;
     }
-
-    infofile.release();    
 
 }
 
