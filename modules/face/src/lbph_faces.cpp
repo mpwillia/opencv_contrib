@@ -139,7 +139,7 @@ void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> histograms
         Mat hist = Mat::zeros(1, getHistogramSize(), CV_32F);
 
         for(int i = 0; i < getHistogramSize(); i++) {
-            hist.at<float>(i) = buffer[i]; 
+            hist.at<float>(0, i) = buffer[i]; 
         }
 
         histograms.push_back(hist);
@@ -182,20 +182,9 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
     }
     std::cout << " ]\n";
 
-    
-    std::cout << "labels: [ ";
-    for(size_t i = 0; i < labels.size(); i++) {
-        if(i != 0)
-            std::cout << ", ";
-        std::cout << labels.at((int)i);
-    }
-    std::cout << " ]\n";
-
-
     String histograms_dir(model_dir + "/" + modelname + "-histograms");
     for(size_t i = 0; i < labels.size(); i++) {
         std::cout << "loading label '" << labels.at((int)i) << "'\n";
-        /*
         String histfilename_base(histograms_dir + "/" + modelname + "-" + labels.at((int)label));
         String histfilename_yaml(histfilename_base + ".yml");
         String histfilename_bin(histfilename_base + ".bin");
@@ -212,7 +201,6 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
             std::cout << "FIRSTS ARE EQUAL!!!!!\n";
         else
             std::cout << "NOT EQUAL!!!!\n";
-        */
     }
 
     infofile.release();    
