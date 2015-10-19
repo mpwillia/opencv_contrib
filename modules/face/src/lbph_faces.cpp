@@ -19,6 +19,8 @@
 #include "opencv2/face.hpp"
 #include "face_basic.hpp"
 
+#include <cstdio>
+
 namespace cv { namespace face {
 
 // Face Recognition based on Local Binary Patterns.
@@ -43,7 +45,8 @@ private:
     // corresponding labels in labels, possibly preserving
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
-
+    
+    void saveRawHistograms(const String &filename, std::vector<Mat> histograms);
 
 public:
     using FaceRecognizer::save;
@@ -149,39 +152,8 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
         std::cout << labels.at((int)i);
     }
     std::cout << " ]\n";
-    /*
-    for (FileNodeIterator it = label_info.begin(); it != label_info.end(); ++it) {
-        FileNode item = *it;
-        item["labels"] >> labels;
-        item["numhists"]
-        std::string key = item.name();
-        std::cout << " found key: " << key << "\n";
-    }  
-    */
 
     infofile.release();    
-    /*
-    std::vector<int> labels;
-    std::vector<int> numhists;
-
-    label_info["labels"] >> labels;
-    label_info["numhists"] >> numhists;
-
-    std::cout << "labels: [ ";
-    for(size_t i = 0; i < labels.size(); i++) {
-        if(i != 0)
-            std::cout << ", ";
-        std::cout << labels.at((int)i);
-    }
-    std::cout << " ]\n";
-    std::cout << "numhists: [ ";
-    for(size_t i = 0; i < labels.size(); i++) {
-        if(i != 0)
-            std::cout << ", ";
-        std::cout << labels.at((int)i);
-    }
-    std::cout << " ]\n";
-    */
 }
 
 void LBPH::load(const FileStorage& fs) {
@@ -203,6 +175,15 @@ void LBPH::load(const FileStorage& fs) {
             _labelsInfo.insert(std::make_pair(item.label, item.value));
         }
     }
+}
+
+void LBPH::saveRawHistograms(const String &filename, std::vector<Mat> histograms) {
+    FILE *fp = fopen(filename, "w");
+    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
+        Mat hist = histograms.at((int)sampleIdx);
+        fwrite(hist.data, sizeof(char), sizeof(hist.data), fp);
+    }
+    fclose(fp);
 }
 
 void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
@@ -252,13 +233,16 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
         char label[16];
         sprintf(label, "%d", unique_labels.at(idx));
         String histogram_filename(histogram_dir + "/" + modelname + "-" + label + ".yml");
-
+        String histogram_rawfilename(histogram_dir + "/" + modelname + "-" + label + ".bin");
         FileStorage histogram_file(histogram_filename, FileStorage::WRITE);
         if (!histogram_file.isOpened())
             CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
 
         histogram_file << "histogram" << histograms_map.at(unique_labels.at(idx));
         histogram_file.release();
+        
+        saveRawHistograms(histogram_rawfilename, histograms_map.at(unique_labels.at(idx)));
+
     } 
 } 
 
