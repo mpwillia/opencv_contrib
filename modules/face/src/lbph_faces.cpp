@@ -134,17 +134,14 @@ int LBPH::getHistogramSize() const {
 void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histograms) {
     FILE *fp = fopen(filename.c_str(), "r");
     if(fp == NULL) {
-        std::cout << "bin: cannot open file at '" << filename << "'\n";
+        std::cout << "cannot open file at '" << filename << "'\n";
         return;
     }
     
-    std::cout << "bin: starting loop\n";
     float buffer[getHistogramSize()];
     while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
-        std::cout << "bin: making hist mat\n";
         Mat hist = Mat::zeros(1, getHistogramSize(), CV_32FC1);
         
-        std::cout << "bin: copying buffer to mat\n";
         for(int i = 0; i < getHistogramSize(); i++) {
             hist.at<float>(0, i) = buffer[i]; 
         }
@@ -220,7 +217,6 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
         else
             std::cout << "NOT EQUAL!!!!\n";
 
-        break;
     }
 
 }
