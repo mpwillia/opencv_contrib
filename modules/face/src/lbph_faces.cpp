@@ -136,8 +136,10 @@ void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histogram
     
     float buffer[getHistogramSize()];
     while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
-        Mat hist = Mat::zeros(1, getHistogramSize(), CV_32F);
-
+        std::cout << "bin: making hist mat\n";
+        Mat hist = Mat::zeros(1, getHistogramSize(), CV_32FC1);
+        
+        std::cout << "bin: copying buffer to mat";
         for(int i = 0; i < getHistogramSize(); i++) {
             hist.at<float>(0, i) = buffer[i]; 
         }
@@ -191,10 +193,12 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
         
         std::vector<Mat> yaml_hists;
         std::vector<Mat> bin_hists;
-
+        
+        std::cout << "loading yaml...\n";
         FileStorage yaml(histfilename_yaml, FileStorage::READ);
         yaml["histograms"] >> yaml_hists;
 
+        std::cout << "loading bin...\n";
         loadRawHistograms(histfilename_bin, bin_hists);
         
         if(matsEqual(yaml_hists.at(0), bin_hists.at(0)))
