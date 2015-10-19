@@ -124,12 +124,10 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) const {
     if (!infofile.isOpened())
         CV_Error(Error::StsError, "File '" + filename + "' can't be opened for writing!");
     
-    /*
     infofile["radius"] >> _radius;
     infofile["neighbors"] >> _neighbors;
     infofile["grid_x"] >> _grid_x;
     infofile["grid_y"] >> _grid_y;
-    */
 
     FileNode label_info = infofile["label_info"];
     for (FileNodeIterator it = label_info.begin(); it != label_info.end(); ++it) {
