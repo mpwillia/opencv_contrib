@@ -20,6 +20,7 @@
 #include "face_basic.hpp"
 
 #include <cstdio>
+#include <cstring>
 
 namespace cv { namespace face {
 
@@ -156,9 +157,14 @@ bool LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histogram
     while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
         Mat hist = Mat::zeros(1, getHistogramSize(), CV_32FC1);
         
+        //float* ptr = hist.ptr<float>();
+        memcpy(hist.ptr<float>(), buffer, getHistogramSize() * sizeof(float));
+
+        /*
         for(int i = 0; i < getHistogramSize(); i++) {
             hist.at<float>(0, i) = buffer[i]; 
         }
+        */
         histograms.push_back(hist);
     }
     fclose(fp);
