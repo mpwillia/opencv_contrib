@@ -156,15 +156,7 @@ bool LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histogram
     float buffer[getHistogramSize()];
     while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
         Mat hist = Mat::zeros(1, getHistogramSize(), CV_32FC1);
-        
-        //float* ptr = hist.ptr<float>();
         memcpy(hist.ptr<float>(), buffer, getHistogramSize() * sizeof(float));
-
-        /*
-        for(int i = 0; i < getHistogramSize(); i++) {
-            hist.at<float>(0, i) = buffer[i]; 
-        }
-        */
         histograms.push_back(hist);
     }
     fclose(fp);
@@ -180,7 +172,7 @@ bool LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &his
 
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         Mat hist = histograms.at((int)sampleIdx);
-        fwrite(hist.data, sizeof(float), getHistogramSize(), fp);
+        fwrite(hist.ptr<float>(), sizeof(float), getHistogramSize(), fp);
     }
     fclose(fp);
     return true;
@@ -289,6 +281,9 @@ void LBPH::save_segmented(const String &parent_dir, const String &modelname, boo
    
     // create our model dir
     String model_dir(parent_dir + "/" + modelname);
+
+    // can write WAY faster if the dir doesn't exist already
+    system(("rm -rf " + model_dir).c_str());
     system(("mkdir " + model_dir).c_str());
 
     // create a map between our labels and our histograms 
