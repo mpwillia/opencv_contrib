@@ -194,7 +194,7 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
         std::cout << "loading label '" << labels.at((int)i) << "'\n";
 
         char label[16];
-        sprintf(label, "%d", unique_labels.at(idx));
+        sprintf(label, "%d", labels.at((int)i));
         String histfilename_base(histograms_dir + "/" + modelname + "-" + label);
         String histfilename_yaml(histfilename_base + ".yml");
         String histfilename_bin(histfilename_base + ".bin");
