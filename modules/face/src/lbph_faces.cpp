@@ -150,7 +150,7 @@ void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histogram
     fclose(fp);
 }
 
-void LBPH::loadTest(const String &parent_dir, const String &modelname, bool binary_hists = false) {
+void LBPH::loadTest(const String &parent_dir, const String &modelname, bool binary_hists) {
     
     String model_dir(parent_dir + "/" + modelname);
     String filename(model_dir + "/" + modelname + ".yml");
@@ -258,7 +258,7 @@ void LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &his
     fclose(fp);
 }
 
-void LBPH::saveTest(const String &parent_dir, const String &modelname, bool binary_hists = false) const {
+void LBPH::saveTest(const String &parent_dir, const String &modelname, bool binary_hists) const {
    
     // create our model dir
     String model_dir(parent_dir + "/" + modelname);
