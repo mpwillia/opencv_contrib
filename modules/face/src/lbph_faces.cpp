@@ -111,8 +111,8 @@ public:
     // See FaceRecognizer::save.
     void save(FileStorage& fs) const;
     
-    void loadTest(const String &parent_dir, const String &modelname);
-    void saveTest(const String &parent_dir, const String &modelname) const;
+    void loadTest(const String &parent_dir, const String &modelname, bool binary_hist = false);
+    void saveTest(const String &parent_dir, const String &modelname, bool binary_hist = false) const;
 
     CV_IMPL_PROPERTY(int, GridX, _grid_x)
     CV_IMPL_PROPERTY(int, GridY, _grid_y)
@@ -150,7 +150,7 @@ void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histogram
     fclose(fp);
 }
 
-void LBPH::loadTest(const String &parent_dir, const String &modelname) {
+void LBPH::loadTest(const String &parent_dir, const String &modelname, bool binary_hists = false) {
     
     String model_dir(parent_dir + "/" + modelname);
     String filename(model_dir + "/" + modelname + ".yml");
@@ -224,7 +224,6 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
             std::cout << "EQUAL!!!!!\n";
         else
             std::cout << "NOT EQUAL!!!!\n";
-
     }
 
 }
@@ -259,7 +258,7 @@ void LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &his
     fclose(fp);
 }
 
-void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
+void LBPH::saveTest(const String &parent_dir, const String &modelname, bool binary_hists = false) const {
    
     // create our model dir
     String model_dir(parent_dir + "/" + modelname);
@@ -307,16 +306,18 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
         sprintf(label, "%d", unique_labels.at(idx));
         String histogram_filename(histogram_dir + "/" + modelname + "-" + label + ".yml");
         
-        FileStorage histogram_file(histogram_filename, FileStorage::WRITE);
-        if (!histogram_file.isOpened())
-            CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
+        if(binary_hists) {
+            String histogram_rawfilename(histogram_dir + "/" + modelname + "-" + label + ".bin");
+            saveRawHistograms(histogram_rawfilename, histograms_map.at(unique_labels.at(idx)));
+        }
+        else {
+            FileStorage histogram_file(histogram_filename, FileStorage::WRITE);
+            if(!histogram_file.isOpened())
+                CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
 
-        histogram_file << "histograms" << histograms_map.at(unique_labels.at(idx));
-        histogram_file.release();
-        
-        String histogram_rawfilename(histogram_dir + "/" + modelname + "-" + label + ".bin");
-        saveRawHistograms(histogram_rawfilename, histograms_map.at(unique_labels.at(idx)));
-
+            histogram_file << "histograms" << histograms_map.at(unique_labels.at(idx));
+            histogram_file.release();
+        }
     } 
 } 
 
