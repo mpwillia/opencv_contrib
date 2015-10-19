@@ -133,7 +133,12 @@ int LBPH::getHistogramSize() const {
 
 void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histograms) {
     FILE *fp = fopen(filename.c_str(), "r");
+    if(fp == NULL) {
+        std::cout << "bin: cannot open file at '" << filename << "'\n";
+        return;
+    }
     
+    std::cout << "bin: starting loop\n";
     float buffer[getHistogramSize()];
     while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
         std::cout << "bin: making hist mat\n";
