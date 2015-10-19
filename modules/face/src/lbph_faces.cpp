@@ -205,7 +205,8 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
         
         std::cout << "loading yaml...\n";
         FileStorage yaml(histfilename_yaml, FileStorage::READ);
-        readFileNodeList(yaml["histograms"], yaml_hists);
+        //readFileNodeList(yaml["histograms"], yaml_hists);
+        yaml["histograms"] >> yaml_hists;
         yaml.release();
 
         std::cout << "loading bin...\n";
@@ -306,7 +307,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
         if (!histogram_file.isOpened())
             CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
 
-        histogram_file << "histogram" << histograms_map.at(unique_labels.at(idx));
+        histogram_file << "histograms" << histograms_map.at(unique_labels.at(idx));
         histogram_file.release();
         
         String histogram_rawfilename(histogram_dir + "/" + modelname + "-" + label + ".bin");
