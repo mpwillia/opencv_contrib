@@ -177,7 +177,7 @@ void LBPH::load(const FileStorage& fs) {
     }
 }
 
-void LBPH::saveRawHistograms(const String &filename, std::vector<Mat> histograms) const {
+void LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> histograms) const {
     FILE *fp = fopen(filename.c_str(), "w");
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         Mat hist = histograms.at((int)sampleIdx);
@@ -233,7 +233,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
         char label[16];
         sprintf(label, "%d", unique_labels.at(idx));
         String histogram_filename(histogram_dir + "/" + modelname + "-" + label + ".yml");
-        String histogram_rawfilename(histogram_dir + "/" + modelname + "-" + label + ".bin");
+        
         FileStorage histogram_file(histogram_filename, FileStorage::WRITE);
         if (!histogram_file.isOpened())
             CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
@@ -241,6 +241,7 @@ void LBPH::saveTest(const String &parent_dir, const String &modelname) const {
         histogram_file << "histogram" << histograms_map.at(unique_labels.at(idx));
         histogram_file.release();
         
+        String histogram_rawfilename(histogram_dir + "/" + modelname + "-" + label + ".bin");
         saveRawHistograms(histogram_rawfilename, histograms_map.at(unique_labels.at(idx)));
 
     } 
