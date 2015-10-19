@@ -214,7 +214,7 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
         
         bool equal = true;
         for(size_t j = 0; j < yaml_hists.size() && j < bin_hists.size(); j++) {
-            if(!matsEqual(yaml_hists.at((int)j)), bin_hists.at((int)j)) {
+            if(!matsEqual(yaml_hists.at((int)j), bin_hists.at((int)j))) {
                 equal = false;
                 break;
             }
