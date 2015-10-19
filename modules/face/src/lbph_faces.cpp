@@ -129,13 +129,22 @@ void LBPH::loadTest(const String &parent_dir, const String &modelname) {
     infofile["grid_x"] >> _grid_x;
     infofile["grid_y"] >> _grid_y;
 
+    std::vector<int> labels;
+    std::vector<int> numhists;
     FileNode label_info = infofile["label_info"];
+    label_info["labels"] >> labels;
+    label_info["numhists"] >> numhists;
+
+    /*
     for (FileNodeIterator it = label_info.begin(); it != label_info.end(); ++it) {
         FileNode item = *it;
+        item["labels"] >> labels;
+        item["numhists"]
         std::string key = item.name();
         std::cout << " found key: " << key << "\n";
     }  
-    
+    */
+
     infofile.release();    
     /*
     std::vector<int> labels;
