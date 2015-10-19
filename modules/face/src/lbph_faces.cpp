@@ -131,7 +131,7 @@ int LBPH::getHistogramSize() const {
     return (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
 }
 
-void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> histograms) {
+void LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histograms) {
     FILE *fp = fopen(filename.c_str(), "r");
     
     float buffer[getHistogramSize()];
@@ -228,7 +228,7 @@ void LBPH::load(const FileStorage& fs) {
     }
 }
 
-void LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> histograms) const {
+void LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &histograms) const {
     FILE *fp = fopen(filename.c_str(), "w");
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         Mat hist = histograms.at((int)sampleIdx);
