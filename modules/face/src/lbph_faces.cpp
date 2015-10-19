@@ -46,7 +46,7 @@ private:
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
     
-    void saveRawHistograms(const String &filename, std::vector<Mat> histograms);
+    void saveRawHistograms(const String &filename, std::vector<Mat> histograms) const;
 
 public:
     using FaceRecognizer::save;
@@ -177,8 +177,8 @@ void LBPH::load(const FileStorage& fs) {
     }
 }
 
-void LBPH::saveRawHistograms(const String &filename, std::vector<Mat> histograms) {
-    FILE *fp = fopen(filename, "w");
+void LBPH::saveRawHistograms(const String &filename, std::vector<Mat> histograms) const {
+    FILE *fp = fopen(filename.c_str(), "w");
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         Mat hist = histograms.at((int)sampleIdx);
         fwrite(hist.data, sizeof(char), sizeof(hist.data), fp);
