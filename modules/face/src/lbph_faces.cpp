@@ -384,10 +384,12 @@ void LBPH::train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, co
     }
 
     // if this model should be trained without preserving old data, delete old model data
+    /*
     if(!preserveData) {
         _labels.release();
         _histograms.clear();
     }
+    */
 
     // append labels to _labels matrix
     for(size_t labelIdx = 0; labelIdx < labels.total(); labelIdx++) {
