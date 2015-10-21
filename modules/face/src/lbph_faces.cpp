@@ -130,6 +130,7 @@ public:
     //--------------------------------------------------------------------------
     void load_segmented(const String &parent_dir, const String &modelname, bool binary_hist = false);
     void save_segmented(const String &parent_dir, const String &modelname, bool binary_hist = false) const;
+    void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
 };
 
 
@@ -169,11 +170,20 @@ bool LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &his
         //std::cout << "cannot open file at '" << filename << "'\n";
         return false;
     }
+   
+    float buffer[getHistogramSize() * (int)histograms.size()];
+    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
+        memcpy(buffer[sampleIdx * getHistogramSize()], histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
+    }
+    fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
 
+    //TODO: Either increase write buffer or group all hists into one write call
+    /*
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         Mat hist = histograms.at((int)sampleIdx);
         fwrite(hist.ptr<float>(), sizeof(float), getHistogramSize(), fp);
     }
+    */
     fclose(fp);
     return true;
 }
@@ -346,6 +356,45 @@ void LBPH::save_segmented(const String &parent_dir, const String &modelname, boo
     std::cout << "Finished saving " << (int)unique_labels.size() << "\n";
 
 } 
+
+//void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData)
+void LBPH::train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists) {
+     
+    if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
+        String error_message = "The images are expected as InputArray::STD_VECTOR_MAT (a std::vector<Mat>) or _InputArray::STD_VECTOR_VECTOR (a std::vector< std::vector<...> >).";
+        CV_Error(Error::StsBadArg, error_message);
+    }
+    if(_in_src.total() == 0) {
+        String error_message = format("Empty training data was given. You'll need more than one sample to learn a model.");
+        CV_Error(Error::StsUnsupportedFormat, error_message);
+    } else if(_in_labels.getMat().type() != CV_32SC1) {
+        String error_message = format("Labels must be given as integer (CV_32SC1). Expected %d, but was %d.", CV_32SC1, _in_labels.type());
+        CV_Error(Error::StsUnsupportedFormat, error_message);
+    }
+
+    // get the vector of matrices
+    std::vector<Mat> src;
+    _in_src.getMatVector(src);
+    // get the label matrix
+    Mat labels = _in_labels.getMat();
+    // check if data is well- aligned
+    if(labels.total() != src.size()) {
+        String error_message = format("The number of samples (src) must equal the number of labels (labels). Was len(samples)=%d, len(labels)=%d.", src.size(), _labels.total());
+        CV_Error(Error::StsBadArg, error_message);
+    }
+
+    // if this model should be trained without preserving old data, delete old model data
+    if(!preserveData) {
+        _labels.release();
+        _histograms.clear();
+    }
+
+    // append labels to _labels matrix
+    for(size_t labelIdx = 0; labelIdx < labels.total(); labelIdx++) {
+        _labels.push_back(labels.at<int>((int)labelIdx));
+    }
+}
+
 
 //------------------------------------------------------------------------------
 // Standard Functions and File IO
