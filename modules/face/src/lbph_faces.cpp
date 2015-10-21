@@ -175,7 +175,7 @@ bool LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &his
     float buffer[getHistogramSize() * (int)histograms.size()];
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         std::cout << "\rAdding hist #" << (int)sampleIdx << std::flush;
-        memcpy(&buffer[sampleIdx * getHistogramSize()], histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
+        memcpy((buffer + sampleIdx * getHistogramSize()), histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
     }
     std::cout << "\nWriting buffer to file";
     fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
