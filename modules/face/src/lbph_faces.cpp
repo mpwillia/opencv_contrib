@@ -128,7 +128,7 @@ public:
     // Additional Public Functions 
     // NOTE: Remember to add header to opencv2/face/facerec.hpp
     //--------------------------------------------------------------------------
-    void load_segmented(const String &parent_dir, const String &modelname, bool binary_hist = false);
+    void load_segmented(const String &parent_dir, const String &modelname);
     void save_segmented(const String &parent_dir, const String &modelname, bool binary_hist = false) const;
     void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
 };
@@ -190,7 +190,7 @@ bool LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &his
 
 
 
-void LBPH::load_segmented(const String &parent_dir, const String &modelname, bool binary_hists) {
+void LBPH::load_segmented(const String &parent_dir, const String &modelname) {
     
     String model_dir(parent_dir + "/" + modelname);
     String filename(model_dir + "/" + modelname + ".yml");
