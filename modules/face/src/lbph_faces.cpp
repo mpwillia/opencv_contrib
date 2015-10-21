@@ -130,7 +130,7 @@ public:
     //--------------------------------------------------------------------------
     void load_segmented(const String &parent_dir, const String &modelname);
     void save_segmented(const String &parent_dir, const String &modelname, bool binary_hist = false) const;
-    void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
+    //void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
 };
 
 
@@ -358,6 +358,7 @@ void LBPH::save_segmented(const String &parent_dir, const String &modelname, boo
 } 
 
 //void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData)
+/*
 void LBPH::train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists) {
      
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
@@ -388,6 +389,7 @@ void LBPH::train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, co
         _labels.push_back(labels.at<int>((int)labelIdx));
     }
 }
+*/
 
 //------------------------------------------------------------------------------
 // Standard Functions and File IO
