@@ -174,7 +174,7 @@ bool LBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) 
         sprintf(label, "%d", labels.at((int)i));
 
         String histfilename_bin(model_dir_bin + "/" + modelname_bin + "-histograms" + "/" + modelname_bin + "-" + label + ".bin");
-        String histfilename_yaml(model_dir_yaml + "/" + modelname_yaml + "-histograms" + "/" + modelname_yaml + "-" + label + ".yaml");
+        String histfilename_yaml(model_dir_yaml + "/" + modelname_yaml + "-histograms" + "/" + modelname_yaml + "-" + label + ".yml");
         
         std::vector<Mat> hists_bin;
         std::vector<Mat> hists_yaml;
