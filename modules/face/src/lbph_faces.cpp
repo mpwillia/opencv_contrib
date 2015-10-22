@@ -139,7 +139,7 @@ public:
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
 
-bool verifyBinaryFiles(const String &parent_dir, const String &modelname) const {
+bool LBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) const {
     
 
     // save our model with both yaml and binary
