@@ -231,7 +231,7 @@ bool LBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) 
         */
     }
 
-    std::cout << "Binary files are OK\n"
+    std::cout << "Binary files are OK\n";
 
     return true;
 } 
