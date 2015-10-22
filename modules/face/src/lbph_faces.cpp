@@ -129,7 +129,7 @@ public:
     // NOTE: Remember to add header to opencv2/face/facerec.hpp
     //--------------------------------------------------------------------------
     void load_segmented(const String &parent_dir, const String &modelname);
-    void save_segmented(const String &parent_dir, const String &modelname, bool binary_hist = false) const;
+    void save_segmented(const String &parent_dir, const String &modelname, bool binary_hist) const;
     bool verifyBinaryFiles(const String &parent_dir, const String &modelname) const;
     //void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
 };
@@ -148,7 +148,9 @@ bool verifyBinaryFiles(const String &parent_dir, const String &modelname) const 
 
 
     // get map of  
+    
 
+    return true;
 } 
 
 
@@ -320,12 +322,6 @@ void LBPH::save_segmented(const String &parent_dir, const String &modelname, boo
         histograms_map[_labels.at<int>((int)sampleIdx)].push_back(_histograms[sampleIdx]);
     }
 
-    // create a map between our labels and our histsize
-    std::map<int, int> labelinfo;
-    for(std::map<int, std::vector<Mat> >::iterator it = histograms_map.begin(); it != histograms_map.end(); ++it) {
-        labelinfo[it->first] = (int)(it->second).size();
-    }
-
     //int unique_labels[(int)histograms_map.size()];
     std::vector<int> unique_labels;
     std::vector<int> label_num_hists;
@@ -350,7 +346,6 @@ void LBPH::save_segmented(const String &parent_dir, const String &modelname, boo
     infofile << "labels" << unique_labels;
     infofile << "numhists" << label_num_hists;
     infofile << "}";
-    infofile << "testlabelinfo" << labelinfo;
     infofile.release();
 
     // create our histogram directory
