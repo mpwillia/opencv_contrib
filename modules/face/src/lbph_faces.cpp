@@ -141,10 +141,12 @@ public:
 
 bool LBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) const {
     
+    String modelname-bin(modelname + "-bin");
+    String modelname-yaml(modelname + "-yaml");
 
     // save our model with both yaml and binary
-    save_segmented(parent_dir, modelname, true);
-    save_segmented(parent_dir, modelname, false);
+    save_segmented(parent_dir, modelname-bin, true);
+    save_segmented(parent_dir, modelname-yaml, false);
 
 
     // get map of  
