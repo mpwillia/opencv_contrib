@@ -168,14 +168,13 @@ bool LBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) 
     label_info["numhists"] >> numhists;
     infofile.release();
    
-    String histograms_dir(model_dir + "/" + modelname + "-histograms");
     for(size_t i = 0; i < labels.size(); i++) {
 
         char label[16];
         sprintf(label, "%d", labels.at((int)i));
 
-        String histfilename_bin(histograms_dir + "/" + modelname + "-" + label + ".bin");
-        String histfilename_yaml(histograms_dir + "/" + modelname + "-" + label + ".yaml");
+        String histfilename_bin(model_dir_bin + "/" + modelname_bin + "-histograms" + "/" + modelname + "-" + label + ".bin");
+        String histfilename_yaml(model_dir_yaml + "/" + modelname_yaml + "-histograms" + "/" + modelname + "-" + label + ".yaml");
         
         std::vector<Mat> hists_bin;
         std::vector<Mat> hists_yaml;
