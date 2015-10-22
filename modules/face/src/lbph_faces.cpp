@@ -130,6 +130,7 @@ public:
     //--------------------------------------------------------------------------
     void load_segmented(const String &parent_dir, const String &modelname);
     void save_segmented(const String &parent_dir, const String &modelname, bool binary_hist = false) const;
+    bool verifyBinaryFiles(const String &parent_dir, const String &modelname) const;
     //void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
 };
 
@@ -137,6 +138,22 @@ public:
 //------------------------------------------------------------------------------
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
+
+bool verifyBinaryFiles(const String &parent_dir, const String &modelname) const {
+    
+
+    // save our model with both yaml and binary
+    save_segmented(parent_dir, modelname, true);
+    save_segmented(parent_dir, modelname, false);
+
+
+    // get map of  
+
+} 
+
+
+
+
 
 bool LBPH::matsEqual(const Mat &a, const Mat &b) const {
     return countNonZero(a!=b) == 0; 
@@ -171,14 +188,10 @@ bool LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &his
         return false;
     }
     
-    std::cout << "Adding histograms to buffers\n";
     float* buffer = new float[getHistogramSize() * (int)histograms.size()];
-
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
-        //std::cout << "Adding hist #" << (int)sampleIdx << "\n";
         memcpy((buffer + sampleIdx * getHistogramSize()), histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
     }
-    std::cout << "\nWriting buffer to file";
     fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
     delete buffer;
 
@@ -198,11 +211,11 @@ bool LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &his
 void LBPH::load_segmented(const String &parent_dir, const String &modelname) {
     
     String model_dir(parent_dir + "/" + modelname);
-    String filename(model_dir + "/" + modelname + ".yml");
+    String infofilepath(model_dir + "/" + modelname + ".yml");
    
-    FileStorage infofile(filename, FileStorage::READ);
+    FileStorage infofile(infofilepath, FileStorage::READ);
     if (!infofile.isOpened())
-        CV_Error(Error::StsError, "File '" + filename + "' can't be opened for writing!");
+        CV_Error(Error::StsError, "File '" + infofilepath + "' can't be opened for writing!");
     
     infofile["radius"] >> _radius;
     infofile["neighbors"] >> _neighbors;
@@ -306,7 +319,13 @@ void LBPH::save_segmented(const String &parent_dir, const String &modelname, boo
     for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
         histograms_map[_labels.at<int>((int)sampleIdx)].push_back(_histograms[sampleIdx]);
     }
-    
+
+    // create a map between our labels and our histsize
+    std::map<int, int> labelinfo;
+    for(std::map<int, std::vector<Mat> >::iterator it = histograms_map.begin(); it != histograms_map.end(); ++it) {
+        labelinfo[it->first] = (int)(it->second).size();
+    }
+
     //int unique_labels[(int)histograms_map.size()];
     std::vector<int> unique_labels;
     std::vector<int> label_num_hists;
@@ -316,23 +335,23 @@ void LBPH::save_segmented(const String &parent_dir, const String &modelname, boo
     }
 
     // create our main info file
-    String filename(model_dir + "/" + modelname + ".yml");
-    FileStorage fs(filename, FileStorage::WRITE);
-    if (!fs.isOpened())
+    String infofilepath(model_dir + "/" + modelname + ".yml");
+    FileStorage infofile(infofilepath, FileStorage::WRITE);
+    if (!infofile.isOpened())
         CV_Error(Error::StsError, "File can't be opened for writing!");
 
-    fs << "radius" << _radius;
-    fs << "neighbors" << _neighbors;
-    fs << "grid_x" << _grid_x;
-    fs << "grid_y" << _grid_y;
-    fs << "numlabels" << (int)histograms_map.size();
-    //fs << "labels" << unique_labels;
-    fs << "label_info" << "{";
-    fs << "labels" << unique_labels;
-    fs << "numhists" << label_num_hists;
-    fs << "}";
-    fs << "histogram_size" << getHistogramSize();
-    fs.release();
+    infofile << "radius" << _radius;
+    infofile << "neighbors" << _neighbors;
+    infofile << "grid_x" << _grid_x;
+    infofile << "grid_y" << _grid_y;
+    infofile << "numlabels" << (int)histograms_map.size();
+    //infofile << "labels" << unique_labels;
+    infofile << "label_info" << "{";
+    infofile << "labels" << unique_labels;
+    infofile << "numhists" << label_num_hists;
+    infofile << "}";
+    infofile << "testlabelinfo" << labelinfo;
+    infofile.release();
 
     // create our histogram directory
     String histogram_dir(model_dir + "/" + modelname + "-histograms");
