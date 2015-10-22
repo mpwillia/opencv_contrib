@@ -130,7 +130,7 @@ public:
     //--------------------------------------------------------------------------
     void load_segmented(const String &parent_dir, const String &modelname);
     void save_segmented(const String &parent_dir, const String &modelname, bool binary_hist) const;
-    bool verifyBinaryFiles(const String &parent_dir, const String &modelname) const;
+    bool verifyBinaryFiles(const String &parent_dir, const String &modelname);
     //void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
 };
 
@@ -139,7 +139,7 @@ public:
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
 
-bool LBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) const {
+bool LBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) {
     
     String modelname_bin(modelname + "-bin");
     String model_dir_bin(parent_dir + "/" + modelname_bin);

@@ -127,7 +127,7 @@ public:
     CV_WRAP virtual void load_segmented(const String &parent_dir, const String &modelname) = 0;
     CV_WRAP virtual void save_segmented(const String &parent_dir, const String &modelname, bool binary_hists) const = 0;
 
-    CV_WRAP virtual bool verifyBinaryFiles(const String &parent_dir, const String &modelname) const = 0;
+    CV_WRAP virtual bool verifyBinaryFiles(const String &parent_dir, const String &modelname) = 0;
    //CV_WRAP virtual void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
 
 };
