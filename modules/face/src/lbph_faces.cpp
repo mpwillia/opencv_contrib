@@ -178,21 +178,23 @@ bool LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &his
     std::cout << "(int)hist size: " << (int)getHistogramSize() << "\n";
 
     std::cout << "Adding histograms to buffers\n";
-    float buffer[getHistogramSize() * (int)histograms.size()];
+    //float buffer[getHistogramSize() * (int)histograms.size()];
+    float* buffer = new float[getHistogramSize() * (int)histograms.size()];
 
     printf("buffer ptr: %p\n", buffer);
 
-    /*
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         std::cout << "Adding hist #" << (int)sampleIdx << "\n";
         
+        /*
         float* ptr = buffer + sampleIdx * getHistogramSize();
         printf("ptr: %p\n", ptr);
-        //memcpy((buffer + sampleIdx * getHistogramSize()), histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
+        */
+        memcpy((buffer + sampleIdx * getHistogramSize()), histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
     }
     std::cout << "\nWriting buffer to file";
     fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
-    */
+    
     //TODO: Either increase write buffer or group all hists into one write call
     /*
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
