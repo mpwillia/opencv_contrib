@@ -183,14 +183,25 @@ bool LBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) 
             // attempt to load yaml 
             yaml["histograms"] >> hists_yaml;
         } 
+        else {
+            std::cout << "Cannot load YAML histograms for label " << label << " | " << histfilename_yaml << "\n";
+            return false;
+        }
+
         yaml.release();
 
         // attempt to load binary
         if (!loadRawHistograms(histfilename_bin, hists_bin)) {
             // loading binary failed
-            std::cout << "cannot load histograms for label " << label << "\n";
+            std::cout << "Cannot load Binary histograms for label " << label << " | " << histfilename_bin << "\n";
+            return false;
         } 
-       
+      
+        if(hists_yaml.size() != hists_bin.size()) {
+            std::cout << "Different number of histograms between YAML(" << (int)hists_yaml.size() << ") and Binary(" << (int)hists_bin.size() << ")!\n";
+            return false;
+        }
+
         for(size_t j = 0; j < hists_yaml.size() && j < hists_bin.size(); j++) {
             if(!matsEqual(hists_yaml.at((int)j), hists_bin.at((int)j))) {
                 std::cout << " -> NOT EQUAL!!! <- \n";
