@@ -170,7 +170,10 @@ bool LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &his
         //std::cout << "cannot open file at '" << filename << "'\n";
         return false;
     }
-    
+
+    printf("hist size: %d\n", getHistogramSize());
+    printf("num hists: %d\n", (int)histograms.size());
+
     std::cout << "Adding histograms to buffers\n";
     float buffer[getHistogramSize() * (int)histograms.size()];
 
