@@ -142,15 +142,101 @@ public:
 bool LBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) const {
     
     String modelname_bin(modelname + "-bin");
+    String model_dir_bin(parent_dir + "/" + modelname_bin);
     String modelname_yaml(modelname + "-yaml");
+    String model_dir_yaml(parent_dir + "/" + modelname_yaml);
 
     // save our model with both yaml and binary
     save_segmented(parent_dir, modelname_bin, true);
     save_segmented(parent_dir, modelname_yaml, false);
 
-
-    // get map of  
+    // load info file
+    String infofilepath(model_dir_bin + "/" + modelname_bin + ".yml");
+    FileStorage infofile(infofilepath, FileStorage::READ);
+    if (!infofile.isOpened())
+        CV_Error(Error::StsError, "File '" + infofilepath + "' can't be opened for writing!");
     
+    infofile["radius"] >> _radius;
+    infofile["neighbors"] >> _neighbors;
+    infofile["grid_x"] >> _grid_x;
+    infofile["grid_y"] >> _grid_y;
+
+    std::vector<int> labels;
+    std::vector<int> numhists;
+    FileNode label_info = infofile["label_info"];
+    label_info["labels"] >> labels;
+    label_info["numhists"] >> numhists;
+    infofile.release();
+   
+    String histograms_dir(model_dir + "/" + modelname + "-histograms");
+    for(size_t i = 0; i < labels.size(); i++) {
+
+        char label[16];
+        sprintf(label, "%d", labels.at((int)i));
+
+        String histfilename_bin(histograms_dir + "/" + modelname + "-" + label + ".bin");
+        String histfilename_yaml(histograms_dir + "/" + modelname + "-" + label + ".yaml");
+        
+        std::vector<Mat> hists_bin;
+        std::vector<Mat> hists_yaml;
+        FileStorage yaml(histfilename_yaml, FileStorage::READ);
+        if (yaml.isOpened()) {
+            // attempt to load yaml 
+            yaml["histograms"] >> hists;
+        } 
+        yaml.release();
+
+        // attempt to load binary
+        if (!loadRawHistograms(histfilename_bin, hists)) {
+            // loading binary failed
+            std::cout << "cannot load histograms for label " << label << "\n";
+        } 
+       
+        bool equal = true;
+        for(size_t j = 0; j < yaml_hists.size() && j < bin_hists.size(); j++) {
+            if(!matsEqual(yaml_hists.at((int)j), bin_hists.at((int)j))) {
+                equal = false;
+                break;
+            }
+        }
+        if(!equal) {
+            std::cout << "NOT EQUAL!!!!\n";
+            return false;
+        }
+
+        
+        /*
+        std::vector<Mat> yaml_hists;
+        std::vector<Mat> bin_hists;
+        
+        std::cout << "loading yaml...\n";
+        FileStorage yaml(histfilename_yaml, FileStorage::READ);
+        //readFileNodeList(yaml["histograms"], yaml_hists);
+        yaml["histograms"] >> yaml_hists;
+        yaml.release();
+
+        std::cout << "loading bin...\n";
+        loadRawHistograms(histfilename_bin, bin_hists);
+       
+        std::cout << "yaml hists size: " << yaml_hists.size() << "\n";
+        std::cout << "bin hists size: " << bin_hists.size() << "\n";
+        
+        bool equal = true;
+        for(size_t j = 0; j < yaml_hists.size() && j < bin_hists.size(); j++) {
+            if(!matsEqual(yaml_hists.at((int)j), bin_hists.at((int)j))) {
+                equal = false;
+                break;
+            }
+        }
+
+        if(equal)
+            std::cout << "EQUAL!!!!!\n";
+        else
+            std::cout << "NOT EQUAL!!!!\n";
+        */
+    }
+
+    std::cout << "Binary files are OK\n"
 
     return true;
 } 
