@@ -33,12 +33,6 @@ namespace cv { namespace face {
 class xLBPH : public xLBPHFaceRecognizer
 {
 private:
-    int _grid_x;
-    int _grid_y;
-    int _radius;
-    int _neighbors;
-    double _threshold;
-
     std::vector<Mat> _histograms;
     Mat _labels;
 
@@ -137,7 +131,7 @@ public:
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
 
-bool xxLBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) {
+bool xLBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) {
     
     String modelname_bin(modelname + "-bin");
     String model_dir_bin(parent_dir + "/" + modelname_bin);

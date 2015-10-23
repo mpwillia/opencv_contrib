@@ -32,6 +32,13 @@ namespace cv { namespace face {
 //
 class LBPH : public LBPHFaceRecognizer
 {
+protected:
+    int _grid_x;
+    int _grid_y;
+    int _radius;
+    int _neighbors;
+    double _threshold;
+
 private:
     int _grid_x;
     int _grid_y;
