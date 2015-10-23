@@ -33,8 +33,16 @@ namespace cv { namespace face {
 class xLBPH : public xLBPHFaceRecognizer
 {
 private:
+    int _grid_x;
+    int _grid_y;
+    int _radius;
+    int _neighbors;
+    double _threshold;
 
-    // Computes a LBPH model with images in src and
+    std::vector<Mat> _histograms;
+    Mat _labels;
+
+    // Computes a xLBPH model with images in src and
     // corresponding labels in labels, possibly preserving
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
@@ -50,8 +58,10 @@ private:
 
 
 public:
+    using FaceRecognizer::save;
+    using FaceRecognizer::load;
 
-    // Initializes this LBPH Model. The current implementation is rather fixed
+    // Initializes this xLBPH Model. The current implementation is rather fixed
     // as it uses the Extended Local Binary Patterns per default.
     //
     // radius, neighbors are used in the local binary patterns creation.
@@ -65,7 +75,7 @@ public:
         _neighbors(neighbors_),
         _threshold(threshold) {}
 
-    // Initializes and computes this LBPH Model. The current implementation is
+    // Initializes and computes this xLBPH Model. The current implementation is
     // rather fixed as it uses the Extended Local Binary Patterns per default.
     //
     // (radius=1), (neighbors=8) are used in the local binary patterns creation.
@@ -85,11 +95,11 @@ public:
 
     ~xLBPH() { }
 
-    // Computes a LBPH model with images in src and
+    // Computes a xLBPH model with images in src and
     // corresponding labels in labels.
     void train(InputArrayOfArrays src, InputArray labels);
 
-    // Updates this LBPH model with images in src and
+    // Updates this xLBPH model with images in src and
     // corresponding labels in labels.
     void update(InputArrayOfArrays src, InputArray labels);
 
@@ -549,7 +559,7 @@ void xLBPH::update(InputArrayOfArrays _in_src, InputArray _in_labels) {
 
 
 //------------------------------------------------------------------------------
-// LBPH
+// xLBPH
 //------------------------------------------------------------------------------
 
 template <typename _Tp> static
@@ -801,7 +811,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     if(_histograms.empty()) {
         // throw error if no data (or simply return -1?)
-        String error_message = "This LBPH model is not computed yet. Did you call the train method?";
+        String error_message = "This xLBPH model is not computed yet. Did you call the train method?";
         CV_Error(Error::StsBadArg, error_message);
     }
     Mat src = _src.getMat();

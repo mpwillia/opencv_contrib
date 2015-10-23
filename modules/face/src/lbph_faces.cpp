@@ -32,18 +32,7 @@ namespace cv { namespace face {
 //
 class LBPH : public LBPHFaceRecognizer
 {
-protected:
-    int _grid_x;
-    int _grid_y;
-    int _radius;
-    int _neighbors;
-    double _threshold;
-
-    std::vector<Mat> _histograms;
-    Mat _labels;
-
 private:
-    /*
     int _grid_x;
     int _grid_y;
     int _radius;
@@ -52,7 +41,6 @@ private:
 
     std::vector<Mat> _histograms;
     Mat _labels;
-    */
 
     // Computes a LBPH model with images in src and
     // corresponding labels in labels, possibly preserving
