@@ -137,7 +137,7 @@ public:
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
 
-bool xLBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) {
+bool xxLBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) {
     
     String modelname_bin(modelname + "-bin");
     String model_dir_bin(parent_dir + "/" + modelname_bin);
@@ -249,16 +249,16 @@ bool xLBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname)
 
 
 
-bool LBPH::matsEqual(const Mat &a, const Mat &b) const {
+bool xLBPH::matsEqual(const Mat &a, const Mat &b) const {
     return countNonZero(a!=b) == 0; 
 }
 
-int LBPH::getHistogramSize() const {
+int xLBPH::getHistogramSize() const {
     return (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
 }
 
 
-bool LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histograms) {
+bool xLBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histograms) {
     FILE *fp = fopen(filename.c_str(), "r");
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
@@ -275,7 +275,7 @@ bool LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histogram
     return true;
 }
 
-bool LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &histograms) const {
+bool xLBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &histograms) const {
     FILE *fp = fopen(filename.c_str(), "w");
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
@@ -302,7 +302,7 @@ bool LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &his
 
 
 
-void LBPH::load_segmented(const String &parent_dir, const String &modelname) {
+void xLBPH::load_segmented(const String &parent_dir, const String &modelname) {
     
     String model_dir(parent_dir + "/" + modelname);
     String infofilepath(model_dir + "/" + modelname + ".yml");
@@ -399,7 +399,7 @@ void LBPH::load_segmented(const String &parent_dir, const String &modelname) {
 
 
 
-void LBPH::save_segmented(const String &parent_dir, const String &modelname, bool binary_hists) const {
+void xLBPH::save_segmented(const String &parent_dir, const String &modelname, bool binary_hists) const {
    
     // create our model dir
     String model_dir(parent_dir + "/" + modelname);
@@ -468,9 +468,9 @@ void LBPH::save_segmented(const String &parent_dir, const String &modelname, boo
 
 } 
 
-//void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData)
+//void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData)
 /*
-void LBPH::train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists) {
+void xLBPH::train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists) {
      
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
         String error_message = "The images are expected as InputArray::STD_VECTOR_MAT (a std::vector<Mat>) or _InputArray::STD_VECTOR_VECTOR (a std::vector< std::vector<...> >).";
@@ -507,7 +507,7 @@ void LBPH::train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, co
 //------------------------------------------------------------------------------
 
 // See FaceRecognizer::load.
-void LBPH::load(const FileStorage& fs) {
+void xLBPH::load(const FileStorage& fs) {
     fs["radius"] >> _radius;
     fs["neighbors"] >> _neighbors;
     fs["grid_x"] >> _grid_x;
@@ -529,7 +529,7 @@ void LBPH::load(const FileStorage& fs) {
 }
 
 // See FaceRecognizer::save.
-void LBPH::save(FileStorage& fs) const {
+void xLBPH::save(FileStorage& fs) const {
     fs << "radius" << _radius;
     fs << "neighbors" << _neighbors;
     fs << "grid_x" << _grid_x;
@@ -543,11 +543,11 @@ void LBPH::save(FileStorage& fs) const {
     fs << "]";
 }
 
-void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels) {
+void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels) {
     this->train(_in_src, _in_labels, false);
 }
 
-void LBPH::update(InputArrayOfArrays _in_src, InputArray _in_labels) {
+void xLBPH::update(InputArrayOfArrays _in_src, InputArray _in_labels) {
     // got no data, just return
     if(_in_src.total() == 0)
         return;
@@ -739,7 +739,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
     return dst;
 }
 
-void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
+void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
 
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
         String error_message = "The images are expected as InputArray::STD_VECTOR_MAT (a std::vector<Mat>) or _InputArray::STD_VECTOR_VECTOR (a std::vector< std::vector<...> >).";
@@ -806,7 +806,7 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
 
 }
 
-void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
+void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     if(_histograms.empty()) {
         // throw error if no data (or simply return -1?)
         String error_message = "This LBPH model is not computed yet. Did you call the train method?";
@@ -838,17 +838,17 @@ void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     std::cout << "\n  -->  Max Dist = " << maxDist << " | Min Dist = " << minDist<< "\n";
 }
 
-int LBPH::predict(InputArray _src) const {
+int xLBPH::predict(InputArray _src) const {
     int label;
     double dummy;
     predict(_src, label, dummy);
     return label;
 }
 
-Ptr<LBPHFaceRecognizer> createLBPHFaceRecognizer(int radius, int neighbors,
+Ptr<xLBPHFaceRecognizer> createxLBPHFaceRecognizer(int radius, int neighbors,
                                              int grid_x, int grid_y, double threshold)
 {
-    return makePtr<LBPH>(radius, neighbors, grid_x, grid_y, threshold);
+    return makePtr<xLBPH>(radius, neighbors, grid_x, grid_y, threshold);
 }
 
 }}
