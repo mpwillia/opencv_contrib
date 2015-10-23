@@ -168,7 +168,7 @@ CV_EXPORTS_W Ptr<LBPHFaceRecognizer> createLBPHFaceRecognizer(int radius=1, int 
 
 //! @}
 
-class CV_EXPORTS_W xLBPHFaceRecognizer : public FaceRecognizer
+class CV_EXPORTS_W xLBPHFaceRecognizer : public LBPHFaceRecognizer 
 {
 public:
     /** @see setGridX */
