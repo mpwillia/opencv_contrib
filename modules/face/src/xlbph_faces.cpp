@@ -132,12 +132,20 @@ public:
     void save_segmented(const String &parent_dir, const String &modelname, bool binary_hist) const;
     bool verifyBinaryFiles(const String &parent_dir, const String &modelname);
     //void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
+    
+
+    void test();
 };
 
 
 //------------------------------------------------------------------------------
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
+
+void xLBPH::test() {
+    std::cout << "\nHOLY SHIT xLBPH WORKS!\n\n";
+}
+
 
 bool xLBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) {
     
