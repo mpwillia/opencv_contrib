@@ -39,8 +39,8 @@ private:
     int _neighbors;
     double _threshold;
 
-    std::vector<Mat> _histograms;
-    Mat _labels;
+    String _modelpath;
+    std::map<int, int> _labelinfo;
 
     // Computes a xLBPH model with images in src and
     // corresponding labels in labels, possibly preserving
@@ -50,12 +50,14 @@ private:
     //--------------------------------------------------------------------------
     // Additional Private Functions
     //--------------------------------------------------------------------------
-    bool saveRawHistograms(const String &filename, const std::vector<Mat> &histograms) const;
-    bool loadRawHistograms(const String &filename, std::vector<Mat> &histograms);
-    
+    bool saveHistograms(int label, const std::vector<Mat> &histograms) const;
+    bool updateHIstograms(int label, const std::vector<Mat> &histrograms) const;
+    bool loadHistograms(int label, std::vector<Mat> &histograms);
+
     int getHistogramSize() const;
     bool matsEqual(const Mat &a, const Mat &b) const;
-
+    
+    String getHistogramsDir() const;
 
 public:
     using FaceRecognizer::save;
@@ -122,7 +124,9 @@ public:
     CV_IMPL_PROPERTY(double, Threshold, _threshold)
     CV_IMPL_PROPERTY_RO(std::vector<cv::Mat>, Histograms, _histograms)
     CV_IMPL_PROPERTY_RO(cv::Mat, Labels, _labels)
-
+    
+    String getModelPath() const;
+    String getModelName() const;
 
     //--------------------------------------------------------------------------
     // Additional Public Functions 
@@ -133,18 +137,22 @@ public:
     bool verifyBinaryFiles(const String &parent_dir, const String &modelname);
     //void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
     
-
-    void test();
+    void test() const;
 };
 
 
 //------------------------------------------------------------------------------
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
-
-void xLBPH::test() {
-    std::cout << "\nHOLY SHIT xLBPH WORKS!\n\n";
+void xLBPH::test() const {
+    _modelpath= "/images/saved-models/xLBPH-tests";
 }
+
+
+String getModelPath() const {
+    return _modelpath; 
+}
+
 
 
 bool xLBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) {
@@ -268,7 +276,11 @@ int xLBPH::getHistogramSize() const {
 }
 
 
-bool xLBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histograms) {
+bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) {
+
+    char labelstr[16];
+    sprintf(labelstr, "%d", label);
+    String filename(modelpath + "/" + )
     FILE *fp = fopen(filename.c_str(), "r");
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
@@ -539,6 +551,7 @@ void xLBPH::load(const FileStorage& fs) {
 }
 
 // See FaceRecognizer::save.
+// TODO: Rewrite
 void xLBPH::save(FileStorage& fs) const {
     fs << "radius" << _radius;
     fs << "neighbors" << _neighbors;
@@ -749,6 +762,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
     return dst;
 }
 
+//TODO Rewrite for xLBPH
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
 
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
@@ -816,6 +830,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
 }
 
+//TODO Rewrite
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     if(_histograms.empty()) {
         // throw error if no data (or simply return -1?)

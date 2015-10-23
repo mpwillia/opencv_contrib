@@ -129,7 +129,10 @@ public:
 
     CV_WRAP virtual bool verifyBinaryFiles(const String &parent_dir, const String &modelname) = 0;
    //CV_WRAP virtual void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
+   
 
+    CV_Wrap virtual void test() const = 0; 
+    CV_Wrap virtual String getModelPath() const = 0; 
 };
 
 /**
@@ -171,27 +174,6 @@ CV_EXPORTS_W Ptr<LBPHFaceRecognizer> createLBPHFaceRecognizer(int radius=1, int 
 class CV_EXPORTS_W xLBPHFaceRecognizer : public LBPHFaceRecognizer 
 {
 public:
-    /** @see setGridX */
-    CV_WRAP virtual int getGridX() const = 0;
-    /** @copybrief getGridX @see getGridX */
-    CV_WRAP virtual void setGridX(int val) = 0;
-    /** @see setGridY */
-    CV_WRAP virtual int getGridY() const = 0;
-    /** @copybrief getGridY @see getGridY */
-    CV_WRAP virtual void setGridY(int val) = 0;
-    /** @see setRadius */
-    CV_WRAP virtual int getRadius() const = 0;
-    /** @copybrief getRadius @see getRadius */
-    CV_WRAP virtual void setRadius(int val) = 0;
-    /** @see setNeighbors */
-    CV_WRAP virtual int getNeighbors() const = 0;
-    /** @copybrief getNeighbors @see getNeighbors */
-    CV_WRAP virtual void setNeighbors(int val) = 0;
-    /** @see setThreshold */
-    CV_WRAP virtual double getThreshold() const = 0;
-    /** @copybrief getThreshold @see getThreshold */
-    CV_WRAP virtual void setThreshold(double val) = 0;
-
 
     CV_WRAP virtual void load_segmented(const String &parent_dir, const String &modelname) = 0;
     CV_WRAP virtual void save_segmented(const String &parent_dir, const String &modelname, bool binary_hists) const = 0;
@@ -199,7 +181,6 @@ public:
     CV_WRAP virtual bool verifyBinaryFiles(const String &parent_dir, const String &modelname) = 0;
    //CV_WRAP virtual void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
    
-   CV_WRAP virtual void test() = 0;
 
 };
 CV_EXPORTS_W Ptr<xLBPHFaceRecognizer> createxLBPHFaceRecognizer(int radius=1, int neighbors=8, int grid_x=8, int grid_y=8, double threshold = DBL_MAX);
