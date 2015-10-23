@@ -33,8 +33,6 @@ namespace cv { namespace face {
 class xLBPH : public xLBPHFaceRecognizer
 {
 private:
-    std::vector<Mat> _histograms;
-    Mat _labels;
 
     // Computes a LBPH model with images in src and
     // corresponding labels in labels, possibly preserving
@@ -85,7 +83,7 @@ public:
         train(src, labels);
     }
 
-    ~LBPH() { }
+    ~xLBPH() { }
 
     // Computes a LBPH model with images in src and
     // corresponding labels in labels.
