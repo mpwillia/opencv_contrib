@@ -206,7 +206,7 @@ bool xLBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname)
         yaml.release();
 
         // attempt to load binary
-        if (!loadRawHistograms(histfilename_bin, hists_bin)) {
+        if (!loadHistograms(histfilename_bin, hists_bin)) {
             // loading binary failed
             std::cout << "Cannot load Binary histograms for label " << label << " | " << histfilename_bin << "\n";
             return false;
@@ -264,7 +264,7 @@ bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) {
     return true;
 }
 
-bool xLBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &histograms) const {
+bool xLBPH::saveHistograms(const String &filename, const std::vector<Mat> &histograms) const {
     FILE *fp = fopen(filename.c_str(), "w");
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
@@ -346,7 +346,7 @@ void xLBPH::load_segmented(const String &parent_dir, const String &modelname) {
             yaml["histograms"] >> hists;
         } 
         // attempt to load binary
-        else if (!loadRawHistograms(histfilename_bin, hists)) {
+        else if (!loadHistograms(histfilename_bin, hists)) {
             // loading binary failed
             std::cout << "cannot load histograms for label " << label << "\n";
         } 
@@ -363,7 +363,7 @@ void xLBPH::load_segmented(const String &parent_dir, const String &modelname) {
         yaml.release();
 
         std::cout << "loading bin...\n";
-        loadRawHistograms(histfilename_bin, bin_hists);
+        loadHistograms(histfilename_bin, bin_hists);
        
         std::cout << "yaml hists size: " << yaml_hists.size() << "\n";
         std::cout << "bin hists size: " << bin_hists.size() << "\n";
@@ -442,7 +442,7 @@ void xLBPH::save_segmented(const String &parent_dir, const String &modelname, bo
         
         if(binary_hists) {
             String histogram_rawfilename(histogram_dir + "/" + modelname + "-" + label + ".bin");
-            saveRawHistograms(histogram_rawfilename, histograms_map.at(unique_labels.at(idx)));
+            saveHistograms(histogram_rawfilename, histograms_map.at(unique_labels.at(idx)));
         }
         else {
             FileStorage histogram_file(histogram_filename, FileStorage::WRITE);
