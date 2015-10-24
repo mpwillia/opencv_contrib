@@ -188,7 +188,7 @@ bool xLBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname)
         char label[16];
         sprintf(label, "%d", labels.at((int)i));
 
-        String histfilename_bin(model_dir_bin + "/" + modelname_bin + "-histograms" + "/" + modelname_bin + "-" + label + ".bin");
+        //String histfilename_bin(model_dir_bin + "/" + modelname_bin + "-histograms" + "/" + modelname_bin + "-" + label + ".bin");
         String histfilename_yaml(model_dir_yaml + "/" + modelname_yaml + "-histograms" + "/" + modelname_yaml + "-" + label + ".yml");
         
         std::vector<Mat> hists_bin;
@@ -206,7 +206,7 @@ bool xLBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname)
         yaml.release();
 
         // attempt to load binary
-        if (!loadHistograms(histfilename_bin, hists_bin)) {
+        if (!loadHistograms(labels.at((int)i), hists_bin)) {
             // loading binary failed
             std::cout << "Cannot load Binary histograms for label " << label << " | " << histfilename_bin << "\n";
             return false;
