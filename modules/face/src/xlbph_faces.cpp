@@ -208,7 +208,7 @@ bool xLBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname)
         // attempt to load binary
         if (!loadHistograms(labels.at((int)i), hists_bin)) {
             // loading binary failed
-            std::cout << "Cannot load Binary histograms for label " << label << " | " << histfilename_bin << "\n";
+            std::cout << "Cannot load Binary histograms for label " << label << "\n";
             return false;
         } 
       
