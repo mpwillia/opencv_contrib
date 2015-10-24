@@ -226,7 +226,8 @@ bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms) const 
  * loads labelinfo from infofile
  */
 void xLBPH::load(const FileStorage& fs) {
-
+    if (!fs.isOpened())
+        CV_Error(Error::StsError, "File can't be opened for writing!");
 }
 
 // See FaceRecognizer::save.
@@ -235,7 +236,8 @@ void xLBPH::load(const FileStorage& fs) {
  * write infofile
  */
 void xLBPH::save(FileStorage& fs) const {
-
+    if (!fs.isOpened())
+        CV_Error(Error::StsError, "File can't be opened for reading!");
 }
 
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels) {
@@ -442,12 +444,17 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
  * saves infofile
  */
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
-    
+    std::cout << "_in_src: " << _in_src << "\n";
+    std::cout << "_in_labels: " << _in_labels << "\n";
+    std::cout << "preserveData: " << preserveData << "\n";
 }
 
 /* TODO Rewrite for xLBPH
  */
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
+    std::cout << "_src: " << _src << "\n";
+    std::cout << "minClass: " << minClass << "\n";
+    std::cout << "minDist: " << minDist << "\n";
 
 }
 
