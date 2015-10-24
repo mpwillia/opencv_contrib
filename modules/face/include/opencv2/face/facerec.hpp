@@ -173,9 +173,6 @@ class CV_EXPORTS_W xLBPHFaceRecognizer : public LBPHFaceRecognizer
 {
 public:
 
-    CV_WRAP virtual void load_segmented(const String &parent_dir, const String &modelname) = 0;
-    CV_WRAP virtual void save_segmented(const String &parent_dir, const String &modelname, bool binary_hists) const = 0;
-
     CV_WRAP virtual void test() = 0; 
     CV_WRAP virtual String getModelPath() const = 0; 
 
