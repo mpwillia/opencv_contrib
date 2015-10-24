@@ -122,8 +122,6 @@ public:
     CV_IMPL_PROPERTY(int, Radius, _radius)
     CV_IMPL_PROPERTY(int, Neighbors, _neighbors)
     CV_IMPL_PROPERTY(double, Threshold, _threshold)
-    CV_IMPL_PROPERTY_RO(std::vector<cv::Mat>, Histograms, _histograms)
-    CV_IMPL_PROPERTY_RO(cv::Mat, Labels, _labels)
     
     String getModelPath() const;
     String getModelName() const;
@@ -149,7 +147,7 @@ void xLBPH::test() {
 }
 
 
-String getModelPath() const {
+String xLBPH::getModelPath() const {
     return _modelpath; 
 }
 
