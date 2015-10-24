@@ -481,11 +481,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
  */
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
 
-    if(_histograms.empty()) {
-        // throw error if no data (or simply return -1?)
-        String error_message = "This LBPH model is not computed yet. Did you call the train method?";
-        CV_Error(Error::StsBadArg, error_message);
-    }
     Mat src = _src.getMat();
     // get the spatial histogram from input image
     Mat lbp_image = elbp(src, _radius, _neighbors);
@@ -497,7 +492,6 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
             true /* normed histograms */);
     // find 1-nearest neighbor
     minDist = DBL_MAX;
-    double maxDist = 0;
     minClass = -1;
 }
 
