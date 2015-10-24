@@ -444,17 +444,27 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
  * saves infofile
  */
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
-    std::cout << "_in_src: " << _in_src << "\n";
-    std::cout << "_in_labels: " << _in_labels << "\n";
-    std::cout << "preserveData: " << preserveData << "\n";
+    if(_in_src == NULL)
+        return;
+
+    if(_in_labels == NULL)
+        return;
+
+    if(preserveData)
+        return;
 }
 
 /* TODO Rewrite for xLBPH
  */
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
-    std::cout << "_src: " << _src << "\n";
-    std::cout << "minClass: " << minClass << "\n";
-    std::cout << "minDist: " << minDist << "\n";
+    if(_src == NULL)
+        return;
+
+    if(minClass == NULL)
+        return;
+
+    if(minDist == NULL)
+        return;
 
 }
 
