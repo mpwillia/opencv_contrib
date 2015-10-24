@@ -264,7 +264,10 @@ bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) {
     return true;
 }
 
-bool xLBPH::saveHistograms(const String &filename, const std::vector<Mat> &histograms) const {
+bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms) const {
+    char labelstr[16];
+    sprintf(labelstr, "%d", label);
+    String filename(modelpath + "/" + )
     FILE *fp = fopen(filename.c_str(), "w");
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
@@ -337,7 +340,7 @@ void xLBPH::load_segmented(const String &parent_dir, const String &modelname) {
         sprintf(label, "%d", labels.at((int)i));
         String histfilename_base(histograms_dir + "/" + modelname + "-" + label);
         String histfilename_yaml(histfilename_base + ".yml");
-        String histfilename_bin(histfilename_base + ".bin");
+        //String histfilename_bin(histfilename_base + ".bin");
         
         std::vector<Mat> hists;
         FileStorage yaml(histfilename_yaml, FileStorage::READ);
@@ -346,41 +349,11 @@ void xLBPH::load_segmented(const String &parent_dir, const String &modelname) {
             yaml["histograms"] >> hists;
         } 
         // attempt to load binary
-        else if (!loadHistograms(histfilename_bin, hists)) {
+        else if (!loadHistograms(labels.at((int)i), hists)) {
             // loading binary failed
             std::cout << "cannot load histograms for label " << label << "\n";
         } 
         yaml.release();
-        
-        /*
-        std::vector<Mat> yaml_hists;
-        std::vector<Mat> bin_hists;
-        
-        std::cout << "loading yaml...\n";
-        FileStorage yaml(histfilename_yaml, FileStorage::READ);
-        //readFileNodeList(yaml["histograms"], yaml_hists);
-        yaml["histograms"] >> yaml_hists;
-        yaml.release();
-
-        std::cout << "loading bin...\n";
-        loadHistograms(histfilename_bin, bin_hists);
-       
-        std::cout << "yaml hists size: " << yaml_hists.size() << "\n";
-        std::cout << "bin hists size: " << bin_hists.size() << "\n";
-        
-        bool equal = true;
-        for(size_t j = 0; j < yaml_hists.size() && j < bin_hists.size(); j++) {
-            if(!matsEqual(yaml_hists.at((int)j), bin_hists.at((int)j))) {
-                equal = false;
-                break;
-            }
-        }
-
-        if(equal)
-            std::cout << "EQUAL!!!!!\n";
-        else
-            std::cout << "NOT EQUAL!!!!\n";
-        */
     }
     std::cout << "Finished loading " << (int)labels.size() << " label's histograms\n";
 
@@ -441,8 +414,8 @@ void xLBPH::save_segmented(const String &parent_dir, const String &modelname, bo
         String histogram_filename(histogram_dir + "/" + modelname + "-" + label + ".yml");
         
         if(binary_hists) {
-            String histogram_rawfilename(histogram_dir + "/" + modelname + "-" + label + ".bin");
-            saveHistograms(histogram_rawfilename, histograms_map.at(unique_labels.at(idx)));
+            //String histogram_rawfilename(histogram_dir + "/" + modelname + "-" + label + ".bin");
+            saveHistograms(unique_labels.at(idx), histograms_map.at(unique_labels.at(idx)));
         }
         else {
             FileStorage histogram_file(histogram_filename, FileStorage::WRITE);
