@@ -444,27 +444,73 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
  * saves infofile
  */
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
-    if(_in_src == NULL)
-        return;
 
-    if(_in_labels == NULL)
-        return;
+    if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
+        String error_message = "The images are expected as InputArray::STD_VECTOR_MAT (a std::vector<Mat>) or _InputArray::STD_VECTOR_VECTOR (a std::vector< std::vector<...> >).";
+        CV_Error(Error::StsBadArg, error_message);
+    }
+    if(_in_src.total() == 0) {
+        String error_message = format("Empty training data was given. You'll need more than one sample to learn a model.");
+        CV_Error(Error::StsUnsupportedFormat, error_message);
+    } else if(_in_labels.getMat().type() != CV_32SC1) {
+        String error_message = format("Labels must be given as integer (CV_32SC1). Expected %d, but was %d.", CV_32SC1, _in_labels.type());
+        CV_Error(Error::StsUnsupportedFormat, error_message);
+    }
 
-    if(preserveData)
-        return;
+    // get the vector of matrices
+    std::vector<Mat> src;
+    _in_src.getMatVector(src);
+    // get the label matrix
+    Mat labels = _in_labels.getMat();
+    // check if data is well- aligned
+    if(labels.total() != src.size()) {
+        String error_message = format("The number of samples (src) must equal the number of labels (labels). Was len(samples)=%d, len(labels)=%d.", src.size(), _labels.total());
+        CV_Error(Error::StsBadArg, error_message);
+    }
+
+    // if this model should be trained without preserving old data, delete old model data
+    if(!preserveData) {
+        _labels.release();
+        _histograms.clear();
+    }
+
+
+    //CONT...
+
 }
 
 /* TODO Rewrite for xLBPH
  */
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
-    if(_src == NULL)
-        return;
 
-    if(minClass == NULL)
-        return;
+    if(_histograms.empty()) {
+        // throw error if no data (or simply return -1?)
+        String error_message = "This LBPH model is not computed yet. Did you call the train method?";
+        CV_Error(Error::StsBadArg, error_message);
+    }
+    Mat src = _src.getMat();
+    // get the spatial histogram from input image
+    Mat lbp_image = elbp(src, _radius, _neighbors);
+    Mat query = spatial_histogram(
+            lbp_image, /* lbp_image */
+            static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), /* number of possible patterns */
+            _grid_x, /* grid size x */
+            _grid_y, /* grid size y */
+            true /* normed histograms */);
+    // find 1-nearest neighbor
+    minDist = DBL_MAX;
+    double maxDist = 0;
+    minClass = -1;
+    for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
+        double dist = compareHist(_histograms[sampleIdx], query, HISTCMP_CHISQR_ALT);
+        if((dist < minDist) && (dist < _threshold)) {
+            minDist = dist;
+            minClass = _labels.at<int>((int) sampleIdx);
+        }
 
-    if(minDist == NULL)
-        return;
+        if(dist > maxDist)
+            maxDist = dist;
+    }
 
 }
 
