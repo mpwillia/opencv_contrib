@@ -131,7 +131,7 @@ public:
    //CV_WRAP virtual void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
    
 
-    CV_Wrap virtual void test() const = 0; 
+    CV_Wrap virtual void test() = 0; 
     CV_Wrap virtual String getModelPath() const = 0; 
 };
 

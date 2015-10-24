@@ -137,21 +137,22 @@ public:
     bool verifyBinaryFiles(const String &parent_dir, const String &modelname);
     //void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
     
-    void test() const;
+    void test();
 };
 
 
 //------------------------------------------------------------------------------
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
-void xLBPH::test() const {
-    _modelpath= "/images/saved-models/xLBPH-tests";
+void xLBPH::test() {
+    _modelpath = "/images/saved-models/xLBPH-tests";
 }
 
 
 String getModelPath() const {
     return _modelpath; 
 }
+
 
 
 
@@ -224,38 +225,6 @@ bool xLBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname)
                 return false;
             }
         }
-
-
-        
-        /*
-        std::vector<Mat> yaml_hists;
-        std::vector<Mat> bin_hists;
-        
-        std::cout << "loading yaml...\n";
-        FileStorage yaml(histfilename_yaml, FileStorage::READ);
-        //readFileNodeList(yaml["histograms"], yaml_hists);
-        yaml["histograms"] >> yaml_hists;
-        yaml.release();
-
-        std::cout << "loading bin...\n";
-        loadRawHistograms(histfilename_bin, bin_hists);
-       
-        std::cout << "yaml hists size: " << yaml_hists.size() << "\n";
-        std::cout << "bin hists size: " << bin_hists.size() << "\n";
-        
-        bool equal = true;
-        for(size_t j = 0; j < yaml_hists.size() && j < bin_hists.size(); j++) {
-            if(!matsEqual(yaml_hists.at((int)j), bin_hists.at((int)j))) {
-                equal = false;
-                break;
-            }
-        }
-
-        if(equal)
-            std::cout << "EQUAL!!!!!\n";
-        else
-            std::cout << "NOT EQUAL!!!!\n";
-        */
     }
 
     std::cout << "Binary files are OK\n";
@@ -490,80 +459,28 @@ void xLBPH::save_segmented(const String &parent_dir, const String &modelname, bo
 
 } 
 
-//void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData)
-/*
-void xLBPH::train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists) {
-     
-    if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
-        String error_message = "The images are expected as InputArray::STD_VECTOR_MAT (a std::vector<Mat>) or _InputArray::STD_VECTOR_VECTOR (a std::vector< std::vector<...> >).";
-        CV_Error(Error::StsBadArg, error_message);
-    }
-    if(_in_src.total() == 0) {
-        String error_message = format("Empty training data was given. You'll need more than one sample to learn a model.");
-        CV_Error(Error::StsUnsupportedFormat, error_message);
-    } else if(_in_labels.getMat().type() != CV_32SC1) {
-        String error_message = format("Labels must be given as integer (CV_32SC1). Expected %d, but was %d.", CV_32SC1, _in_labels.type());
-        CV_Error(Error::StsUnsupportedFormat, error_message);
-    }
-
-    // get the vector of matrices
-    std::vector<Mat> src;
-    _in_src.getMatVector(src);
-    // get the label matrix
-    Mat labels = _in_labels.getMat();
-    // check if data is well- aligned
-    if(labels.total() != src.size()) {
-        String error_message = format("The number of samples (src) must equal the number of labels (labels). Was len(samples)=%d, len(labels)=%d.", src.size(), _labels.total());
-        CV_Error(Error::StsBadArg, error_message);
-    }
-
-    // append labels to _labels matrix
-    for(size_t labelIdx = 0; labelIdx < labels.total(); labelIdx++) {
-        _labels.push_back(labels.at<int>((int)labelIdx));
-    }
-}
-*/
 
 //------------------------------------------------------------------------------
 // Standard Functions and File IO
 //------------------------------------------------------------------------------
 
 // See FaceRecognizer::load.
+/* TODO: Rewrite for xLBPH
+ * sets modelpath
+ * loads alg settings from infofile
+ * loads labelinfo from infofile
+ */
 void xLBPH::load(const FileStorage& fs) {
-    fs["radius"] >> _radius;
-    fs["neighbors"] >> _neighbors;
-    fs["grid_x"] >> _grid_x;
-    fs["grid_y"] >> _grid_y;
-    //read matrices
-    readFileNodeList(fs["histograms"], _histograms);
-    fs["labels"] >> _labels;
-    const FileNode& fn = fs["labelsInfo"];
-    if (fn.type() == FileNode::SEQ)
-    {
-        _labelsInfo.clear();
-        for (FileNodeIterator it = fn.begin(); it != fn.end();)
-        {
-            LabelInfo item;
-            it >> item;
-            _labelsInfo.insert(std::make_pair(item.label, item.value));
-        }
-    }
+
 }
 
 // See FaceRecognizer::save.
-// TODO: Rewrite
+/* TODO: Rewrite for xLBPH
+ * wha does this do?
+ * write infofile
+ */
 void xLBPH::save(FileStorage& fs) const {
-    fs << "radius" << _radius;
-    fs << "neighbors" << _neighbors;
-    fs << "grid_x" << _grid_x;
-    fs << "grid_y" << _grid_y;
-    // write matrices
-    writeFileNodeList(fs, "histograms", _histograms);
-    fs << "labels" << _labels;
-    fs << "labelsInfo" << "[";
-    for (std::map<int, String>::const_iterator it = _labelsInfo.begin(); it != _labelsInfo.end(); it++)
-        fs << LabelInfo(it->first, it->second);
-    fs << "]";
+
 }
 
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels) {
@@ -762,105 +679,21 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
     return dst;
 }
 
-//TODO Rewrite for xLBPH
+/* TODO Rewrite for xLBPH
+ * sets modelpath
+ * calculates histograms
+ * saves histograms
+ * updates lableinfo
+ * saves infofile
+ */
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
-
-    if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
-        String error_message = "The images are expected as InputArray::STD_VECTOR_MAT (a std::vector<Mat>) or _InputArray::STD_VECTOR_VECTOR (a std::vector< std::vector<...> >).";
-        CV_Error(Error::StsBadArg, error_message);
-    }
-    if(_in_src.total() == 0) {
-        String error_message = format("Empty training data was given. You'll need more than one sample to learn a model.");
-        CV_Error(Error::StsUnsupportedFormat, error_message);
-    } else if(_in_labels.getMat().type() != CV_32SC1) {
-        String error_message = format("Labels must be given as integer (CV_32SC1). Expected %d, but was %d.", CV_32SC1, _in_labels.type());
-        CV_Error(Error::StsUnsupportedFormat, error_message);
-    }
-
-    // get the vector of matrices
-    std::vector<Mat> src;
-    _in_src.getMatVector(src);
-    // get the label matrix
-    Mat labels = _in_labels.getMat();
-    // check if data is well- aligned
-    if(labels.total() != src.size()) {
-        String error_message = format("The number of samples (src) must equal the number of labels (labels). Was len(samples)=%d, len(labels)=%d.", src.size(), _labels.total());
-        CV_Error(Error::StsBadArg, error_message);
-    }
-
-    // if this model should be trained without preserving old data, delete old model data
-    if(!preserveData) {
-        _labels.release();
-        _histograms.clear();
-    }
-
-    // append labels to _labels matrix
-    for(size_t labelIdx = 0; labelIdx < labels.total(); labelIdx++) {
-        _labels.push_back(labels.at<int>((int)labelIdx));
-    }
-
-    // store the spatial histograms of the original data
-    for(size_t sampleIdx = 0; sampleIdx < src.size(); sampleIdx++) {
-        // calculate lbp image
-        Mat lbp_image = elbp(src[sampleIdx], _radius, _neighbors);
-         
-        if(sampleIdx == 0)
-            std::cout << "lbp_image size = " << lbp_image.cols << "x" << lbp_image.rows << " | depth = " << lbp_image.depth() << " | channels = " << lbp_image.channels() << "\n";
-         
-        // get spatial histogram from this lbp image
-        Mat p = spatial_histogram(
-                lbp_image, /* lbp_image */
-                static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), /* number of possible patterns */
-                _grid_x, /* grid size x */
-                _grid_y, /* grid size y */
-                true);
-         
-        if(sampleIdx == 0)
-            std::cout << "p size = " << p.cols << "x" << p.rows << " | depth = " << p.depth() << " | channels = " << p.channels() << "\n";
-
-        // add to templates
-        _histograms.push_back(p);
-
-        // free memory
-        //lbp_image.release();
-    }
-   
-    std::cout << "Num Histograms: " << _histograms.size() << "\n";
-    std::cout << "Elems In Histograms : " << _histograms.at(0).rows << "x" << _histograms.at(0).cols << "\n";
-
+    
 }
 
-//TODO Rewrite
+/* TODO Rewrite for xLBPH
+ */
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
-    if(_histograms.empty()) {
-        // throw error if no data (or simply return -1?)
-        String error_message = "This xLBPH model is not computed yet. Did you call the train method?";
-        CV_Error(Error::StsBadArg, error_message);
-    }
-    Mat src = _src.getMat();
-    // get the spatial histogram from input image
-    Mat lbp_image = elbp(src, _radius, _neighbors);
-    Mat query = spatial_histogram(
-            lbp_image, /* lbp_image */
-            static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), /* number of possible patterns */
-            _grid_x, /* grid size x */
-            _grid_y, /* grid size y */
-            true /* normed histograms */);
-    // find 1-nearest neighbor
-    minDist = DBL_MAX;
-    double maxDist = 0;
-    minClass = -1;
-    for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
-        double dist = compareHist(_histograms[sampleIdx], query, HISTCMP_CHISQR_ALT);
-        if((dist < minDist) && (dist < _threshold)) {
-            minDist = dist;
-            minClass = _labels.at<int>((int) sampleIdx);
-        }
 
-        if(dist > maxDist)
-            maxDist = dist;
-    }
-    std::cout << "\n  -->  Max Dist = " << maxDist << " | Min Dist = " << minDist<< "\n";
 }
 
 int xLBPH::predict(InputArray _src) const {
