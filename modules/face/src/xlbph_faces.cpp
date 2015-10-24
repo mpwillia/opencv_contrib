@@ -464,14 +464,12 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     Mat labels = _in_labels.getMat();
     // check if data is well- aligned
     if(labels.total() != src.size()) {
-        String error_message = format("The number of samples (src) must equal the number of labels (labels). Was len(samples)=%d, len(labels)=%d.", src.size(), _labels.total());
-        CV_Error(Error::StsBadArg, error_message);
+        //String error_message = format("The number of samples (src) must equal the number of labels (labels). Was len(samples)=%d, len(labels)=%d.", src.size(), _labels.total());
+        //CV_Error(Error::StsBadArg, error_message);
     }
 
     // if this model should be trained without preserving old data, delete old model data
     if(!preserveData) {
-        _labels.release();
-        _histograms.clear();
     }
 
 
@@ -501,17 +499,6 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     minDist = DBL_MAX;
     double maxDist = 0;
     minClass = -1;
-    for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
-        double dist = compareHist(_histograms[sampleIdx], query, HISTCMP_CHISQR_ALT);
-        if((dist < minDist) && (dist < _threshold)) {
-            minDist = dist;
-            minClass = _labels.at<int>((int) sampleIdx);
-        }
-
-        if(dist > maxDist)
-            maxDist = dist;
-    }
-
 }
 
 int xLBPH::predict(InputArray _src) const {
