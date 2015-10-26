@@ -149,7 +149,7 @@ String xLBPH::getModelPath() const {
 String xLBPH::getModelName() const {
     size_t idx = _modelpath.find_last_of('/');
     std::cout << "idx = " << idx << "\n";
-    std::cout << "length = " << _modelpath.length << "\n";
+    std::cout << "length = " << _modelpath.length() << "\n";
 
     if((int)idx <= 0) {
         // if we can't find a '/' character than assume the path given is just the modelname 
