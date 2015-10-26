@@ -154,7 +154,7 @@ const char* xLBPH::getModelPathCStr() const {
 } 
 
 std::string xLBPH::getModelPathStr() const {
-    return _modelpath.c_str(); 
+    return std::string(_modelpath.c_str());
 } 
 
 String xLBPH::getModelName() const {
