@@ -124,8 +124,6 @@ public:
     CV_IMPL_PROPERTY(double, Threshold, _threshold)
     
     String getModelPath() const;
-    const char* getModelPathCStr() const;
-    std::string getModelPathStr() const;
     String getModelName() const;
 
     //--------------------------------------------------------------------------
@@ -144,23 +142,21 @@ void xLBPH::test() {
     _modelpath = "/images/saved-models/xLBPH-tests";
 }
 
-
 String xLBPH::getModelPath() const {
     return _modelpath; 
 }
 
-const char* xLBPH::getModelPathCStr() const {
-    return _modelpath.c_str(); 
-} 
-
-std::string xLBPH::getModelPathStr() const {
-    return std::string(_modelpath.c_str());
-} 
-
 String xLBPH::getModelName() const {
-    return "tempmodelname";
-} 
+    size_t idx = _modelpath.find_last_of('/');
+    std::cout << "idx = " << idx << "\n";
 
+    if((int)idx <= 0) {
+        // if we can't find a '/' character than assume the path given is just the modelname 
+        return _modelpath;
+    }
+
+    return _modelpath.substr(idx);
+} 
 
 
 

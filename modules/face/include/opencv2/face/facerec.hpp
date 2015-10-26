@@ -195,8 +195,6 @@ public:
 
     CV_WRAP virtual void test() = 0; 
     CV_WRAP virtual String getModelPath() const = 0; 
-    CV_WRAP virtual const char* getModelPathCStr() const = 0; 
-    CV_WRAP virtual std::string  getModelPathStr() const = 0; 
     CV_WRAP virtual String getModelName() const = 0;
 
 };
