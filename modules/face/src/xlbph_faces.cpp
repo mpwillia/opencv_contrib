@@ -478,7 +478,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, String mode
      
     std::cout << "Organizing images by label...\n";
     // organize the mats and labels
-    std::mat<int, std::vector<Mat> > labelImages;
+    std::map<int, std::vector<Mat> > labelImages;
     for(size_t matIdx = 0; matIdx < src.size(); matIdx++) {
         labelImages[allLabels.at((int)matIdx)].push_back(src.at((int)matIdx));
     }
