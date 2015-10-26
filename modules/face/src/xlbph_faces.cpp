@@ -42,10 +42,6 @@ private:
     String _modelpath;
     std::map<int, int> _labelinfo;
 
-    // Computes a xLBPH model with images in src and
-    // corresponding labels in labels, possibly preserving
-    // old model data.
-    void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
     
     //--------------------------------------------------------------------------
     // Additional Private Functions
@@ -100,6 +96,7 @@ public:
     // Computes a xLBPH model with images in src and
     // corresponding labels in labels.
     void train(InputArrayOfArrays src, InputArray labels);
+    void train(InputArrayOfArrays src, InputArray labels, String modelpath);
 
     // Updates this xLBPH model with images in src and
     // corresponding labels in labels.
@@ -139,7 +136,7 @@ public:
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
 void xLBPH::test() {
-    _modelpath = "/images/saved-models/xLBPH-tests/";
+    _modelpath = "/images/saved-models/xLBPH-tests";
 }
 
 String xLBPH::getModelPath() const {
@@ -148,8 +145,6 @@ String xLBPH::getModelPath() const {
 
 String xLBPH::getModelName() const {
     size_t idx = _modelpath.find_last_of('/');
-    std::cout << "idx = " << idx << "\n";
-    std::cout << "length = " << _modelpath.length() << "\n";
 
     if((int)idx <= 0) {
         // if we can't find a '/' character than assume the path given is just the modelname 
@@ -248,7 +243,7 @@ void xLBPH::save(FileStorage& fs) const {
 }
 
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels) {
-    this->train(_in_src, _in_labels, false);
+    CV_Error(Error::StsBadFunc, "Train must be given a model name for xLBPH");
 }
 
 void xLBPH::update(InputArrayOfArrays _in_src, InputArray _in_labels) {
@@ -256,7 +251,7 @@ void xLBPH::update(InputArrayOfArrays _in_src, InputArray _in_labels) {
     if(_in_src.total() == 0)
         return;
 
-    this->train(_in_src, _in_labels, true);
+    //this->train(_in_src, _in_labels, true);
 }
 
 
@@ -450,7 +445,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
  * updates lableinfo
  * saves infofile
  */
-void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
+void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, String modelpath) {
 
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
         String error_message = "The images are expected as InputArray::STD_VECTOR_MAT (a std::vector<Mat>) or _InputArray::STD_VECTOR_VECTOR (a std::vector< std::vector<...> >).";
@@ -474,13 +469,73 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         //String error_message = format("The number of samples (src) must equal the number of labels (labels). Was len(samples)=%d, len(labels)=%d.", src.size(), _labels.total());
         //CV_Error(Error::StsBadArg, error_message);
     }
+    
+    // Get all of the labels
+    std::vector<int> allLabels;
+    for(size_t labelIdx = 0; labelIdx < labels.total(); labelIdx++) {
+       allLabels.push_back(labels.at<int>((int)labelIdx));
+    }
+     
+    std::cout << "Organizing images by label...\n";
+    // organize the mats and labels
+    std::mat<int, std::vector<Mat> > labelImages;
+    for(size_t matIdx = 0; matIdx < src.size(); matIdx++) {
+        labelImages[allLabels.at((int)matIdx)].push_back(src.at((int)matIdx));
+    }
+    std::cout << "Organized images for " << labelImages.size() << " labels.\n";
 
-    // if this model should be trained without preserving old data, delete old model data
-    if(!preserveData) {
+    // create model directory
+    _modelpath = modelpath;
+    system(("mkdir " + _modelpath).c_str());
+    String histogram_dir(_modelpath + "/" + getModelName() + "-histograms");
+    system(("mkdir " + histogram_dir).c_str());
+    
+    std::vector<int> uniqueLabels;
+    std::vector<int> numhists;
+
+    // start training
+    for(std::map<int, std::vector<Mat> >::iterator it = labelImages.begin(); it != labelImages.end(); ++it) {
+        //label = it->first;
+        std::vector<Mat> imgs = it->second;
+        std::vector<Mat> hists;
+
+        for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
+            // calculate lbp image
+            Mat lbp_image = elbp(src[sampleIdx], _radius, _neighbors);
+
+            // get spatial histogram from this lbp image
+            Mat p = spatial_histogram(
+                    lbp_image, /* lbp_image */
+                    static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), /* number of possible patterns */
+                    _grid_x, /* grid size x */
+                    _grid_y, /* grid size y */
+                    true);
+
+            hists.push_back(p);
+        }
+
+        uniqueLabels.push_back(it->first);
+        numhists.push_back((int)imgs.size());
+        saveHistograms(it->first, hists);
+
     }
 
+    String infofilepath(_modelpath + "/" + getModelName() + ".yml");
+    FileStorage infofile(infofilepath, FileStorage::WRITE);
+    if (!infofile.isOpened())
+        CV_Error(Error::StsError, "File can't be opened for writing!");
 
-    //CONT...
+    infofile << "radius" << _radius;
+    infofile << "neighbors" << _neighbors;
+    infofile << "grid_x" << _grid_x;
+    infofile << "grid_y" << _grid_y;
+    infofile << "numlabels" << (int)labelImages.size();
+    //infofile << "labels" << unique_labels;
+    infofile << "label_info" << "{";
+    infofile << "labels" << uniqueLabels;
+    infofile << "numhists" << numhists;
+    infofile << "}";
+    infofile.release();
 
 }
 
