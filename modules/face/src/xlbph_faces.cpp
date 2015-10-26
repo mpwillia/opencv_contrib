@@ -139,7 +139,7 @@ public:
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
 void xLBPH::test() {
-    _modelpath = "/images/saved-models/xLBPH-tests";
+    _modelpath = "/images/saved-models/xLBPH-tests/";
 }
 
 String xLBPH::getModelPath() const {
