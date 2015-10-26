@@ -196,6 +196,8 @@ public:
     CV_WRAP virtual void test() = 0; 
     CV_WRAP virtual String getModelPath() const = 0; 
     CV_WRAP virtual String getModelName() const = 0;
+    
+    CV_WRAP virtual void train(InputArrayOfArrays src, InputArray labels, String modelpath) = 0;
 
 };
 CV_EXPORTS_W Ptr<xLBPHFaceRecognizer> createxLBPHFaceRecognizer(int radius=1, int neighbors=8, int grid_x=8, int grid_y=8, double threshold = DBL_MAX);
