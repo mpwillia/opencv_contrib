@@ -170,7 +170,7 @@ bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) {
 
     char labelstr[16];
     sprintf(labelstr, "%d", label);
-    String filename(getModelPath() + "/" + getModelName() + "-" + labelstr + ".bin");
+    String filename(getModelPath() + "/" + getModelName() + "-histograms/" + getModelName() + "-" + labelstr + ".bin");
     FILE *fp = fopen(filename.c_str(), "r");
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
@@ -190,7 +190,7 @@ bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) {
 bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms) const {
     char labelstr[16];
     sprintf(labelstr, "%d", label);
-    String filename(getModelPath() + "/" + getModelName() + "-" + labelstr + ".bin");
+    String filename(getModelPath() + "/" + getModelName() + "-histograms/" + getModelName() + "-" + labelstr + ".bin");
     FILE *fp = fopen(filename.c_str(), "w");
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
