@@ -195,6 +195,7 @@ public:
 
     CV_WRAP virtual void test() = 0; 
     CV_WRAP virtual String getModelPath() const = 0; 
+    CV_WRAP virtual char* getModelPathTest() const = 0; 
     CV_WRAP virtual String getModelName() const = 0;
 
 };
