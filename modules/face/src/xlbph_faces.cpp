@@ -162,8 +162,12 @@ void xLBPH::setModelPath(String modelpath) {
     else {
         // is the '/' character in the last index
         if ((int)idx >= (int)modelpath.length()-1) {
-            // it is so truncate it 
-            _modelpath = modelpath.substr(0, modelpath.length()-1);
+            if((int)modelpath.length() == 1)
+                CV_Error(Error::StsBadArg, "Modelpath cannot be empty!");
+            else {
+                // it is so truncate it 
+                _modelpath = modelpath.substr(0, modelpath.length()-1);
+            }
         }
         else {
             // it isn't so w/e 
