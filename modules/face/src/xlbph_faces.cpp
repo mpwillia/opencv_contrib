@@ -207,7 +207,7 @@ String xLBPH::getHistogramsDir() const {
     return getModelPath() + "/" + getModelName() + "-histograms";
 }
 
-String getHistogramFile(int label) const {
+String xLBPH::getHistogramFile(int label) const {
     char labelstr[16];
     sprintf(labelstr, "%d", label);
     return getHistogramsDir() + "/" + getModelName() + "-" + labelstr + ".bin";
