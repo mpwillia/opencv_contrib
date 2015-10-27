@@ -33,15 +33,20 @@ namespace cv { namespace face {
 class xLBPH : public xLBPHFaceRecognizer
 {
 private:
+    // alg settings
     int _grid_x;
     int _grid_y;
     int _radius;
     int _neighbors;
     double _threshold;
-
+    
+    // model path info
     String _modelpath;
-    std::map<int, int> _labelinfo;
+    String _modelname;
 
+    // label info
+    std::map<int, int> _labelinfo;
+    
     
     //--------------------------------------------------------------------------
     // Additional Private Functions
@@ -66,12 +71,15 @@ public:
     // grid_x, grid_y control the grid size of the spatial histograms.
     xLBPH(int radius_=1, int neighbors_=8,
             int gridx=8, int gridy=8,
-            double threshold = DBL_MAX) :
-        _grid_x(gridx),
-        _grid_y(gridy),
-        _radius(radius_),
-        _neighbors(neighbors_),
-        _threshold(threshold) {}
+            double threshold = DBL_MAX,
+            String modelpath) :
+                _grid_x(gridx),
+                _grid_y(gridy),
+                _radius(radius_),
+                _neighbors(neighbors_),
+                _threshold(threshold) {
+        setModelPath(modelpath);
+    }
 
     // Initializes and computes this xLBPH Model. The current implementation is
     // rather fixed as it uses the Extended Local Binary Patterns per default.
@@ -82,12 +90,14 @@ public:
             InputArray labels,
             int radius_=1, int neighbors_=8,
             int gridx=8, int gridy=8,
-            double threshold = DBL_MAX) :
+            double threshold = DBL_MAX,
+            String modelpath) :
                 _grid_x(gridx),
                 _grid_y(gridy),
                 _radius(radius_),
                 _neighbors(neighbors_),
                 _threshold(threshold) {
+        setModelPath(modelpath);
         train(src, labels);
     }
 
@@ -120,6 +130,8 @@ public:
     CV_IMPL_PROPERTY(int, Neighbors, _neighbors)
     CV_IMPL_PROPERTY(double, Threshold, _threshold)
     
+    // path getters/setters
+    void setModelPath(String modelpath);
     String getModelPath() const;
     String getModelName() const;
 
@@ -131,6 +143,54 @@ public:
     void test();
 };
 
+//------------------------------------------------------------------------------
+// Model Path and Model File Getters/Setters 
+//------------------------------------------------------------------------------
+
+// Sets _modelpath, extracts model name from path, and sets _modelname
+void xLBPH::setModelPath(String modelpath) {
+    if(modelpath.length() <= 0)
+        CV_Error(Error::StsBadArg,, "Modelpath cannot be empty!");
+
+    //find last '/' in the string
+    size_t idx = modelpath.find_last_of('/');
+    if((int)idx <= 0) {
+        // didn't find a '/' character 
+        _modelpath = modelpath
+        _modelname = modelpath
+    }
+    else {
+        // is the '/' character in the last index
+        if ((int)idx >= modelpath.length()-1) {
+            // it is so truncate it 
+            _modelpath = modelpath.substr(0, modelpath.length()-1);
+        }
+        else {
+            // it isn't so w/e 
+        }
+
+        // parse modelname from set _modelpath
+        idx = _modelpath.find_last_of('/');
+        if((int)idx <= 0) {
+            _modelname = modelpath 
+        }
+        else if((int)idx >= _modelpath.length()-1) {
+            CV_Error(Error::StsBadArg,, "Invalid path '" + _modelpath + "'!");
+        }
+        else {
+            _modelname = _modelpath.substr(idx + 1);
+        }
+    }
+}
+
+String xLBPH::getModelPath() const {
+    return _modelpath; 
+}
+
+String xLBPH::getModelName() const {
+    return _modelname;
+} 
+
 
 //------------------------------------------------------------------------------
 // Additional Functions and File IO
@@ -139,20 +199,6 @@ void xLBPH::test() {
     _modelpath = "/images/saved-models/xLBPH-tests";
 }
 
-String xLBPH::getModelPath() const {
-    return _modelpath; 
-}
-
-String xLBPH::getModelName() const {
-    size_t idx = _modelpath.find_last_of('/');
-
-    if((int)idx <= 0) {
-        // if we can't find a '/' character than assume the path given is just the modelname 
-        return _modelpath;
-    }
-
-    return _modelpath.substr(idx + 1);
-} 
 
 
 
@@ -565,7 +611,9 @@ int xLBPH::predict(InputArray _src) const {
 }
 
 Ptr<xLBPHFaceRecognizer> createxLBPHFaceRecognizer(int radius, int neighbors,
-                                             int grid_x, int grid_y, double threshold)
+                                                   int grid_x, int grid_y, 
+                                                   double threshold, 
+                                                   String modelpath)
 {
     return makePtr<xLBPH>(radius, neighbors, grid_x, grid_y, threshold);
 }
