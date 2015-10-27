@@ -150,14 +150,14 @@ public:
 // Sets _modelpath, extracts model name from path, and sets _modelname
 void xLBPH::setModelPath(String modelpath) {
     if(modelpath.length() <= 0)
-        CV_Error(Error::StsBadArg,, "Modelpath cannot be empty!");
+        CV_Error(Error::StsBadArg, "Modelpath cannot be empty!");
 
     //find last '/' in the string
     size_t idx = modelpath.find_last_of('/');
     if((int)idx <= 0) {
         // didn't find a '/' character 
-        _modelpath = modelpath
-        _modelname = modelpath
+        _modelpath = modelpath;
+        _modelname = modelpath;
     }
     else {
         // is the '/' character in the last index
@@ -172,10 +172,10 @@ void xLBPH::setModelPath(String modelpath) {
         // parse modelname from set _modelpath
         idx = _modelpath.find_last_of('/');
         if((int)idx <= 0) {
-            _modelname = modelpath 
+            _modelname = modelpath;
         }
         else if((int)idx >= _modelpath.length()-1) {
-            CV_Error(Error::StsBadArg,, "Invalid path '" + _modelpath + "'!");
+            CV_Error(Error::StsBadArg, "Invalid path '" + _modelpath + "'!");
         }
         else {
             _modelname = _modelpath.substr(idx + 1);
