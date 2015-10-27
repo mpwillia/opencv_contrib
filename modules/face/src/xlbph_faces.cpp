@@ -134,6 +134,9 @@ public:
     void setModelPath(String modelpath);
     String getModelPath() const;
     String getModelName() const;
+    String getInfoFile() const;
+    String getHistogramsDir() const;
+    String getHistogramFile(int label) const;
 
     //--------------------------------------------------------------------------
     // Additional Public Functions 
@@ -196,6 +199,19 @@ String xLBPH::getModelName() const {
     return _modelname;
 } 
 
+String xLBPH::getInfoFile() const {
+    return getModelPath() + "/" + getModelName() + ".yml";
+}
+
+String xLBPH::getHistogramsDir() const {
+    return getModelPath() + "/" + getModelName() + "-histograms";
+}
+
+String getHistogramFile(int label) const {
+    char labelstr[16];
+    sprintf(labelstr, "%d", label);
+    return getHistogramsDir() + "/" + getModelName() + "-" + labelstr + ".bin";
+}
 
 //------------------------------------------------------------------------------
 // Additional Functions and File IO
@@ -203,8 +219,6 @@ String xLBPH::getModelName() const {
 void xLBPH::test() {
     _modelpath = "/images/saved-models/xLBPH-tests";
 }
-
-
 
 
 
@@ -218,10 +232,8 @@ int xLBPH::getHistogramSize() const {
 
 
 bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) {
-
-    char labelstr[16];
-    sprintf(labelstr, "%d", label);
-    String filename(getModelPath() + "/" + getModelName() + "-histograms/" + getModelName() + "-" + labelstr + ".bin");
+    
+    String filename = getHistogramFile(label);
     FILE *fp = fopen(filename.c_str(), "r");
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
@@ -239,9 +251,7 @@ bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) {
 }
 
 bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms) const {
-    char labelstr[16];
-    sprintf(labelstr, "%d", label);
-    String filename(getModelPath() + "/" + getModelName() + "-histograms/" + getModelName() + "-" + labelstr + ".bin");
+    String filename = getHistogramFile(label);
     FILE *fp = fopen(filename.c_str(), "w");
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
