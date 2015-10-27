@@ -161,7 +161,7 @@ void xLBPH::setModelPath(String modelpath) {
     }
     else {
         // is the '/' character in the last index
-        if ((int)idx >= modelpath.length()-1) {
+        if ((int)idx >= (int)modelpath.length()-1) {
             // it is so truncate it 
             _modelpath = modelpath.substr(0, modelpath.length()-1);
         }
@@ -174,7 +174,7 @@ void xLBPH::setModelPath(String modelpath) {
         if((int)idx <= 0) {
             _modelname = modelpath;
         }
-        else if((int)idx >= _modelpath.length()-1) {
+        else if((int)idx >= (int)_modelpath.length()-1) {
             CV_Error(Error::StsBadArg, "Invalid path '" + _modelpath + "'!");
         }
         else {
