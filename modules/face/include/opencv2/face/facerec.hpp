@@ -200,7 +200,7 @@ public:
     CV_WRAP virtual String getModelName() const = 0;
     CV_WRAP virtual String getInfoFile() const = 0; 
     CV_WRAP virtual String getHistogramsDir() const = 0;
-    CV_WRAP virtual String getHistogramFile() const = 0;
+    CV_WRAP virtual String getHistogramFile(int label) const = 0;
 
     CV_WRAP virtual void train(InputArrayOfArrays src, InputArray labels, String modelpath) = 0;
 
