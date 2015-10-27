@@ -58,8 +58,6 @@ private:
     int getHistogramSize() const;
     bool matsEqual(const Mat &a, const Mat &b) const;
     
-    String getHistogramsDir() const;
-
 public:
     using FaceRecognizer::save;
     using FaceRecognizer::load;
