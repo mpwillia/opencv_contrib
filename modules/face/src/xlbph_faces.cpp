@@ -72,7 +72,7 @@ public:
     xLBPH(int radius_=1, int neighbors_=8,
             int gridx=8, int gridy=8,
             double threshold = DBL_MAX,
-            String modelpath) :
+            String modelpath="") :
                 _grid_x(gridx),
                 _grid_y(gridy),
                 _radius(radius_),
@@ -91,7 +91,7 @@ public:
             int radius_=1, int neighbors_=8,
             int gridx=8, int gridy=8,
             double threshold = DBL_MAX,
-            String modelpath) :
+            String modelpath="") :
                 _grid_x(gridx),
                 _grid_y(gridy),
                 _radius(radius_),
@@ -615,7 +615,7 @@ Ptr<xLBPHFaceRecognizer> createxLBPHFaceRecognizer(int radius, int neighbors,
                                                    double threshold, 
                                                    String modelpath)
 {
-    return makePtr<xLBPH>(radius, neighbors, grid_x, grid_y, threshold);
+    return makePtr<xLBPH>(radius, neighbors, grid_x, grid_y, threshold, modelpath);
 }
 
 }}
