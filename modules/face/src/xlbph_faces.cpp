@@ -167,6 +167,7 @@ void xLBPH::setModelPath(String modelpath) {
         }
         else {
             // it isn't so w/e 
+            _modelpath = modelpath;
         }
 
         // parse modelname from set _modelpath
