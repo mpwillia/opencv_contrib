@@ -700,7 +700,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
 
             if(avgDist >= 0)
             {
-                avgDist /= it-second;
+                avgDist /= it->second;
                 if(avgDist < minDist) {
                     minDist = avgDist;
                     minClass = it->first;
