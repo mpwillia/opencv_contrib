@@ -643,8 +643,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     infofile.release();
 
     // lastly we need to set _labelinfo
-    std::map<int, int> _labelinfo = std::map<int, int>(); // if _labelinfo was set then clear it
-    for(size_t labelIdx = 0; labelIdx < uniqueLabels.total(); labelIdx++) {
+    _labelinfo = std::map<int, int>(); // if _labelinfo was set then clear it
+    for(size_t labelIdx = 0; labelIdx < uniqueLabels.size(); labelIdx++) {
         _labelinfo[uniqueLabels.at((int)labelIdx)] = numhists.at((int)labelIdx);
     }
 
