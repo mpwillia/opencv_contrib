@@ -60,7 +60,7 @@ private:
     bool writeHistograms(int label, const std::vector<Mat> &histograms, bool update) const;
     bool saveHistograms(int label, const std::vector<Mat> &histograms) const;
     bool updateHistograms(int label, const std::vector<Mat> &histrograms) const;
-    bool loadHistograms(int label, std::vector<Mat> &histograms);
+    bool loadHistograms(int label, std::vector<Mat> &histograms) const;
 
     bool exists(const String &filename) const;
     int getHistogramSize() const;
@@ -240,8 +240,7 @@ bool xLBPH::exists(const String &filepath) const {
 }
 
 
-
-bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) {
+bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) const {
     
     String filename = getHistogramFile(label);
     FILE *fp = fopen(filename.c_str(), "r");
