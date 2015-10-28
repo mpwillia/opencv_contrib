@@ -49,6 +49,11 @@ private:
     std::map<int, int> _labelinfo;
     
     
+    // Computes a LBPH model with images in src and
+    // corresponding labels in labels, possibly preserving
+    // old model data.
+    void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
+
     //--------------------------------------------------------------------------
     // Additional Private Functions
     //--------------------------------------------------------------------------
@@ -316,6 +321,7 @@ void xLBPH::save(FileStorage& fs) const {
 }
 
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels) {
+    this->train(_in_src, _in_labels, false);
 }
 
 void xLBPH::update(InputArrayOfArrays _in_src, InputArray _in_labels) {
@@ -561,26 +567,28 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         labelImages[allLabels.at((int)matIdx)].push_back(src.at((int)matIdx));
     }
     std::cout << "Organized images for " << labelImages.size() << " labels.\n";
-
-    // create model directory
-    // check if the model directory already exists
-    if(exists(getModelPath())) {
-        // model directory exists
-        // check if the directory is actually a model
-        if(exists(getInfoFile()) && exists(getHistogramsDir())) {
-            // is a model dir so overwrite  
-            system(("rm -r " + getModelPath()).c_str());     
-        }
-        else {
-            // is not a model dir so error
-            CV_Error(Error::StsError, "Given model path at '" + getModelPath() +"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
-        }
-    }
     
-    // create the model directories
-    system(("mkdir " + getModelPath()).c_str()); 
-    system(("mkdir " + getHistogramsDir()).c_str());
-
+    if(!preserveData)
+    {
+        // create model directory
+        // check if the model directory already exists
+        if(exists(getModelPath())) {
+            // model directory exists
+            // check if the directory is actually a model
+            if(exists(getInfoFile()) && exists(getHistogramsDir())) {
+                // is a model dir so overwrite  
+                system(("rm -r " + getModelPath()).c_str());     
+            }
+            else {
+                // is not a model dir so error
+                CV_Error(Error::StsError, "Given model path at '" + getModelPath() +"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
+            }
+        }
+        
+        // create the model directories
+        system(("mkdir " + getModelPath()).c_str()); 
+        system(("mkdir " + getHistogramsDir()).c_str());
+    }
     
     std::vector<int> uniqueLabels;
     std::vector<int> numhists;
@@ -608,7 +616,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
         uniqueLabels.push_back(it->first);
         numhists.push_back((int)imgs.size());
-        saveHistograms(it->first, hists);
+        writeHistograms(it->first, hists, preserveData);
         
         // free memory
         /*
