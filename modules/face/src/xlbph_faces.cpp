@@ -678,7 +678,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     // iterate through _labelinfo
     int labelcount = 0;
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
-        std::cout << "Calculating histogram distance for label " << labelcount << " / " << labelImages.size() << " [" << it->first << "]\r" << std::flush;
+        std::cout << "Calculating histogram distance for label " << labelcount << " / " << _labelinfo.size() << " [" << it->first << "]\r" << std::flush;
 
         std::vector<Mat> histograms;
         loadHistograms(it->first, histograms);
@@ -688,11 +688,12 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         if((int)histograms.size() > 0) {
             double avgDist = 0;
             for(size_t histIdx = 0; histIdx < histograms.size(); histIdx++) {
-                avgDist += compareHist(_histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
+                avgDist += compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
 
                 //check if it is even possible for us to be better
                 if(avgDist / (int)histograms.size() > minDist) {
                     // if it's not then stop comparing histograms, set invalid avg dist and break
+                    std::cout << "\nTerminated calcuation early\n";
                     avgDist = -1;
                     break;
                 }
@@ -707,7 +708,11 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
                 }
             }
         }
+
+        labelcount++;
     }
+
+    std::cout << "Finished calculating histogram distance for  " << _labelinfo.size() << " labels.            \n";
 }
 
 int xLBPH::predict(InputArray _src) const {
