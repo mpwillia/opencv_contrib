@@ -52,7 +52,7 @@ private:
     //--------------------------------------------------------------------------
     // Additional Private Functions
     //--------------------------------------------------------------------------
-    bool saveHistograms(int label, const std::vector<Mat> &histograms, bool update) const;
+    bool writeHistograms(int label, const std::vector<Mat> &histograms, bool update) const;
     bool saveHistograms(int label, const std::vector<Mat> &histograms) const;
     bool updateHIstograms(int label, const std::vector<Mat> &histrograms) const;
     bool loadHistograms(int label, std::vector<Mat> &histograms);
@@ -255,15 +255,15 @@ bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) {
     return true;
 }
 
-bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms, bool update) const {
-    return saveHistograms(label, histograms, false);
+bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms) const {
+    return writeHistograms(label, histograms, false);
 }
 
 bool xLBPH::updateHistograms(int label, const std::vector<Mat> &histograms) const {
-    return saveHistograms(label, histograms, true);
+    return writeHistograms(label, histograms, true);
 }
 
-bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms, bool update) const {
+bool xLBPH::writeHistograms(int label, const std::vector<Mat> &histograms, bool update) const {
     String filename = getHistogramFile(label);
     FILE *fp = fopen(filename.c_str(), (update == true ? "a" : "w"));
     if(fp == NULL) {
