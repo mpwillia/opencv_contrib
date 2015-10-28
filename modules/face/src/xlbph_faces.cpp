@@ -647,6 +647,10 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         _labelinfo[uniqueLabels.at((int)labelIdx)] = numhists.at((int)labelIdx);
     }
 
+    for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
+        std::cout << it->first << " -> " << it->second << "\n";
+    }
+
     std::cout << "Training complete\n";
 }
 
