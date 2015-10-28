@@ -623,7 +623,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         }
         */
     }
-    std::cout << "Finished calculating histograms for " << labelImages.size() << " labels.\n";
+    std::cout << "Finished calculating histograms for " << labelImages.size() << " labels.            \n";
     std::cout << "Writing infofile\n";
     String infofilepath(_modelpath + "/" + getModelName() + ".yml");
     FileStorage infofile(infofilepath, FileStorage::WRITE);
@@ -642,12 +642,25 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     infofile << "}";
     infofile.release();
 
+    // lastly we need to set _labelinfo
+    std::map<int, int> _labelinfo = std::map<int, int>(); // if _labelinfo was set then clear it
+    for(size_t labelIdx = 0; labelIdx < uniqueLabels.total(); labelIdx++) {
+        _labelinfo[uniqueLabels.at((int)labelIdx)] = numhists.at((int)labelIdx);
+    }
+
     std::cout << "Training complete\n";
 }
 
 /* TODO Rewrite for xLBPH
  */
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
+    
+    CV_Assert((int)_labelinfo.size() <= 0);
+    /*
+    if((int)_labelinfo.size() <= 0) {
+        CV_Error(Error::StsError, "Given model path at '" + getModelPath() +"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
+    }
+    */
 
     Mat src = _src.getMat();
     // get the spatial histogram from input image
@@ -661,6 +674,11 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     // find 1-nearest neighbor
     minDist = DBL_MAX;
     minClass = -1;
+   
+    
+
+    // iterate through _labelinfo
+    for(std::map<int, int >::iterator it = labelImages.begin(); it != labelImages.end(); ++it) {
 }
 
 int xLBPH::predict(InputArray _src) const {
