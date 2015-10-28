@@ -54,7 +54,7 @@ private:
     //--------------------------------------------------------------------------
     bool writeHistograms(int label, const std::vector<Mat> &histograms, bool update) const;
     bool saveHistograms(int label, const std::vector<Mat> &histograms) const;
-    bool updateHIstograms(int label, const std::vector<Mat> &histrograms) const;
+    bool updateHistograms(int label, const std::vector<Mat> &histrograms) const;
     bool loadHistograms(int label, std::vector<Mat> &histograms);
 
     bool exists(const String &filename) const;
@@ -263,9 +263,9 @@ bool xLBPH::updateHistograms(int label, const std::vector<Mat> &histograms) cons
     return writeHistograms(label, histograms, true);
 }
 
-bool xLBPH::writeHistograms(int label, const std::vector<Mat> &histograms, bool update) const {
+bool xLBPH::writeHistograms(int label, const std::vector<Mat> &histograms, bool appendhists) const {
     String filename = getHistogramFile(label);
-    FILE *fp = fopen(filename.c_str(), (update == true ? "a" : "w"));
+    FILE *fp = fopen(filename.c_str(), (appendhists == true ? "a" : "w"));
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
         return false;
