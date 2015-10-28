@@ -590,7 +590,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     // start training
     int labelcount = 1;
     for(std::map<int, std::vector<Mat> >::iterator it = labelImages.begin(); it != labelImages.end(); ++it) {
-        std::cout << "Calculating histograms for label " << labelcount << " / " << labelImages.size() << " [" << it->first << "]\r";
+        std::cout << "Calculating histograms for label " << labelcount << " / " << labelImages.size() << " [" << it->first << "]\r" << std::flush;
 
         //label = it->first;
         std::vector<Mat> imgs = it->second;
