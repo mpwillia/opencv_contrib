@@ -678,7 +678,8 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     
 
     // iterate through _labelinfo
-    for(std::map<int, int >::iterator it = labelImages.begin(); it != labelImages.end(); ++it) {
+    for(std::map<int, int >::iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
+    }
 }
 
 int xLBPH::predict(InputArray _src) const {
