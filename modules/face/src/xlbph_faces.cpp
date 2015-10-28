@@ -548,12 +548,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         CV_Error(Error::StsBadArg, error_message);
     }
     
-    // if we aren't preserving the data we already have then delete what is there
-    if(!preserveData) {
-        _labels.release();
-        _histograms.clear();
-    }
-
     // Get all of the labels
     std::vector<int> allLabels;
     for(size_t labelIdx = 0; labelIdx < labels.total(); labelIdx++) {
