@@ -21,6 +21,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <sys/stat.h>
 
 namespace cv { namespace face {
 
@@ -51,10 +52,12 @@ private:
     //--------------------------------------------------------------------------
     // Additional Private Functions
     //--------------------------------------------------------------------------
+    bool saveHistograms(int label, const std::vector<Mat> &histograms, bool update) const;
     bool saveHistograms(int label, const std::vector<Mat> &histograms) const;
     bool updateHIstograms(int label, const std::vector<Mat> &histrograms) const;
     bool loadHistograms(int label, std::vector<Mat> &histograms);
 
+    bool exists(const String &filename) const;
     int getHistogramSize() const;
     bool matsEqual(const Mat &a, const Mat &b) const;
     
@@ -104,7 +107,6 @@ public:
     // Computes a xLBPH model with images in src and
     // corresponding labels in labels.
     void train(InputArrayOfArrays src, InputArray labels);
-    void train(InputArrayOfArrays src, InputArray labels, String modelpath);
 
     // Updates this xLBPH model with images in src and
     // corresponding labels in labels.
@@ -219,7 +221,6 @@ void xLBPH::test() {
 }
 
 
-
 bool xLBPH::matsEqual(const Mat &a, const Mat &b) const {
     return countNonZero(a!=b) == 0; 
 }
@@ -227,6 +228,12 @@ bool xLBPH::matsEqual(const Mat &a, const Mat &b) const {
 int xLBPH::getHistogramSize() const {
     return (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
 }
+
+bool xLBPH::exists(const String &filepath) const {
+    struct stat buffer;   
+    return (stat (filepath.c_str(), &buffer) == 0);   
+}
+
 
 
 bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) {
@@ -248,9 +255,17 @@ bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) {
     return true;
 }
 
-bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms) const {
+bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms, bool update) const {
+    return saveHistograms(label, histograms, false);
+}
+
+bool xLBPH::updateHistograms(int label, const std::vector<Mat> &histograms) const {
+    return saveHistograms(label, histograms, true);
+}
+
+bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms, bool update) const {
     String filename = getHistogramFile(label);
-    FILE *fp = fopen(filename.c_str(), "w");
+    FILE *fp = fopen(filename.c_str(), (update == true ? "a" : "w"));
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
         return false;
@@ -273,7 +288,6 @@ bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms) const 
     fclose(fp);
     return true;
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -302,7 +316,6 @@ void xLBPH::save(FileStorage& fs) const {
 }
 
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels) {
-    CV_Error(Error::StsBadFunc, "Train must be given a model name for xLBPH");
 }
 
 void xLBPH::update(InputArrayOfArrays _in_src, InputArray _in_labels) {
@@ -310,7 +323,7 @@ void xLBPH::update(InputArrayOfArrays _in_src, InputArray _in_labels) {
     if(_in_src.total() == 0)
         return;
 
-    //this->train(_in_src, _in_labels, true);
+    this->train(_in_src, _in_labels, true);
 }
 
 
@@ -504,7 +517,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
  * updates lableinfo
  * saves infofile
  */
-void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, String modelpath) {
+void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
 
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
         String error_message = "The images are expected as InputArray::STD_VECTOR_MAT (a std::vector<Mat>) or _InputArray::STD_VECTOR_VECTOR (a std::vector< std::vector<...> >).";
@@ -525,10 +538,16 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, String mode
     Mat labels = _in_labels.getMat();
     // check if data is well- aligned
     if(labels.total() != src.size()) {
-        //String error_message = format("The number of samples (src) must equal the number of labels (labels). Was len(samples)=%d, len(labels)=%d.", src.size(), _labels.total());
-        //CV_Error(Error::StsBadArg, error_message);
+        String error_message = format("The number of samples (src) must equal the number of labels (labels). Was len(samples)=%d, len(labels)=%d.", src.size(), _labels.total());
+        CV_Error(Error::StsBadArg, error_message);
     }
     
+    // if we aren't preserving the data we already have then delete what is there
+    if(!preserveData) {
+        _labels.release();
+        _histograms.clear();
+    }
+
     // Get all of the labels
     std::vector<int> allLabels;
     for(size_t labelIdx = 0; labelIdx < labels.total(); labelIdx++) {
@@ -544,10 +563,24 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, String mode
     std::cout << "Organized images for " << labelImages.size() << " labels.\n";
 
     // create model directory
-    _modelpath = modelpath;
-    system(("mkdir " + _modelpath).c_str());
-    String histogram_dir(_modelpath + "/" + getModelName() + "-histograms");
-    system(("mkdir " + histogram_dir).c_str());
+    // check if the model directory already exists
+    if(exists(getModelPath())) {
+        // model directory exists
+        // check if the directory is actually a model
+        if(exists(getInfoFile()) && exists(getHistogramsDir())) {
+            // is a model dir so overwrite  
+            system(("rm -r " + getModelPath()).c_str());     
+        }
+        else {
+            // is not a model dir so error
+            CV_Error(Error::StsError, "Given model path at '" + getModelPath() +"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
+        }
+    }
+    
+    // create the model directories
+    system(("mkdir " + getModelPath()).c_str()); 
+    system(("mkdir " + getHistogramsDir()).c_str());
+
     
     std::vector<int> uniqueLabels;
     std::vector<int> numhists;
@@ -576,7 +609,13 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, String mode
         uniqueLabels.push_back(it->first);
         numhists.push_back((int)imgs.size());
         saveHistograms(it->first, hists);
-
+        
+        // free memory
+        /*
+        for (std::vector<Mat>::iterator it = hists.begin() ; it != hists.end(); ++it) {
+             
+        }
+        */
     }
 
     String infofilepath(_modelpath + "/" + getModelName() + ".yml");
