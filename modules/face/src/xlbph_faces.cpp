@@ -675,10 +675,38 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     minDist = DBL_MAX;
     minClass = -1;
    
-    
-
     // iterate through _labelinfo
+    int labelcount = 0;
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
+        std::cout << "Calculating histogram distance for label " << labelcount << " / " << labelImages.size() << " [" << it->first << "]\r" << std::flush;
+
+        std::vector<Mat> histograms;
+        loadHistograms(it->first, histograms);
+
+        CV_Assert((int)histograms.size() == it->second);
+
+        if((int)histograms.size() > 0) {
+            double avgDist = 0;
+            for(size_t histIdx = 0; histIdx < histograms.size(); histIdx++) {
+                avgDist += compareHist(_histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
+
+                //check if it is even possible for us to be better
+                if(avgDist / (int)histograms.size() > minDist) {
+                    // if it's not then stop comparing histograms, set invalid avg dist and break
+                    avgDist = -1;
+                    break;
+                }
+            }
+
+            if(avgDist >= 0)
+            {
+                avgDist /= (int)histograms.size();
+                if(avgDist < minDist) {
+                    minDist = avgDist;
+                    minClass = it->second;
+                }
+            }
+        }
     }
 }
 
