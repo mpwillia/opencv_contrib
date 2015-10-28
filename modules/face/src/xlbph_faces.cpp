@@ -588,7 +588,10 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     std::vector<int> numhists;
 
     // start training
+    int labelcount = 1;
     for(std::map<int, std::vector<Mat> >::iterator it = labelImages.begin(); it != labelImages.end(); ++it) {
+        std::cout << "Calculating histograms for label " << labelcount << " / " << labelImages.size() << " [" << it->first << "]\r";
+
         //label = it->first;
         std::vector<Mat> imgs = it->second;
         std::vector<Mat> hists;
@@ -611,7 +614,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         uniqueLabels.push_back(it->first);
         numhists.push_back((int)imgs.size());
         writeHistograms(it->first, hists, preserveData);
-        
+        labelcount++;
+
         // free memory
         /*
         for (std::vector<Mat>::iterator it = hists.begin() ; it != hists.end(); ++it) {
@@ -619,7 +623,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         }
         */
     }
-
+    std::cout << "Finished calculating histograms for " << labelImages.size() << " labels.\n";
+    std::cout << "Writing infofile\n";
     String infofilepath(_modelpath + "/" + getModelName() + ".yml");
     FileStorage infofile(infofilepath, FileStorage::WRITE);
     if (!infofile.isOpened())
@@ -637,6 +642,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     infofile << "}";
     infofile.release();
 
+    std::cout << "Training complete\n";
 }
 
 /* TODO Rewrite for xLBPH
