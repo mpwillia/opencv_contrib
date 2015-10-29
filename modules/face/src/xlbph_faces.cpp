@@ -21,8 +21,9 @@
 
 #include <cstdio>
 #include <cstring>
-#include <sys/stat.h>
-#include <sys/mman.h>
+#include <sys/stat>
+#include <sys/mman>
+#include <fcntl>
 
 #define COMP_ALG HISTCMP_CHISQR_ALT
 //#define COMP_ALG HISTCMP_BHATTACHARYYA
