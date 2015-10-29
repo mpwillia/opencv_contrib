@@ -888,10 +888,10 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         }
     }
     
-    for(size_t idx = preds.size()-1; idx >= 0; idx--) {
+    for(size_t idx = 0; idx < preds.size() ; idx++) {
         std::cout << preds.at(idx)  << ", ";
     }
-    std::cout << "\n";
+    std::cout << " <- returned\n";
 
 
     /*
