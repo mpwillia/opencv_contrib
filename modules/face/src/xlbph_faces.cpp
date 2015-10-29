@@ -696,7 +696,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     }
     
     std::cout << "Calculating histogram averages...\n";
-    calcHistogramAverages(uniqueLabels);
+    calcHistogramAverages();
 
     std::cout << "Training complete\n";
 }
