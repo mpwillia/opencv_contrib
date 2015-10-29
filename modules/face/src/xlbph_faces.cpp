@@ -870,6 +870,8 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     // find 1-nearest neighbor
     minDist = DBL_MAX;
     minClass = -1;
+    
+    std::vector<int> preds;
 
     //int labelcount = 0;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
@@ -881,9 +883,15 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
             if((dist < minDist) && (dist < _threshold)) {
                 minDist = dist;
                 minClass = it->first;
+                preds.push_back(it->first);
             }
         }
     }
+    
+    for(size_t idx = preds.size()-1; idx >= 0; idx--) {
+        std::cout << preds.at(idx)  << ", ";
+    }
+    std::cout << "\n";
 
 
     /*
