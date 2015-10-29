@@ -225,8 +225,6 @@ String xLBPH::getHistogramFile(int label) const {
 }
 
 String xLBPH::getHistogramAveragesFile() const {
-    char labelstr[16];
-    sprintf(labelstr, "%d", label);
     return getHistogramsDir() + "/" + getModelName() + "-averages.bin";
 }
 
