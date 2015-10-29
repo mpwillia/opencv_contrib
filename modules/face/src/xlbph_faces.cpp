@@ -199,10 +199,6 @@ void xLBPH::setModelPath(String modelpath) {
     }
 
 
-
-    
-
-
     /*
     if(modelpath.length() <= 0)
         CV_Error(Error::StsBadArg, "Modelpath cannot be empty!");
@@ -399,7 +395,8 @@ bool xLBPH::loadHistogramAverages(std::map<int, Mat> &histavgs) const {
 // Histogram Memory Mapping
 //------------------------------------------------------------------------------
 void xLBPH::mmapHistograms() {
-     
+
+    _histograms = std::map<int, std::vector<Mat> >();
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
         // map histogram
         String filename = getHistogramFile(it->first);
@@ -419,6 +416,8 @@ void xLBPH::mmapHistograms() {
             _histograms[it->first].push_back(mat);
         }
     }
+
+    std::cout << "_histograms size: " << _histograms.size() << "\n";
 }
 
 void xLBPH::munmapHistograms() {
