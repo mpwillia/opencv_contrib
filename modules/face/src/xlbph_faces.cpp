@@ -870,13 +870,13 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     minDist = DBL_MAX;
     minClass = -1;
 
-    int labelcount = 0;
+    //int labelcount = 0;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
        
         std::vector<Mat> hists = it->second;
 
         for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
-            double dist = compareHist(histograms.at(histIdx), query, COMP_ALG);
+            double dist = compareHist(hists.at(histIdx), query, COMP_ALG);
             if((dist < minDist) && (dist < _threshold)) {
                 minDist = dist;
                 minClass = it->first;
