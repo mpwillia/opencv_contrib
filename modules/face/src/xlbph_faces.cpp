@@ -723,6 +723,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         CV_Error(Error::StsError, "Given model path at '" + getModelPath() +"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
     }
     */
+    
 
     Mat src = _src.getMat();
     // get the spatial histogram from input image
@@ -733,6 +734,20 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
             _grid_x, /* grid size x */
             _grid_y, /* grid size y */
             true /* normed histograms */);
+
+    // find labels to check
+    std::map<int, Mat> histavgs;
+    std::vector<std::pair<V,K>> avgsdists;
+    loadHistogramAverages(histavgs);
+    for(std::map<int, int>::const_iterator it = histavgs.begin(); it != histavgs.end(); ++it) {
+        avgsdist.push_back(std::pair<V,K>(it->first, compareHist(it->second, query, HISTCMP_CHISQR_ALT)))
+    }
+    std::sort(avgsdists.begin(), avgsdists.end());
+
+    for(size_t avgsdistIdx = 0; avgsdistIdx < avgsdists.size(); avgsdistIdx++) {
+        std::cout << avgsdists.at(avgsdistsIdx)->second << "\n";
+    }
+
     // find 1-nearest neighbor
     minDist = DBL_MAX;
     minClass = -1;
