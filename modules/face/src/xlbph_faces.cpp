@@ -58,7 +58,7 @@ private:
     // Additional Private Functions
     //--------------------------------------------------------------------------
     bool readHistograms(const String &filename, std::vector<Mat> &histograms) const;
-    bool writeHistograms(String &filename, const std::vector<Mat> &histograms, bool update) const;
+    bool writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const;
 
     bool saveHistograms(int label, const std::vector<Mat> &histograms) const;
     bool updateHistograms(int label, const std::vector<Mat> &histrograms) const;
