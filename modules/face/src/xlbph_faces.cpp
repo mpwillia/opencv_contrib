@@ -660,7 +660,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
         uniqueLabels.push_back(it->first);
         numhists.push_back((int)imgs.size());
-        writeHistograms(it->first, hists, preserveData);
+        writeHistograms(getHistogramFile(it->first), hists, preserveData);
         labelcount++;
 
         // free memory
