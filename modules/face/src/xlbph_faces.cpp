@@ -310,7 +310,6 @@ bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &hist
 
 bool xLBPH::calcHistogramAverages() const {
     
-    std::cout << "FDSAFSA\n";
     std::vector<Mat> averages;
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
         std::vector<Mat> hists;
@@ -318,18 +317,20 @@ bool xLBPH::calcHistogramAverages() const {
         Mat histavg = Mat::zeros(1, getHistogramSize(), CV_64FC1); // NOTE: is 64bit to prevent overflow
         
         for(size_t labelIdx = 0; labelIdx < hists.size(); labelIdx++) {
-            histavg += hists.at((int)labelIdx);
+            Mat dst;
+            hists.at((int)labelIdx).convertTo(dst, CV_64FC1);
+            histavg += dst;
         }
         Mat div = Mat::zeros(1, getHistogramSize(), CV_64FC1);
         div.setTo(Scalar(it->second));
         std::cout << "histavg depth: " << histavg.depth() << " | div depth: " << div.depth() << "\n";
-        Mat result;
+        //Mat result;
         //divide(histavg, div, result, 1, CV_64FC1);
-        /*
-        div.convertTo(div, CV_64FC1);
-        histavg.convertTo(histavg, CV_64FC1);
+        //div.convertTo(div, CV_64FC1);
+        //histavg.convertTo(histavg, CV_64FC1);
+
         histavg /= div;
-        */
+
         histavg.convertTo(histavg, CV_32FC1);
         averages.push_back(histavg);
     }
