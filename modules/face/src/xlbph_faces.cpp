@@ -310,6 +310,7 @@ bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &hist
 
 bool xLBPH::calcHistogramAverages() const {
     
+    std::cout << "FDSAFSA\n";
     std::vector<Mat> averages;
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
         std::vector<Mat> hists;
