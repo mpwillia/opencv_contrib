@@ -739,7 +739,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     std::map<int, Mat> histavgs;
     std::vector<std::pair<double, int> > avgsdists;
     loadHistogramAverages(histavgs);
-    for(std::map<int, int>::const_iterator it = histavgs.begin(); it != histavgs.end(); ++it) {
+    for(std::map<int, Mat>::const_iterator it = histavgs.begin(); it != histavgs.end(); ++it) {
         avgsdist.push_back(std::pair<double, int>(it->first, compareHist(it->second, query, HISTCMP_CHISQR_ALT)))
     }
     std::sort(avgsdists.begin(), avgsdists.end());
