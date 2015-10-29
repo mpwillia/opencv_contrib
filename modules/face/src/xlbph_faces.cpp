@@ -23,7 +23,8 @@
 #include <cstring>
 #include <sys/stat.h>
 
-#define COMP_ALG HISTCMP_CHISQR_ALT
+//#define COMP_ALG HISTCMP_CHISQR_ALT
+#define COMP_ALG HISTCMP_BHATTACHARYYA
 
 namespace cv { namespace face {
 
