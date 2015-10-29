@@ -181,7 +181,7 @@ void xLBPH::setModelPath(String modelpath) {
     CV_Assert(modelpath.length() > 0);
 
     // path can't contain "//"
-    CV_Assert((int)modelpath.find("//") != -1);
+    CV_Assert((int)modelpath.find("//") == -1);
     
     // find last index of '/' 
     size_t idx = modelpath.find_last_of('/');
