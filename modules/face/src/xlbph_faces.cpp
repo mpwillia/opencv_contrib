@@ -64,7 +64,7 @@ private:
     bool updateHistograms(int label, const std::vector<Mat> &histrograms) const;
     bool loadHistograms(int label, std::vector<Mat> &histograms) const;
     
-    bool calcHistogramAverages(std::vector<int> labels) const;
+    bool calcHistogramAverages() const;
     bool loadHistogramAverages(std::vector<int> labels, std::map<int, Mat> &histavgs) const;
 
     bool exists(const String &filename) const;
