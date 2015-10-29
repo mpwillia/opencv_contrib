@@ -745,7 +745,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     std::sort(avgsdists.begin(), avgsdists.end());
 
     for(size_t avgsdistsIdx = 0; avgsdistsIdx < avgsdists.size(); avgsdistsIdx++) {
-        std::cout << avgsdists.at(avgsdistsIdx).second << "\n";
+        std::cout << avgsdists.at(avgsdistsIdx).first << " | " << avgsdists.at(avgsdistsIdx).second << "\n";
     }
 
     // find 1-nearest neighbor
