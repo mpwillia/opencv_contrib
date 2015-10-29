@@ -309,7 +309,8 @@ bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &hist
 }
 
 bool xLBPH::calcHistogramAverages() const {
-    
+ compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
+   
     std::vector<Mat> averages;
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
         std::vector<Mat> hists;
@@ -322,12 +323,14 @@ bool xLBPH::calcHistogramAverages() const {
             histavg += dst;
         }
 
-        //Mat div = Mat::zeros(1, getHistogramSize(), CV_64FC1);
-        //div.setTo(Scalar(it->second));
         histavg /= it->second;
-
         histavg.convertTo(histavg, CV_32FC1);
         averages.push_back(histavg);
+
+        double distAB = compareHist(hists.at(0), hists.at(1));
+        double distAvg = compareHist(hists.at(0), histavg);
+
+        std::cout << "distAB: " << distAB << " | distAvg: " << distAvg << "\n";
     }
     
     return writeHistograms(getHistogramAveragesFile(), averages, false);
