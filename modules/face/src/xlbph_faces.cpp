@@ -321,14 +321,16 @@ bool xLBPH::calcHistogramAverages() const {
         }
         Mat div = Mat::zeros(1, getHistogramSize(), CV_64FC1);
         div.setTo(Scalar(it->second));
-        divide(histavg, div, histavg);
+        std::cout << "histavg depth: " << histavg.depth() << " | div depth: " << div.depth() << "\n";
+        Mat result;
+        divide(histavg, div, result, 1, -1);
         /*
         div.convertTo(div, CV_64FC1);
         histavg.convertTo(histavg, CV_64FC1);
         histavg /= div;
         */
-        histavg.convertTo(histavg, CV_32FC1);
-        averages.push_back(histavg);
+        histavg.convertTo(result, CV_32FC1);
+        averages.push_back(result);
     }
     
     return writeHistograms(getHistogramAveragesFile(), averages, false);
