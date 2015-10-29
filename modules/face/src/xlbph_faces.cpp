@@ -23,6 +23,8 @@
 #include <cstring>
 #include <sys/stat.h>
 
+#define COMP_ALG HISTCMP_CHISQR_ALT
+
 namespace cv { namespace face {
 
 // Face Recognition based on Local Binary Patterns.
@@ -740,7 +742,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     std::vector<std::pair<double, int> > avgsdists;
     loadHistogramAverages(histavgs);
     for(std::map<int, Mat>::const_iterator it = histavgs.begin(); it != histavgs.end(); ++it) {
-        avgsdists.push_back(std::pair<double, int>(it->first, compareHist(it->second, query, HISTCMP_CHISQR_ALT)));
+        avgsdists.push_back(std::pair<double, int>(compareHist(it->second, query, COMP_ALG), it->first));
     }
     std::sort(avgsdists.begin(), avgsdists.end());
 
@@ -765,7 +767,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         if((int)histograms.size() > 0) {
             double avgDist = 0;
             for(size_t histIdx = 0; histIdx < histograms.size(); histIdx++) {
-                avgDist += compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
+                avgDist += compareHist(histograms.at(histIdx), query, COMP_ALG);
 
                 //check if it is even possible for us to be better
                 if(avgDist / it->second > minDist) {
