@@ -685,6 +685,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         CV_Assert((int)histograms.size() == it->second);
 
         if((int)histograms.size() > 0) {
+            /*
             double avgDist = 0;
             for(size_t histIdx = 0; histIdx < histograms.size(); histIdx++) {
                 avgDist += compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
@@ -705,6 +706,16 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
                     minDist = avgDist;
                     minClass = it->first;
                 }
+            }
+            */
+
+            for(size_t histIdx = 0; histIdx < histograms.size(); histIdx++) {
+                double dist = compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
+                if((dist < minDist) && (dist < _threshold)) {
+                    minDist = dist;
+                    minClass = it->first;
+                }
+
             }
         }
 
