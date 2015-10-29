@@ -328,9 +328,10 @@ bool xLBPH::calcHistogramAverages() const {
         averages.push_back(histavg);
 
         double distAB = compareHist(hists.at(0), hists.at(1), HISTCMP_CHISQR_ALT);
+        double distAEnd = compareHist(hists.at(0), hists.at(it->second - 1), HISTCMP_CHISQR_ALT);
         double distAvg = compareHist(hists.at(0), histavg, HISTCMP_CHISQR_ALT);
 
-        std::cout << "distAB: " << distAB << " | distAvg: " << distAvg << "\n";
+        std::cout << "distAB: " << distAB << " | distAEnd: " << distAEnd << " | distAvg: " << distAvg << "\n";
     }
     
     return writeHistograms(getHistogramAveragesFile(), averages, false);
