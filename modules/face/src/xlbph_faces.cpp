@@ -309,7 +309,6 @@ bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &hist
 }
 
 bool xLBPH::calcHistogramAverages() const {
- compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
    
     std::vector<Mat> averages;
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
