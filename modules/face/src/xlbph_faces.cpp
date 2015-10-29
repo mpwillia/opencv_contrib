@@ -321,6 +321,8 @@ bool xLBPH::calcHistogramAverages() const {
         }
         Mat div = Mat::zeros(1, getHistogramSize(), CV_64FC1);
         div.setTo(Scalar(it->second));
+        div.convertTo(div, CV_64FC1);
+        histavg.convertTo(histavg, CV_64FC1);
         histavg /= div;
         histavg.convertTo(histavg, CV_32FC1);
         averages.push_back(histavg);
