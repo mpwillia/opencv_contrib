@@ -323,7 +323,7 @@ bool xLBPH::calcHistogramAverages() const {
         div.setTo(Scalar(it->second));
         std::cout << "histavg depth: " << histavg.depth() << " | div depth: " << div.depth() << "\n";
         Mat result;
-        divide(histavg, div, result, 1, -1);
+        divide(histavg, div, result, 1, CV_64FC1);
         /*
         div.convertTo(div, CV_64FC1);
         histavg.convertTo(histavg, CV_64FC1);
