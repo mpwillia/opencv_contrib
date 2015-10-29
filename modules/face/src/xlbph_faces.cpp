@@ -77,8 +77,8 @@ private:
     int getHistogramSize() const;
     bool matsEqual(const Mat &a, const Mat &b) const;
 
-    bool mmapHistograms();
-    bool munmapHistograms();
+    void mmapHistograms();
+    void munmapHistograms();
 
 public:
     using FaceRecognizer::save;
@@ -432,15 +432,15 @@ void xLBPH::munmapHistograms() {
 void xLBPH::load() {
      
     // load data from the info file
-    FileStorage fs(getInfoFile(), FileStorage::READ);
-    if (!fs.isOpened())
-        CV_Error(Error::StsError, "File '"+filename+"' can't be opened for reading!");
+    FileStorage infofile(getInfoFile(), FileStorage::READ);
+    if (!infofile.isOpened())
+        CV_Error(Error::StsError, "File '"+getInfoFile()+"' can't be opened for reading!");
     
     // alg settings
-    fs["radius"] >> _radius;
-    fs["neighbors"] >> _neighbors;
-    fs["grid_x"] >> _grid_x;
-    fs["grid_y"] >> _grid_y;
+    infofile["radius"] >> _radius;
+    infofile["neighbors"] >> _neighbors;
+    infofile["grid_x"] >> _grid_x;
+    infofile["grid_y"] >> _grid_y;
     
     // label_info
     std::vector<int> labels;
@@ -454,7 +454,7 @@ void xLBPH::load() {
     for(size_t idx = 0; idx < labels.size(); idx++) {
         _labelinfo[labels.at((int)idx)] = numhists.at((int)idx);
     }
-    fs.release();
+    infofile.release();
 
     // mem map histograms
 }
