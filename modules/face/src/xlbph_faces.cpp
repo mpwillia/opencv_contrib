@@ -23,7 +23,7 @@
 #include <cstring>
 #include <sys/stat.h>
 #include <sys/mman.h>
-#include <fcntl>
+#include <fcntl.h>
 
 #define COMP_ALG HISTCMP_CHISQR_ALT
 //#define COMP_ALG HISTCMP_BHATTACHARYYA
