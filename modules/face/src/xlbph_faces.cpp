@@ -57,10 +57,15 @@ private:
     //--------------------------------------------------------------------------
     // Additional Private Functions
     //--------------------------------------------------------------------------
-    bool writeHistograms(int label, const std::vector<Mat> &histograms, bool update) const;
+    bool readHistograms(const String &filename, std::vector<Mat> &histograms) const;
+    bool writeHistograms(String &filename, const std::vector<Mat> &histograms, bool update) const;
+
     bool saveHistograms(int label, const std::vector<Mat> &histograms) const;
     bool updateHistograms(int label, const std::vector<Mat> &histrograms) const;
     bool loadHistograms(int label, std::vector<Mat> &histograms) const;
+    
+    bool calcHistogramAverages(std::vector<int> labels) const;
+    bool loadHistogramAverages(std::vector<int> labels, std::map<int, Mat> &histavgs) const;
 
     bool exists(const String &filename) const;
     int getHistogramSize() const;
@@ -142,6 +147,7 @@ public:
     String getInfoFile() const;
     String getHistogramsDir() const;
     String getHistogramFile(int label) const;
+    String getHistogramAveragesFile() const;
 
     //--------------------------------------------------------------------------
     // Additional Public Functions 
@@ -218,6 +224,12 @@ String xLBPH::getHistogramFile(int label) const {
     return getHistogramsDir() + "/" + getModelName() + "-" + labelstr + ".bin";
 }
 
+String xLBPH::getHistogramAveragesFile() const {
+    char labelstr[16];
+    sprintf(labelstr, "%d", label);
+    return getHistogramsDir() + "/" + getModelName() + "-averages.bin";
+}
+
 //------------------------------------------------------------------------------
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
@@ -240,9 +252,22 @@ bool xLBPH::exists(const String &filepath) const {
 }
 
 
+// Wrapper functions for load/save/updating histograms for specific labels
 bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) const {
-    
-    String filename = getHistogramFile(label);
+    return readHistograms(getHistogramFile(label), histograms);
+}
+
+bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms) const {
+    return writeHistograms(getHistogramFile(label), histograms, false);
+}
+
+bool xLBPH::updateHistograms(int label, const std::vector<Mat> &histograms) const {
+    return writeHistograms(getHistogramFile(label), histograms, true);
+}
+
+
+// Main read/write functions for histograms
+bool xLBPH::readHistograms(const String &filename, std::vector<Mat> &histograms) const {
     FILE *fp = fopen(filename.c_str(), "r");
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
@@ -259,16 +284,8 @@ bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) const {
     return true;
 }
 
-bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms) const {
-    return writeHistograms(label, histograms, false);
-}
 
-bool xLBPH::updateHistograms(int label, const std::vector<Mat> &histograms) const {
-    return writeHistograms(label, histograms, true);
-}
-
-bool xLBPH::writeHistograms(int label, const std::vector<Mat> &histograms, bool appendhists) const {
-    String filename = getHistogramFile(label);
+bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const {
     FILE *fp = fopen(filename.c_str(), (appendhists == true ? "a" : "w"));
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
@@ -290,6 +307,39 @@ bool xLBPH::writeHistograms(int label, const std::vector<Mat> &histograms, bool 
     }
     */
     fclose(fp);
+    return true;
+}
+
+bool xLBPH::calcHistogramAverages() const {
+    
+    std::vector<Mat> averages;
+    for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
+        std::vector<Mat> hists;
+        loadHistograms(it->first, hists);
+        Mat histavg = Mat::zeros(1, getHistogramSize(), CV_64FC1); // NOTE: is 64bit to prevent overflow
+        
+        for(size_t labelIdx = 0; labelIdx < hists.size(); labelIdx++) {
+            histavg += hists.at((int)labelIdx);
+        }
+        histavg /= it->second;
+        histavg.convertTo(histavg, CV_32FC1);
+        averages.push_back(histavg);
+    }
+    
+    return writeHistograms(getHistogramAveragesFile(), averages, false);
+}
+
+bool xLBPH::loadHistogramAverages(std::map<int, Mat> &histavgs) const {
+    
+    std::vector<Mat> hists;
+    if(readHistograms(getHistogramAveragesFile(), hists) != true)
+        return false;
+    
+    int histIdx = 0;
+    for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
+        histavgs[it->first] = hists.at(histIdx++);
+    }
+
     return true;
 }
 
@@ -646,6 +696,9 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     for(size_t labelIdx = 0; labelIdx < uniqueLabels.size(); labelIdx++) {
         _labelinfo[uniqueLabels.at((int)labelIdx)] = numhists.at((int)labelIdx);
     }
+    
+    std::cout << "Calculating histogram averages...\n";
+    calcHistogramAverages(uniqueLabels);
 
     std::cout << "Training complete\n";
 }
