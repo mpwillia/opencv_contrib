@@ -417,7 +417,7 @@ void xLBPH::mmapHistograms() {
         }
     }
 
-    std::cout << "_histograms size: " << _histograms.size() << "\n";
+    //std::cout << "_histograms size: " << _histograms.size() << "\n";
 }
 
 void xLBPH::munmapHistograms() {
@@ -457,6 +457,7 @@ void xLBPH::load() {
     infofile.release();
 
     // mem map histograms
+    mmapHistograms();
 }
 
 
