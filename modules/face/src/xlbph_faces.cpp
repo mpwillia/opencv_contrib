@@ -22,9 +22,10 @@
 #include <cstdio>
 #include <cstring>
 #include <sys/stat.h>
+#include <sys/mman.h>
 
-//#define COMP_ALG HISTCMP_CHISQR_ALT
-#define COMP_ALG HISTCMP_BHATTACHARYYA
+#define COMP_ALG HISTCMP_CHISQR_ALT
+//#define COMP_ALG HISTCMP_BHATTACHARYYA
 
 namespace cv { namespace face {
 
@@ -50,7 +51,9 @@ private:
 
     // label info
     std::map<int, int> _labelinfo;
-    
+
+    // histograms
+    std::map<int, std::vector<Mat> > _histograms;
     
     // Computes a LBPH model with images in src and
     // corresponding labels in labels, possibly preserving
@@ -73,10 +76,13 @@ private:
     bool exists(const String &filename) const;
     int getHistogramSize() const;
     bool matsEqual(const Mat &a, const Mat &b) const;
-    
+
+    bool mmapHistograms();
+    bool munmapHistograms();
+
 public:
     using FaceRecognizer::save;
-    using FaceRecognizer::load;
+    //using FaceRecognizer::load;
 
     // Initializes this xLBPH Model. The current implementation is rather fixed
     // as it uses the Extended Local Binary Patterns per default.
@@ -133,6 +139,8 @@ public:
 
     // See FaceRecognizer::load.
     void load(const FileStorage& fs);
+    void load(const String &filename);
+    void load();
 
     // See FaceRecognizer::save.
     void save(FileStorage& fs) const;
@@ -165,7 +173,36 @@ public:
 //------------------------------------------------------------------------------
 
 // Sets _modelpath, extracts model name from path, and sets _modelname
+
 void xLBPH::setModelPath(String modelpath) {
+    
+    // given path can't be empty
+    CV_Assert(modelpath.length() > 0);
+
+    // path can't contain "//"
+    CV_Assert((int)modelpath.find("//") != -1);
+    
+    // find last index of '/' 
+    size_t idx = modelpath.find_last_of('/');
+
+    if((int)idx < 0) {
+        _modelpath = modelpath;
+        _modelname = modelpath;
+    }
+    else if((int)idx >= (int)modelpath.length()-1) {
+        setModelPath(modelpath.substr(0, modelpath.length()-1));
+    }
+    else {
+        _modelpath = modelpath;
+        _modelname = _modelpath.substr(idx + 1);
+    }
+
+
+
+    
+
+
+    /*
     if(modelpath.length() <= 0)
         CV_Error(Error::StsBadArg, "Modelpath cannot be empty!");
 
@@ -203,6 +240,7 @@ void xLBPH::setModelPath(String modelpath) {
             _modelname = _modelpath.substr(idx + 1);
         }
     }
+    */
 }
 
 String xLBPH::getModelPath() const {
@@ -356,10 +394,81 @@ bool xLBPH::loadHistogramAverages(std::map<int, Mat> &histavgs) const {
     return true;
 }
 
+//------------------------------------------------------------------------------
+// Histogram Memory Mapping
+//------------------------------------------------------------------------------
+void xLBPH::mmapHistograms() {
+     
+    for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
+        // map histogram
+        String filename = getHistogramFile(it->first);
+        int fd = open(filename.c_str(), O_RDONLY);
+        if(fd < 0)
+            CV_Error(Error::StsError, "Cannot open histogram file '"+filename+"'");
+
+        struct stat st;
+        stat(filename.c_str(), &st);
+        void* mapPtr = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
+        if(mapPtr == MAP_FAILED)
+            CV_Error(Error::StsError, "Cannot mem map file '"+filename+"'");
+
+        // make matricies
+        for(int i = 0; i < it->second; i++) {
+            Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * sizeof(float) * i));
+            _histograms[it->first].push_back(mat);
+        }
+    }
+}
+
+void xLBPH::munmapHistograms() {
+     
+}
+
+
 
 //------------------------------------------------------------------------------
 // Standard Functions and File IO
 //------------------------------------------------------------------------------
+void xLBPH::load() {
+     
+    // load data from the info file
+    FileStorage fs(getInfoFile(), FileStorage::READ);
+    if (!fs.isOpened())
+        CV_Error(Error::StsError, "File '"+filename+"' can't be opened for reading!");
+    
+    // alg settings
+    fs["radius"] >> _radius;
+    fs["neighbors"] >> _neighbors;
+    fs["grid_x"] >> _grid_x;
+    fs["grid_y"] >> _grid_y;
+    
+    // label_info
+    std::vector<int> labels;
+    std::vector<int> numhists;
+    FileNode label_info = infofile["label_info"];
+    label_info["labels"] >> labels;
+    label_info["numhists"] >> numhists;
+  
+    CV_Assert(labels.size() == numhists.size());
+    _labelinfo = std::map<int, int>(); 
+    for(size_t idx = 0; idx < labels.size(); idx++) {
+        _labelinfo[labels.at((int)idx)] = numhists.at((int)idx);
+    }
+    fs.release();
+
+    // mem map histograms
+}
+
+
+void xLBPH::load(const String &modelpath) {
+    
+    // set our model path to the filename
+    setModelPath(modelpath);
+
+    // load the model
+    load();    
+}
+
 
 // See FaceRecognizer::load.
 /* TODO: Rewrite for xLBPH
@@ -713,6 +822,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     std::cout << "Calculating histogram averages...\n";
     calcHistogramAverages();
 
+    load();
+
     std::cout << "Training complete\n";
 }
 
@@ -721,6 +832,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     
     CV_Assert((int)_labelinfo.size() > 0);
+    CV_Assert((int)_histograms.size() > 0);
+
     /*
     if((int)_labelinfo.size() <= 0) {
         CV_Error(Error::StsError, "Given model path at '" + getModelPath() +"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
@@ -739,6 +852,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
             true /* normed histograms */);
 
     // find labels to check
+    /*
     std::map<int, Mat> histavgs;
     std::vector<std::pair<double, int> > avgsdists;
     loadHistogramAverages(histavgs);
@@ -750,11 +864,28 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     for(size_t avgsdistsIdx = 0; avgsdistsIdx < avgsdists.size(); avgsdistsIdx++) {
         std::cout << avgsdists.at(avgsdistsIdx).first << " | " << avgsdists.at(avgsdistsIdx).second << "\n";
     }
+    */
 
     // find 1-nearest neighbor
     minDist = DBL_MAX;
     minClass = -1;
-   
+
+    int labelcount = 0;
+    for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
+       
+        std::vector<Mat> hists = it->second;
+
+        for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
+            double dist = compareHist(histograms.at(histIdx), query, COMP_ALG);
+            if((dist < minDist) && (dist < _threshold)) {
+                minDist = dist;
+                minClass = it->first;
+            }
+        }
+    }
+
+
+    /*
     // iterate through _labelinfo
     int labelcount = 0;
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
@@ -788,7 +919,6 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
                 }
             }
             
-            /*
             for(size_t histIdx = 0; histIdx < histograms.size(); histIdx++) {
                 double dist = compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
                 if((dist < minDist) && (dist < _threshold)) {
@@ -797,12 +927,11 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
                 }
 
             }
-            */
         }
 
         labelcount++;
     }
-
+    */
     //std::cout << "Finished calculating histogram distance for  " << _labelinfo.size() << " labels.            \n";
 }
 
