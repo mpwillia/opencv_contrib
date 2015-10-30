@@ -281,6 +281,7 @@ static String matToString(const Mat &mat) {
         sprintf(valuestr, "%f", mat.at<float>(i));
         s += valuestr;
     }
+    s += "]";
     
     return s;
 }
@@ -486,7 +487,8 @@ bool xLBPH::loadHistogramAverages(std::map<int, Mat> &histavgs) const {
 //------------------------------------------------------------------------------
 void xLBPH::mmapHistograms() {
 
-    _histograms = std::map<int, std::vector<Mat> >();
+    //_histograms = std::map<int, std::vector<Mat> >();
+    _histograms.clear();
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
         // map histogram
         String filename = getHistogramFile(it->first);
@@ -508,6 +510,7 @@ void xLBPH::mmapHistograms() {
         }
     }
 
+    // verify our mmap'd histograms 
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
         
         std::vector<Mat> query = it->second;
@@ -517,10 +520,8 @@ void xLBPH::mmapHistograms() {
         CV_Assert(query.size() == check.size());
 
         for(size_t idx = 0; idx < query.size(); idx++) {
-            if(matsEqual(query.at(idx), check.at(idx)))
+            if(!matsEqual(query.at(idx), check.at(idx)))
                 CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
-            if((int)idx >= 2)
-                break;
         }
     }
 
