@@ -278,7 +278,7 @@ static String matToString(const Mat &mat) {
             s += ", ";
 
         char valuestr[16];
-        sprintf(valuestr, "%f", mat.at(i));
+        sprintf(valuestr, "%f", mat.at<float>(i));
         s += valuestr;
     }
     
@@ -309,7 +309,7 @@ void xLBPH::test() {
     }
     fwrite(buffer, sizeof(float), size * numhists, writefp);
     delete buffer;
-    fclose(fp);
+    fclose(writefp);
   
 
     // mmap fake file
