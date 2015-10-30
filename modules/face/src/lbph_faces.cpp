@@ -832,6 +832,8 @@ void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         if((dist < minDist) && (dist < _threshold)) {
             minDist = dist;
             minClass = _labels.at<int>((int) sampleIdx);
+
+            std::cout << "[" << minClass << " | " << minDist << "], ";
         }
 
         if(dist > maxDist)

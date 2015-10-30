@@ -881,10 +881,11 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
             double dist = compareHist(hists.at(histIdx), query, COMP_ALG);
             if((dist < minDist) && (dist < _threshold)) {
-                std::cout << "[" << it->first << " | " << dist << "], ";
                 minDist = dist;
                 minClass = it->first;
                 preds.push_back(it->first);
+
+                std::cout << "[" << minClass << " | " << minDist << "], ";
             }
         }
     }
