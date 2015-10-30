@@ -269,8 +269,90 @@ String xLBPH::getHistogramAveragesFile() const {
 //------------------------------------------------------------------------------
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
+
+static String matToString(const Mat &mat) {
+    String s = "[";
+
+    for(int i = 0; i < mat.cols; i++) {
+        if(i != 0)
+            s += ", ";
+
+        char valuestr[16];
+        sprintf(valuestr, "%f", mat.at(i));
+        s += valuestr;
+    }
+    
+    return s;
+}
+
 void xLBPH::test() {
-    _modelpath = "/images/saved-models/xLBPH-tests";
+    // make some fake hists
+    int numhists = 5;
+    int size = 10;
+    std::vector<Mat> histsToSave;
+    
+    for(int i = 0; i < numhists; i++) {
+        Mat mat = Mat::zeros(1, size, CV_32FC1);
+        mat += i;
+        histsToSave.at(i) = mat;
+    }
+    
+    String testhistsfile = getHistogramsDir() + "/testhists.bin";
+    // write them to a fake file
+    FILE *writefp = fopen(testhistsfile.c_str(), "w");
+    if(writefp == NULL) 
+        CV_Error(Error::StsError, "Cannot open histogram file '"+testhistsfile+"'");
+
+    float* buffer = new float[size * numhists];
+    for(size_t sampleIdx = 0; (int)sampleIdx < numhists; sampleIdx++) {
+        memcpy((buffer + sampleIdx * size), histsToSave.at((int)sampleIdx).ptr<float>(), size * sizeof(float));
+    }
+    fwrite(buffer, sizeof(float), size * numhists, writefp);
+    delete buffer;
+    fclose(fp);
+  
+
+    // mmap fake file
+    int fd = open(testhistsfile.c_str(), O_RDONLY);
+    if(fd < 0)
+        CV_Error(Error::StsError, "Cannot open histogram file '"+testhistsfile+"'");
+
+    char* mapPtr = (char*)mmap(NULL, size * numhists * sizeof(float), PROT_READ, MAP_PRIVATE, fd, 0);
+    if(mapPtr == MAP_FAILED)
+        CV_Error(Error::StsError, "Cannot mem map file '"+testhistsfile+"'");
+
+    // make matricies from map
+    std::vector<Mat> query;
+    for(int i = 0; i < numhists; i++) {
+        Mat mat(1, size, CV_32FC1, mapPtr + (size * sizeof(float) * i));
+        query.push_back(mat);
+    }
+
+
+    // load mats from file 
+    std::vector<Mat> check;
+    FILE *readfp = fopen(testhistsfile.c_str(), "r");
+    if(readfp == NULL) 
+        CV_Error(Error::StsError, "Cannot open histogram file '"+testhistsfile+"'");
+    
+    float buffer[size];
+    while(fread(buffer, sizeof(float), size, readfp) > 0) {
+        Mat hist = Mat::zeros(1, size, CV_32FC1);
+        memcpy(hist.ptr<float>(), buffer, size * sizeof(float));
+        check.push_back(hist);
+    }
+    fclose(readfp);
+
+
+    // compare results
+    CV_Assert(query.size() == check.size());
+
+    for(size_t idx = 0; idx < query.size(); idx++) {
+        if(matsEqual(query.at(idx), check.at(idx)))
+            CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
+        if((int)idx >= 2)
+            break;
+    }
 }
 
 
