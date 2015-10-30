@@ -875,7 +875,8 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
 
     //int labelcount = 0;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
-       
+        
+        std::cout << it->first ", ";
         std::vector<Mat> hists = it->second;
 
         for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
@@ -887,6 +888,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
             }
         }
     }
+    std::cout << "\n";
     
     for(size_t idx = 0; idx < preds.size() ; idx++) {
         std::cout << preds.at(idx)  << ", ";
