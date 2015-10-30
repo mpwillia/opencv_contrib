@@ -417,6 +417,11 @@ void xLBPH::mmapHistograms() {
         }
     }
 
+    std::cout << "_histograms size: " << _histograms.size() << "\n";
+    for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
+        std::cout << it->first << " -> numhists: " << (it->second).size() << "\n";
+    }
+
     //std::cout << "_histograms size: " << _histograms.size() << "\n";
 }
 
