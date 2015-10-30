@@ -295,7 +295,7 @@ void xLBPH::test() {
     for(int i = 0; i < numhists; i++) {
         Mat mat = Mat::zeros(1, size, CV_32FC1);
         mat += i;
-        histsToSave.at(i) = mat;
+        histsToSave.push_back(mat);
     }
     
     std::cout << "Saving test hists...\n";
