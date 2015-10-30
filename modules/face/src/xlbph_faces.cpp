@@ -303,12 +303,12 @@ void xLBPH::test() {
     if(writefp == NULL) 
         CV_Error(Error::StsError, "Cannot open histogram file '"+testhistsfile+"'");
 
-    float* buffer = new float[size * numhists];
+    float* writebuffer = new float[size * numhists];
     for(size_t sampleIdx = 0; (int)sampleIdx < numhists; sampleIdx++) {
-        memcpy((buffer + sampleIdx * size), histsToSave.at((int)sampleIdx).ptr<float>(), size * sizeof(float));
+        memcpy((writebuffer + sampleIdx * size), histsToSave.at((int)sampleIdx).ptr<float>(), size * sizeof(float));
     }
-    fwrite(buffer, sizeof(float), size * numhists, writefp);
-    delete buffer;
+    fwrite(writebuffer, sizeof(float), size * numhists, writefp);
+    delete writebuffer;
     fclose(writefp);
   
 
@@ -335,10 +335,10 @@ void xLBPH::test() {
     if(readfp == NULL) 
         CV_Error(Error::StsError, "Cannot open histogram file '"+testhistsfile+"'");
     
-    float buffer[size];
-    while(fread(buffer, sizeof(float), size, readfp) > 0) {
+    float readbuffer[size];
+    while(fread(readbuffer, sizeof(float), size, readfp) > 0) {
         Mat hist = Mat::zeros(1, size, CV_32FC1);
-        memcpy(hist.ptr<float>(), buffer, size * sizeof(float));
+        memcpy(hist.ptr<float>(), readbuffer, size * sizeof(float));
         check.push_back(hist);
     }
     fclose(readfp);
@@ -348,8 +348,11 @@ void xLBPH::test() {
     CV_Assert(query.size() == check.size());
 
     for(size_t idx = 0; idx < query.size(); idx++) {
-        if(matsEqual(query.at(idx), check.at(idx)))
+        if(!matsEqual(query.at(idx), check.at(idx)))
+        {
+            std::cout << "query: " << matToString(query.at(idx)) << "  |  " << matToString(check.at(idx)) << " :check" << "\n";
             CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
+        }
         if((int)idx >= 2)
             break;
     }
