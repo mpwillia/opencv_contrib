@@ -779,6 +779,9 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
 
     // store the spatial histograms of the original data
     for(size_t sampleIdx = 0; sampleIdx < src.size(); sampleIdx++) {
+        std::cout << "Calculating histograms for image " << sampleIdx << " / " << src.size() << "\r" << std::flush;
+
+
         // calculate lbp image
         Mat lbp_image = elbp(src[sampleIdx], _radius, _neighbors);
          
@@ -803,6 +806,7 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
         //lbp_image.release();
     }
    
+    std::cout << "Finished calculating histograms for " << src.size() << " images.            \n";
     std::cout << "Num Histograms: " << _histograms.size() << "\n";
     std::cout << "Elems In Histograms : " << _histograms.at(0).rows << "x" << _histograms.at(0).cols << "\n";
 
