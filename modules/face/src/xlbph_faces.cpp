@@ -417,6 +417,20 @@ void xLBPH::mmapHistograms() {
         }
     }
 
+    for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
+        
+        std::vector<Mat> query = it->second;
+        std::vector<Mat> check;
+        loadHistograms(it->first, check);
+        
+        CV_Assert(query.size() == check.size());
+
+        for(size_t idx = 0; idx < query.size(); idx++) {
+            if(matsEqual(query.at(idx), check.at(idx)))
+                CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
+        }
+    }
+
     std::cout << "_histograms size: " << _histograms.size() << "\n";
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
         std::cout << it->first << " -> numhists: " << (it->second).size() << "\n";
