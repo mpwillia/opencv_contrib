@@ -404,9 +404,10 @@ void xLBPH::mmapHistograms() {
         if(fd < 0)
             CV_Error(Error::StsError, "Cannot open histogram file '"+filename+"'");
 
-        struct stat st;
-        stat(filename.c_str(), &st);
-        char* mapPtr = (char*)mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
+        //struct stat st;
+        //stat(filename.c_str(), &st);
+        //char* mapPtr = (char*)mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
+        char* mapPtr = (char*)mmap(NULL, getHistogramSize() * it->second * sizeof(float), PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
         if(mapPtr == MAP_FAILED)
             CV_Error(Error::StsError, "Cannot mem map file '"+filename+"'");
 
