@@ -287,8 +287,8 @@ static String matToString(const Mat &mat) {
 
 void xLBPH::test() {
     // make some fake hists
-    int numhists = 5;
-    int size = 10;
+    int numhists = 16;
+    int size = 8;
     std::vector<Mat> histsToSave;
     
     std::cout << "Making test hists...\n";
@@ -353,13 +353,13 @@ void xLBPH::test() {
     CV_Assert(query.size() == check.size());
 
     for(size_t idx = 0; idx < query.size(); idx++) {
+        
+        std::cout << "query: " << matToString(query.at(idx)) << "  |  " << matToString(check.at(idx)) << " :check" << "\n";
         if(!matsEqual(query.at(idx), check.at(idx)))
         {
-            std::cout << "query: " << matToString(query.at(idx)) << "  |  " << matToString(check.at(idx)) << " :check" << "\n";
+            //std::cout << "query: " << matToString(query.at(idx)) << "  |  " << matToString(check.at(idx)) << " :check" << "\n";
             CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
         }
-        if((int)idx >= 2)
-            break;
     }
 }
 
