@@ -291,12 +291,14 @@ void xLBPH::test() {
     int size = 10;
     std::vector<Mat> histsToSave;
     
+    std::cout << "Making test hists...\n";
     for(int i = 0; i < numhists; i++) {
         Mat mat = Mat::zeros(1, size, CV_32FC1);
         mat += i;
         histsToSave.at(i) = mat;
     }
     
+    std::cout << "Saving test hists...\n";
     String testhistsfile = getHistogramsDir() + "/testhists.bin";
     // write them to a fake file
     FILE *writefp = fopen(testhistsfile.c_str(), "w");
@@ -312,6 +314,7 @@ void xLBPH::test() {
     fclose(writefp);
   
 
+    std::cout << "Mapping test hists file...\n";
     // mmap fake file
     int fd = open(testhistsfile.c_str(), O_RDONLY);
     if(fd < 0)
@@ -320,7 +323,8 @@ void xLBPH::test() {
     char* mapPtr = (char*)mmap(NULL, size * numhists * sizeof(float), PROT_READ, MAP_PRIVATE, fd, 0);
     if(mapPtr == MAP_FAILED)
         CV_Error(Error::StsError, "Cannot mem map file '"+testhistsfile+"'");
-
+    
+    std::cout << "Loading query mats...\n";
     // make matricies from map
     std::vector<Mat> query;
     for(int i = 0; i < numhists; i++) {
@@ -328,7 +332,8 @@ void xLBPH::test() {
         query.push_back(mat);
     }
 
-
+    
+    std::cout << "Loading check mat...\n";
     // load mats from file 
     std::vector<Mat> check;
     FILE *readfp = fopen(testhistsfile.c_str(), "r");
@@ -343,7 +348,7 @@ void xLBPH::test() {
     }
     fclose(readfp);
 
-
+    std::cout << "Comparing results...\n";
     // compare results
     CV_Assert(query.size() == check.size());
 
