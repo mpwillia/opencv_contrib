@@ -428,6 +428,7 @@ void xLBPH::mmapHistograms() {
         for(size_t idx = 0; idx < query.size(); idx++) {
             if(matsEqual(query.at(idx), check.at(idx)))
                 CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
+            break;
         }
     }
 
