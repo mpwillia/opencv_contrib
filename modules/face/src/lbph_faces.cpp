@@ -850,15 +850,15 @@ void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     }
 
     std::sort(preds.begin(), preds.end());
-    std::cout << "\n";
 
+    std::cout << "\nPredictions: ";
     for(size_t idx = 0; idx < preds.size() ; idx++) {
         std::pair<double, int> pred = preds.at(idx);
         printf("[%d, %f], ", pred.second, pred.first);
         //std::cout << pred->second << ", " << pred->first
         //std::cout << preds.at(idx)  << ", ";
     }
-    std::cout << " <- returned\n";
+    std::cout << "\n";
     //std::cout << "\n  -->  Max Dist = " << maxDist << " | Min Dist = " << minDist<< "\n";
 }
 

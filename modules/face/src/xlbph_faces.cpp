@@ -524,12 +524,13 @@ void xLBPH::mmapHistograms() {
                 CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
         }
     }
-
+    
+    /*
     std::cout << "_histograms size: " << _histograms.size() << "\n";
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
         std::cout << it->first << " -> numhists: " << (it->second).size() << "\n";
     }
-
+    */
     //std::cout << "_histograms size: " << _histograms.size() << "\n";
 }
 
@@ -999,20 +1000,20 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
                 minClass = it->first;
                 preds.push_back(std::pair<double, int>(dist, it->first));
 
-                std::cout << "[" << minClass << " | " << minDist << "], ";
+                //std::cout << "[" << minClass << " | " << minDist << "], ";
             }
         }
     }
     std::sort(preds.begin(), preds.end());
-    std::cout << "\n";
     
+    std::cout << "\nPredictions: ";
     for(size_t idx = 0; idx < preds.size() ; idx++) {
         std::pair<double, int> pred = preds.at(idx);
         printf("[%d, %f], ", pred.second, pred.first);
         //std::cout << pred->second << ", " << pred->first
         //std::cout << preds.at(idx)  << ", ";
     }
-    std::cout << " <- returned\n";
+    std::cout << "\n";
 
 
     /*
