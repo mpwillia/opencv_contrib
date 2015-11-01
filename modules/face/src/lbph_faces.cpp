@@ -854,7 +854,7 @@ void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
 
     for(size_t idx = 0; idx < preds.size() ; idx++) {
         std::pair<double, int> pred = preds.at(idx);
-        printf("[%d, %f], ", pred->second, pred->first);
+        printf("[%d, %f], ", pred.second, pred.first);
         //std::cout << pred->second << ", " << pred->first
         //std::cout << preds.at(idx)  << ", ";
     }
