@@ -943,10 +943,39 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     Ptr<LBPHFaceRecognizer> check = createLBPHFaceRecognizer(_radius, _neighbors, _grid_x, _grid_y, _threshold);
     check->train(_in_src, _in_labels);
 
-    std::vector<cv::Mat> checkHists = check->getHistograms();
+    std::vector<cv::Mat> checkHistsAll = check->getHistograms();
     cv::Mat checkLabels = check->getLabels();
-    std::map<int, size_t> checkIdxs;
+    //std::map<int, size_t> checkIdxs;
+    bool allEqual = true;
+    
+    //sort LBPH histograms
+    std::map<int, std::vector<Mat> > checkHistsMap;
+    for(size_t idx = 0; idx < checkHistsAll.size(); idx++) {
+        checkHistsMap[checkLabels.at<int>((int)idx)].push_back(checkHistsAll.at(idx));
+    }
 
+    for(std::map<int, std::vector<Mat> >::const_iterator it = checkHistsMap.begin(); it != checkHistsMap.end(); ++it) {
+        std::vector<Mat> checkHists = it->second;
+        std::vector<Mat> queryHists = _histograms[it->first];
+        
+        if(checkHists.size() != queryHists.size()) {
+            std::cout << "ERROR: For label " << it->first << " checkHists is not the same siee as queryHists\n";
+            allEqual = false;
+        }
+        else
+        {
+            for(size_t histIdx = 0; histIdx < checkHists.size(); histIdx++) {
+                if(!matsEquals(checkHists.at(histIdx), queryHists.at(histIdx))) {
+                    std::cout << "ERROR: For label " << it->first << " at histIdx of " << histIdx << " hists NOT EQUAL!!!\n";
+                    allEqual = false;
+                } 
+            }
+        }
+    }
+    
+    CV_Assert(allEqual == true);
+
+    /*
     for(size_t idx = 0; idx < checkHists.size(); idx++) {
         int label = checkLabels.at<int>((int)idx);
 
@@ -956,6 +985,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
             CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
         }
     }
+    */    
+
 
 
     std::cout << "Training complete\n";
