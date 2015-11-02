@@ -335,9 +335,9 @@ void xLBPH::test() {
     for(size_t idx = 0; idx < query.size(); idx++) {
         
         std::cout << "idx: " << idx << std::flush;
-        std::cout << "  |  saved: " << matToString(histsToSave.at(idx)) << std::flush;
-        std::cout << "  |  query: " << matToString(query.at(idx)) << std::flush;
-        std::cout << "  |  check: " << matToString(check.at(idx)) << std::flush;
+        std::cout << "  |  saved: " << matToHex(histsToSave.at(idx)) << std::flush;
+        std::cout << "  |  query: " << matToHex(query.at(idx)) << std::flush;
+        std::cout << "  |  check: " << matToHex(check.at(idx)) << std::flush;
         std::cout << "\n";
         //std::cout << "saved: " << matToString(histsToSave.at(idx)) <<"  |  query: " << matToString(query.at(idx)) << "  |  check: " << matToString(check.at(idx)) << "\n";
         if(!matsEqual(query.at(idx), check.at(idx)))
