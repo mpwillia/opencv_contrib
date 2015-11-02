@@ -955,7 +955,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     }
     */
 
-    LBPHFaceRecognizer check;
+    LBPH check;
 
 
     Mat src = _src.getMat();
