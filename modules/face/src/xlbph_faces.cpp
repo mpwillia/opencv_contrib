@@ -370,7 +370,7 @@ bool xLBPH::readHistograms(const String &filename, std::vector<Mat> &histograms)
     //SIZEOF_CV_32FC1
     
     unsigned char buffer[getHistogramSize() * SIZEOF_CV_32FC1];
-    while(fread(buffer, sizeof(unsigned char), getHistogramSize(), fp) > 0) {
+    while(fread(buffer, sizeof(unsigned char), getHistogramSize() * SIZEOF_CV_32FC1, fp) > 0) {
         Mat hist = Mat::zeros(1, getHistogramSize(), CV_32FC1);
         memcpy(hist.ptr<unsigned char>(), buffer, getHistogramSize() * SIZEOF_CV_32FC1);
         histograms.push_back(hist);
