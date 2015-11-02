@@ -259,6 +259,12 @@ void xLBPH::test() {
         mat += i;
         histsToSave.push_back(mat);
     }
+    Mat matmax = Mat::zeros(1, size, CV_32FC1);
+    Mat matmin = Mat::zeros(1, size, CV_32FC1);
+    matmax += FLT_MAX;
+    matmin -= FLT_MIN;
+    histsToSave.push_back(matmax);
+    histsToSave.push_back(matmin);
     
     std::cout << "Saving test hists...\n";
     String testhistsfile = getHistogramsDir() + "/testhists.bin";
