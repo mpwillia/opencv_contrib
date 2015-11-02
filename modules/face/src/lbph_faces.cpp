@@ -834,9 +834,11 @@ void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     
     //NOTE: <double, int> instead of <int, double> so we sort by dist not label
     std::vector<std::pair<double, int> > preds;
+    std::map<int, std::vector<double> > alldists;
 
     for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
         double dist = compareHist(_histograms[sampleIdx], query, HISTCMP_CHISQR_ALT);
+        alldists[it->first].push_back(dist);
         if((dist < minDist) && (dist < _threshold)) {
             minDist = dist;
             minClass = _labels.at<int>((int) sampleIdx);
@@ -859,6 +861,17 @@ void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         //std::cout << preds.at(idx)  << ", ";
     }
     std::cout << "\n";
+
+
+    std::cout << "\nAll Predictions by PID: ";
+    for(std::map<int, std::vector<double> >::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
+        std::vector<double> dists = it->second;
+        std::cout << it->first << " -> ";
+        for(size_t distIdx = 0; distIdx < dists.size(); distIdx++) {
+            std::cout << dists.at(distIdx) << ", ";
+        }
+        std::cout << "\n";
+    }
     //std::cout << "\n  -->  Max Dist = " << maxDist << " | Min Dist = " << minDist<< "\n";
 }
 

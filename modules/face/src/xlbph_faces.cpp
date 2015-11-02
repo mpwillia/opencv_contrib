@@ -988,6 +988,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     //NOTE: <double, int> instead of <int, double> so we sort by dist not label
     std::vector<std::pair<double, int> > preds;
     std::map<int, double> bestpreds;
+    std::map<int, std::vector<double> > alldists;
 
     //int labelcount = 0;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
@@ -997,6 +998,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
 
         for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
             double dist = compareHist(hists.at(histIdx), query, COMP_ALG);
+            alldists[it->first].push_back(dist);
             if((dist < minDist) && (dist < _threshold)) {
                 minDist = dist;
                 minClass = it->first;
@@ -1010,6 +1012,8 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
             }
 
         }
+
+        std::sort(alldists[it->first].begin(), alldists[it->first].end());
     }
     std::sort(preds.begin(), preds.end());
     
@@ -1025,6 +1029,16 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     std::cout << "\nBest Prediction by PID: ";
     for(std::map<int, double>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
         printf("[%d, %f]\n", it->first, it->second);
+    }
+
+    std::cout << "\nAll Predictions by PID: ";
+    for(std::map<int, std::vector<double> >::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
+        std::vector<double> dists = it->second;
+        std::cout << it->first << " -> ";
+        for(size_t distIdx = 0; distIdx < dists.size(); distIdx++) {
+            std::cout << dists.at(distIdx) << ", ";
+        }
+        std::cout << "\n";
     }
 
     /*
