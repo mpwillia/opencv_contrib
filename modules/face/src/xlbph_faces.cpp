@@ -954,7 +954,9 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         CV_Error(Error::StsError, "Given model path at '" + getModelPath() +"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
     }
     */
-    
+
+    LBPHFaceRecognizer check;
+
 
     Mat src = _src.getMat();
     // get the spatial histogram from input image
