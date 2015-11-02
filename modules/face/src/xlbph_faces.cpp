@@ -198,46 +198,6 @@ void xLBPH::setModelPath(String modelpath) {
         _modelname = _modelpath.substr(idx + 1);
     }
 
-
-    /*
-    if(modelpath.length() <= 0)
-        CV_Error(Error::StsBadArg, "Modelpath cannot be empty!");
-
-    //find last '/' in the string
-    size_t idx = modelpath.find_last_of('/');
-    if((int)idx <= 0) {
-        // didn't find a '/' character 
-        _modelpath = modelpath;
-        _modelname = modelpath;
-    }
-    else {
-        // is the '/' character in the last index
-        if ((int)idx >= (int)modelpath.length()-1) {
-            if((int)modelpath.length() == 1)
-                CV_Error(Error::StsBadArg, "Modelpath cannot be empty!");
-            else {
-                // it is so truncate it 
-                _modelpath = modelpath.substr(0, modelpath.length()-1);
-            }
-        }
-        else {
-            // it isn't so w/e 
-            _modelpath = modelpath;
-        }
-
-        // parse modelname from set _modelpath
-        idx = _modelpath.find_last_of('/');
-        if((int)idx <= 0) {
-            _modelname = modelpath;
-        }
-        else if((int)idx >= (int)_modelpath.length()-1) {
-            CV_Error(Error::StsBadArg, "Invalid path '" + _modelpath + "'!");
-        }
-        else {
-            _modelname = _modelpath.substr(idx + 1);
-        }
-    }
-    */
 }
 
 String xLBPH::getModelPath() const {
@@ -965,7 +925,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         else
         {
             for(size_t histIdx = 0; histIdx < checkHists.size(); histIdx++) {
-                if(!matsEquals(checkHists.at(histIdx), queryHists.at(histIdx))) {
+                if(!matsEqual(checkHists.at(histIdx), queryHists.at(histIdx))) {
                     std::cout << "ERROR: For label " << it->first << " at histIdx of " << histIdx << " hists NOT EQUAL!!!\n";
                     allEqual = false;
                 } 
