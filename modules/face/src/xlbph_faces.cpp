@@ -233,7 +233,7 @@ String xLBPH::getHistogramAveragesFile() const {
 static String matToHex(const Mat &mat) {
     String s = "";
     
-    unsigned char* data = mat.ptr<unsigned char>();
+    const unsigned char* data = mat.ptr<unsigned char>();
 
     for(int i = 0; i < mat.cols; i++) {
         char valuestr[32];
