@@ -27,6 +27,7 @@
 
 #define COMP_ALG HISTCMP_CHISQR_ALT
 //#define COMP_ALG HISTCMP_BHATTACHARYYA
+#define SIZEOF_CV_32FC1 4
 
 namespace cv { namespace face {
 
@@ -360,13 +361,24 @@ bool xLBPH::readHistograms(const String &filename, std::vector<Mat> &histograms)
         //std::cout << "cannot open file at '" << filename << "'\n";
         return false;
     }
+    //SIZEOF_CV_32FC1
     
+    unsigned char buffer[getHistogramSize() * SIZEOF_CV_32FC1];
+    while(fread(buffer, sizeof(unsigned char), getHistogramSize(), fp) > 0) {
+        Mat hist = Mat::zeros(1, getHistogramSize(), CV_32FC1);
+        memcpy(hist.ptr<unsigned char>(), buffer, getHistogramSize() * SIZEOF_CV_32FC1);
+        histograms.push_back(hist);
+    }
+
+    
+    /*
     float buffer[getHistogramSize()];
     while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
         Mat hist = Mat::zeros(1, getHistogramSize(), CV_32FC1);
         memcpy(hist.ptr<float>(), buffer, getHistogramSize() * sizeof(float));
         histograms.push_back(hist);
     }
+    */
     fclose(fp);
     return true;
 }
@@ -378,13 +390,22 @@ bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &hist
         //std::cout << "cannot open file at '" << filename << "'\n";
         return false;
     }
-    
+   
+    unsigned char* buffer = new unsigned char[getHistogramSize() * (int)histograms.size() * SIZEOF_CV_32FC1];
+    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
+        memcpy(buffer + (sampleIdx * getHistogramSize() * SIZEOF_CV_32FC1), histograms.at((int)sampleIdx).ptr<unsigned char>(), getHistogramSize() * SIZEOF_CV_32FC1);
+    }
+    fwrite(buffer, sizeof(unsigned char), getHistogramSize() * (int)histograms.size() * SIZEOF_CV_32FC1, fp);
+    delete buffer;
+
+    /*
     float* buffer = new float[getHistogramSize() * (int)histograms.size()];
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         memcpy((buffer + sampleIdx * getHistogramSize()), histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
     }
     fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
     delete buffer;
+    */
 
     //TODO: Either increase write buffer or group all hists into one write call
     /*
