@@ -480,13 +480,13 @@ void xLBPH::mmapHistograms() {
         //struct stat st;
         //stat(filename.c_str(), &st);
         //char* mapPtr = (char*)mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
-        char* mapPtr = (char*)mmap(NULL, getHistogramSize() * it->second * sizeof(float), PROT_READ, MAP_PRIVATE, fd, 0);
+        unsigned char* mapPtr = (unsigned char*)mmap(NULL, getHistogramSize() * it->second * SIZEOF_CV_32FC1, PROT_READ, MAP_PRIVATE, fd, 0);
         if(mapPtr == MAP_FAILED)
             CV_Error(Error::StsError, "Cannot mem map file '"+filename+"'");
 
         // make matricies
         for(int i = 0; i < it->second; i++) {
-            Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * sizeof(float) * i));
+            Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * SIZEOF_CV_32FC1 * i));
             _histograms[it->first].push_back(mat);
         }
     }
@@ -915,8 +915,10 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         _labelinfo[uniqueLabels.at((int)labelIdx)] = numhists.at((int)labelIdx);
     }
     
+    /*
     std::cout << "Calculating histogram averages...\n";
     calcHistogramAverages();
+    */
 
     load();
 
