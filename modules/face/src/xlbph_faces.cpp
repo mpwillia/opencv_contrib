@@ -238,9 +238,9 @@ static String matToHex(const Mat &mat) {
     for(int i = 0; i < mat.cols; i++) {
         char valuestr[32];
         int idx = i*4;
-        sprintf(valuestr, "%02x%02x ", data+idx, data+idx+1);
+        sprintf(valuestr, "%02x%02x ", *(data+idx), *(data+idx+1));
         s += valuestr;
-        sprintf(valuestr, "%02x%02x ", data+idx+2, data+idx+3);
+        sprintf(valuestr, "%02x%02x ", *(data+idx+2), *(data+idx+3));
         s += valuestr;
     }
     return s;
