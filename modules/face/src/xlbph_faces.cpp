@@ -1035,7 +1035,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     for(std::map<int, std::vector<double> >::const_iterator it = alldists.begin(); it != alldists.end(); ++it) {
         std::vector<double> dists = it->second;
         std::cout << it->first << " -> ";
-        for(size_t distIdx = 0; distIdx < dists.size(); distIdx++) {
+        for(size_t distIdx = 0; distIdx < dists.size() && (int)distsIdx < 10; distIdx++) {
             std::cout << dists.at(distIdx) << ", ";
         }
         std::cout << "\n";
