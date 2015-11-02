@@ -868,7 +868,7 @@ void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         std::vector<double> dists = it->second;
         std::sort(dists.begin(), dists.end());
         std::cout << it->first << " -> ";
-        for(size_t distIdx = 0; distIdx < dists.size() && (int)distsIdx < 10; distIdx++) {
+        for(size_t distIdx = 0; distIdx < dists.size() && (int)distIdx < 10; distIdx++) {
             std::cout << dists.at(distIdx) << ", ";
         }
         std::cout << "\n";
