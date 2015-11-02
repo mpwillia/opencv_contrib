@@ -261,8 +261,8 @@ void xLBPH::test() {
     }
     Mat matmax = Mat::zeros(1, size, CV_32FC1);
     Mat matmin = Mat::zeros(1, size, CV_32FC1);
-    matmax += FLT_MAX;
-    matmin -= FLT_MIN;
+    matmax = FLT_MAX;
+    matmin = FLT_MIN;
     histsToSave.push_back(matmax);
     histsToSave.push_back(matmin);
     
