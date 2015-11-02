@@ -318,7 +318,7 @@ void xLBPH::test() {
 
     std::cout << "Comparing results...\n";
     // compare results
-    CV_Assert(query.size() == check.size());
+    CV_Assert(query.size() == check.size() && query.size() == histsToSave.size());
 
     for(size_t idx = 0; idx < query.size(); idx++) {
         
