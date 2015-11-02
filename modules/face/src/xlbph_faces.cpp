@@ -913,10 +913,13 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     for(size_t idx = 0; idx < checkHistsAll.size(); idx++) {
         checkHistsMap[checkLabels.at<int>((int)idx)].push_back(checkHistsAll.at(idx));
     }
-
+    
+    std::cout << "#### Checking histograms loaded from file into mem..."
     for(std::map<int, std::vector<Mat> >::const_iterator it = checkHistsMap.begin(); it != checkHistsMap.end(); ++it) {
         std::vector<Mat> checkHists = it->second;
-        std::vector<Mat> queryHists = _histograms[it->first];
+        //std::vector<Mat> queryHists = _histograms[it->first];
+        std::vector<Mat> queryHists;
+        loadHistograms(it->first, queryHists);
         
         if(checkHists.size() != queryHists.size()) {
             std::cout << "ERROR: For label " << it->first << " checkHists is not the same siee as queryHists\n";
@@ -928,6 +931,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                 if(!matsEqual(checkHists.at(histIdx), queryHists.at(histIdx))) {
                     std::cout << "ERROR: For label " << it->first << " at histIdx of " << histIdx << " hists NOT EQUAL!!!\n";
                     allEqual = false;
+                    break;
                 } 
             }
         }
@@ -935,6 +939,30 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     
     CV_Assert(allEqual == true);
 
+    std::cout << "\n#### Checking histograms memmapped from file..."
+    for(std::map<int, std::vector<Mat> >::const_iterator it = checkHistsMap.begin(); it != checkHistsMap.end(); ++it) {
+        std::vector<Mat> checkHists = it->second;
+        std::vector<Mat> queryHists = _histograms[it->first];
+        //std::vector<Mat> queryHists;
+        //loadHistograms(it->first, queryHists);
+        
+        if(checkHists.size() != queryHists.size()) {
+            std::cout << "ERROR: For label " << it->first << " checkHists is not the same siee as queryHists\n";
+            allEqual = false;
+        }
+        else
+        {
+            for(size_t histIdx = 0; histIdx < checkHists.size(); histIdx++) {
+                if(!matsEqual(checkHists.at(histIdx), queryHists.at(histIdx))) {
+                    std::cout << "ERROR: For label " << it->first << " at histIdx of " << histIdx << " hists NOT EQUAL!!!\n";
+                    allEqual = false;
+                    break;
+                } 
+            }
+        }
+    }
+    
+    CV_Assert(allEqual == true);
     /*
     for(size_t idx = 0; idx < checkHists.size(); idx++) {
         int label = checkLabels.at<int>((int)idx);
