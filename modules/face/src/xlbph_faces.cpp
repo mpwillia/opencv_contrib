@@ -250,11 +250,11 @@ static String matToString(const Mat &mat) {
 void xLBPH::test() {
     // make some fake hists
     int numhists = 16;
-    int size = 8;
+    int size = 4;
     std::vector<Mat> histsToSave;
     
     std::cout << "Making test hists...\n";
-    for(int i = 0; i < numhists; i++) {
+    for(int i = 0; i < numhists - 2; i++) {
         Mat mat = Mat::zeros(1, size, CV_32FC1);
         mat += i;
         histsToSave.push_back(mat);
@@ -504,7 +504,12 @@ void xLBPH::mmapHistograms() {
         std::vector<Mat> check;
         loadHistograms(it->first, check);
         
-        CV_Assert(query.size() == check.size());
+        if(query.size() != check.size()) {
+            std::cout << "query.size() = " << query.size() << "  |  check.size() = " << check.size() << "\n";
+            CV_Error(Error::StsError, "query.size() != check.size()");
+        }
+
+        //CV_Assert(query.size() == check.size());
 
         for(size_t idx = 0; idx < query.size(); idx++) {
             if(!matsEqual(query.at(idx), check.at(idx)))
