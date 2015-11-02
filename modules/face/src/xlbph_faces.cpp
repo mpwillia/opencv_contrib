@@ -939,6 +939,25 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
     load();
 
+    std::cout << "Check against standard LBPH histograms...\n";
+    Ptr<LBPHFaceRecognizer> check = createLBPHFaceRecognizer();
+    check->train(_in_src, _in_labels);
+
+    std::vector<cv::Mat> checkHists = check->getHistograms();
+    cv::Mat checkLabels = check->getLabels();
+    std::map<int, size_t> checkIdxs;
+
+    for(size_t idx = 0; idx < checkHists.size(); idx++) {
+        int label = checkLabels.at<int>((int)idx);
+
+        if(!matsEqual(_histograms[label].at(checkIdxs[label]++), check.at(idx)))
+        {
+            //std::cout << "query: " << matToString(query.at(idx)) << "  |  " << matToString(check.at(idx)) << " :check" << "\n";
+            CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
+        }
+    }
+
+
     std::cout << "Training complete\n";
 }
 
@@ -954,9 +973,6 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         CV_Error(Error::StsError, "Given model path at '" + getModelPath() +"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
     }
     */
-
-    Ptr<LBPHFaceRecognizer> check = createLBPHFaceRecognizer();
-
 
     Mat src = _src.getMat();
     // get the spatial histogram from input image
