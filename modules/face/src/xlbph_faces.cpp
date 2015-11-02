@@ -235,7 +235,7 @@ static String matToHex(const Mat &mat) {
     
     for(int i = 0; i < mat.cols; i++) {
         char valuestr[32];
-        sprintf(valuestr, "%X ", mat.at<unsigned int>(i));
+        sprintf(valuestr, "%.8x ", mat.at<float>(i));
         s += valuestr;
     }
     return s;
@@ -509,7 +509,9 @@ void xLBPH::mmapHistograms() {
             Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * SIZEOF_CV_32FC1 * i));
             _histograms[it->first].push_back(mat);
         }
+
     }
+
 
     // verify our mmap'd histograms 
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
@@ -984,7 +986,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                     break;
                 } 
                 else {
-                    std::cout << "GOOD: For label " << it->first;
+                    std::cout << "GOOD: For label " << it->first << "\n";
                     std::cout << "Expected: " << matToHex(checkHists.at(histIdx)) << "\n";
                     std::cout << "And Got:  " << matToHex(queryHists.at(histIdx)) << "\n";
                 }
