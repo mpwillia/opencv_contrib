@@ -914,7 +914,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         checkHistsMap[checkLabels.at<int>((int)idx)].push_back(checkHistsAll.at(idx));
     }
     
-    std::cout << "#### Checking histograms loaded from file into mem..."
+    std::cout << "#### Checking histograms loaded from file into mem...";
     for(std::map<int, std::vector<Mat> >::const_iterator it = checkHistsMap.begin(); it != checkHistsMap.end(); ++it) {
         std::vector<Mat> checkHists = it->second;
         //std::vector<Mat> queryHists = _histograms[it->first];
@@ -936,10 +936,10 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
             }
         }
     }
-    
     CV_Assert(allEqual == true);
 
-    std::cout << "\n#### Checking histograms memmapped from file..."
+
+    std::cout << "\n#### Checking histograms memmapped from file...";
     for(std::map<int, std::vector<Mat> >::const_iterator it = checkHistsMap.begin(); it != checkHistsMap.end(); ++it) {
         std::vector<Mat> checkHists = it->second;
         std::vector<Mat> queryHists = _histograms[it->first];
@@ -961,8 +961,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
             }
         }
     }
-    
     CV_Assert(allEqual == true);
+
     /*
     for(size_t idx = 0; idx < checkHists.size(); idx++) {
         int label = checkLabels.at<int>((int)idx);
