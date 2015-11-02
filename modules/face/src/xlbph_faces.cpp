@@ -232,11 +232,10 @@ String xLBPH::getHistogramAveragesFile() const {
 //------------------------------------------------------------------------------
 static String matToHex(const Mat &mat) {
     String s = "";
-
+    
     for(int i = 0; i < mat.cols; i++) {
-        
         char valuestr[32];
-        sprintf(valuestr, "%X ", mat.at<float>(i));
+        sprintf(valuestr, "%X ", mat.at<unsigned int>(i));
         s += valuestr;
     }
     return s;
