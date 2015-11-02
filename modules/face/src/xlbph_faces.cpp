@@ -235,7 +235,7 @@ static String matToHex(const Mat &mat) {
     
     for(int i = 0; i < mat.cols; i++) {
         char valuestr[32];
-        sprintf(valuestr, "%.8x ", mat.at<float>(i));
+        sprintf(valuestr, "%.8x ", mat.at<unsigned int>(i));
         s += valuestr;
     }
     return s;
