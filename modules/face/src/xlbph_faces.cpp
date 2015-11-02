@@ -318,11 +318,16 @@ void xLBPH::test() {
 
     std::cout << "Comparing results...\n";
     // compare results
-    CV_Assert(query.size() == check.size() && query.size() == histsToSave.size());
+    CV_Assert(query.size() == check.size());
+    CV_Assert(query.size() == histsToSave.size());
 
     for(size_t idx = 0; idx < query.size(); idx++) {
         
-        std::cout << "saved: " << matToString(histsToSave.at(idx)) <<"  |  query: " << matToString(query.at(idx)) << "  |  check: " << matToString(check.at(idx)) << "\n";
+        std::cout << "saved: " << matToString(histsToSave.at(idx)) << std::flush;
+        std::cout << "  |  query: " << matToString(query.at(idx)) << std::flush;
+        std::cout << "  |  check: " << matToString(check.at(idx)) << std::flush;
+        std::cout << "\n";
+        //std::cout << "saved: " << matToString(histsToSave.at(idx)) <<"  |  query: " << matToString(query.at(idx)) << "  |  check: " << matToString(check.at(idx)) << "\n";
         if(!matsEqual(query.at(idx), check.at(idx)))
         {
             //std::cout << "query: " << matToString(query.at(idx)) << "  |  " << matToString(check.at(idx)) << " :check" << "\n";
@@ -948,7 +953,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         checkHistsMap[checkLabels.at<int>((int)idx)].push_back(checkHistsAll.at(idx));
     }
     
-    std::cout << "#### Checking histograms loaded from file into mem...";
+    std::cout << "#### Checking histograms loaded from file into mem...\n";
     for(std::map<int, std::vector<Mat> >::const_iterator it = checkHistsMap.begin(); it != checkHistsMap.end(); ++it) {
         std::vector<Mat> checkHists = it->second;
         //std::vector<Mat> queryHists = _histograms[it->first];
@@ -973,7 +978,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     CV_Assert(allEqual == true);
 
 
-    std::cout << "\n#### Checking histograms memmapped from file...";
+    std::cout << "\n#### Checking histograms memmapped from file...\n";
     for(std::map<int, std::vector<Mat> >::const_iterator it = checkHistsMap.begin(); it != checkHistsMap.end(); ++it) {
         std::vector<Mat> checkHists = it->second;
         std::vector<Mat> queryHists = _histograms[it->first];
