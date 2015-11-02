@@ -805,7 +805,7 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
         // free memory
         //lbp_image.release();
     }
-   
+    
     std::cout << "Finished calculating histograms for " << src.size() << " images.            \n";
     std::cout << "Num Histograms: " << _histograms.size() << "\n";
     std::cout << "Elems In Histograms : " << _histograms.at(0).rows << "x" << _histograms.at(0).cols << "\n";

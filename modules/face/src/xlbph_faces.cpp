@@ -940,7 +940,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     load();
 
     std::cout << "Check against standard LBPH histograms...\n";
-    Ptr<LBPHFaceRecognizer> check = createLBPHFaceRecognizer();
+    Ptr<LBPHFaceRecognizer> check = createLBPHFaceRecognizer(_radius, _neighbors, _grid_x, _grid_y, _threshold);
     check->train(_in_src, _in_labels);
 
     std::vector<cv::Mat> checkHists = check->getHistograms();
