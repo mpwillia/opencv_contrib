@@ -230,6 +230,17 @@ String xLBPH::getHistogramAveragesFile() const {
 //------------------------------------------------------------------------------
 // Additional Functions and File IO
 //------------------------------------------------------------------------------
+static String matToHex(const Mat &mat) {
+    String s = "";
+
+    for(int i = 0; i < mat.cols; i++) {
+        
+        char valuestr[32];
+        sprintf(valuestr, "%X ", mat.at<float>(i));
+        s += valuestr;
+    }
+    return s;
+}
 
 static String matToString(const Mat &mat) {
     String s = "[";
@@ -971,6 +982,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
             for(size_t histIdx = 0; histIdx < checkHists.size(); histIdx++) {
                 if(!matsEqual(checkHists.at(histIdx), queryHists.at(histIdx))) {
                     std::cout << "ERROR: For label " << it->first << " at histIdx of " << histIdx << " hists NOT EQUAL!!!\n";
+                    std::cout << "Expected: " << matToHex(checkHists.at(histIdx)) << "\n";
+                    std::cout << "But Got:  " << matToHex(queryHists.at(histIdx)) << "\n";
                     allEqual = false;
                     break;
                 } 
@@ -996,6 +1009,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
             for(size_t histIdx = 0; histIdx < checkHists.size(); histIdx++) {
                 if(!matsEqual(checkHists.at(histIdx), queryHists.at(histIdx))) {
                     std::cout << "ERROR: For label " << it->first << " at histIdx of " << histIdx << " hists NOT EQUAL!!!\n";
+                    std::cout << "Expected: " << matToHex(checkHists.at(histIdx)) << "\n";
+                    std::cout << "But Got:  " << matToHex(queryHists.at(histIdx)) << "\n";
                     allEqual = false;
                     break;
                 } 
