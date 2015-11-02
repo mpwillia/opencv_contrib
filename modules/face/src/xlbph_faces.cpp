@@ -950,7 +950,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     for(size_t idx = 0; idx < checkHists.size(); idx++) {
         int label = checkLabels.at<int>((int)idx);
 
-        if(!matsEqual(_histograms[label].at(checkIdxs[label]++), check.at(idx)))
+        if(!matsEqual(_histograms[label].at(checkIdxs[label]++), checkHists.at(idx)))
         {
             //std::cout << "query: " << matToString(query.at(idx)) << "  |  " << matToString(check.at(idx)) << " :check" << "\n";
             CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
