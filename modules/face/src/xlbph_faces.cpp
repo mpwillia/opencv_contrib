@@ -238,7 +238,7 @@ static String matToString(const Mat &mat) {
         if(i != 0)
             s += ", ";
 
-        char valuestr[16];
+        char valuestr[64];
         sprintf(valuestr, "%f", mat.at<float>(i));
         s += valuestr;
     }
@@ -321,9 +321,11 @@ void xLBPH::test() {
     CV_Assert(query.size() == check.size());
     CV_Assert(query.size() == histsToSave.size());
 
+    std::cout << "saved size: " << histsToSave.size() << "  |  query size: " << query.size() << "  |  check size: " << check.size() << "\n";
     for(size_t idx = 0; idx < query.size(); idx++) {
         
-        std::cout << "saved: " << matToString(histsToSave.at(idx)) << std::flush;
+        std::cout << "idx: " << idx << std::flush;
+        std::cout << "  |  saved: " << matToString(histsToSave.at(idx)) << std::flush;
         std::cout << "  |  query: " << matToString(query.at(idx)) << std::flush;
         std::cout << "  |  check: " << matToString(check.at(idx)) << std::flush;
         std::cout << "\n";
