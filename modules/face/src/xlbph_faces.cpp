@@ -27,7 +27,7 @@
 
 #define COMP_ALG HISTCMP_CHISQR_ALT
 //#define COMP_ALG HISTCMP_BHATTACHARYYA
-#define SIZEOF_CV_32FC1 4
+//#define SIZEOF_CV_32FC1 4
 
 namespace cv { namespace face {
 
@@ -56,11 +56,17 @@ private:
 
     // histograms
     std::map<int, std::vector<Mat> > _histograms;
-    
+   
+
+    int algToUse;
     // Computes a LBPH model with images in src and
     // corresponding labels in labels, possibly preserving
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
+
+    void predict_std(InputArray _src, int &label, double &dist) const;
+    void predict_avg(InputArray _src, int &label, double &dist) const;
+    //void predict_cluster(InputArray _src, int &label, double &dist) const;
 
     //--------------------------------------------------------------------------
     // Additional Private Functions
@@ -100,6 +106,7 @@ public:
                 _radius(radius_),
                 _neighbors(neighbors_),
                 _threshold(threshold) {
+        algToUse = 0;
         setModelPath(modelpath);
     }
 
@@ -119,6 +126,7 @@ public:
                 _radius(radius_),
                 _neighbors(neighbors_),
                 _threshold(threshold) {
+        algToUse = 0;
         setModelPath(modelpath);
         train(src, labels);
     }
@@ -162,6 +170,8 @@ public:
     String getHistogramFile(int label) const;
     String getHistogramAveragesFile() const;
 
+    void setAlgToUse(int alg);
+
     //--------------------------------------------------------------------------
     // Additional Public Functions 
     // NOTE: Remember to add header to opencv2/face/facerec.hpp
@@ -169,6 +179,11 @@ public:
     
     void test();
 };
+
+void xLBPH::setAlgToUse(int alg) {
+    algToUse = alg; 
+}
+
 
 //------------------------------------------------------------------------------
 // Model Path and Model File Getters/Setters 
@@ -955,14 +970,15 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         _labelinfo[uniqueLabels.at((int)labelIdx)] = numhists.at((int)labelIdx);
     }
     
-    /*
-    std::cout << "Calculating histogram averages...\n";
-    calcHistogramAverages();
-    */
+    if(algToUse == 1 || 3)
+    {
+        std::cout << "Calculating histogram averages...\n";
+        calcHistogramAverages();
+    }
 
     load();
-    std::cout << "Histogram Size: " << getHistogramSize() << "\n";
-
+    
+    
     std::cout << "Check against standard LBPH histograms...\n";
     Ptr<LBPHFaceRecognizer> check = createLBPHFaceRecognizer(_radius, _neighbors, _grid_x, _grid_y, _threshold);
     check->train(_in_src, _in_labels);
@@ -999,14 +1015,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                     allEqual = false;
                     break;
                 } 
-                else {
-                    /*
-                    std::cout << "GOOD: For label " << it->first << "\n";
-                    std::cout << "Expected: " << matToHex(checkHists.at(histIdx)) << "\n";
-                    std::cout << "And Got:  " << matToHex(queryHists.at(histIdx)) << "\n";
-                    */
-                }
-
             }
         }
     }
@@ -1039,21 +1047,80 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     }
     CV_Assert(allEqual == true);
 
-    /*
-    for(size_t idx = 0; idx < checkHists.size(); idx++) {
-        int label = checkLabels.at<int>((int)idx);
+    std::cout << "Training complete\n";
+}
 
-        if(!matsEqual(_histograms[label].at(checkIdxs[label]++), checkHists.at(idx)))
-        {
-            //std::cout << "query: " << matToString(query.at(idx)) << "  |  " << matToString(check.at(idx)) << " :check" << "\n";
-            CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
+void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const {
+    Mat query = _query.getMat();
+
+    std::map<int, Mat> histavgs;
+    loadHistogramAverages(histavgs);
+
+    // <double, int> so we sort by dist
+    std::vector<std::pair<double, int> > bestlabels;
+    for(std::map<int, Mat>::const_iterator it = histavgs.begin(); it != histavgs.end(); it++) {
+        double dist = compareHist(it->second, query, COMP_ALG) ;
+        bestlabels.push_back(std::pair<double, int>(dist, it->first));
+    } 
+    std::sort(bestlabels.begin(), bestlabels.end());
+    
+    minDist = DBL_MAX;
+    minClass = -1;
+    std::map<int, double> bestpreds;
+    const int numLabelsToCheck = 5;
+    for(size_t idx = 0; idx < bestlabels.size() && (int)idx < numLabelsToCheck; idx++) {
+        int label = bestlabels.at(idx).second;
+        std::vector<Mat> hists = _histograms[label];
+
+        for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
+            double dist = compareHist(hists.at(histIdx), query, COMP_ALG);
+            if((dist < minDist) && (dist < _threshold)) {
+                minDist = dist;
+                minClass = it->first;
+            }
+
+            if(dist < bestpreds[it->first]) {
+                bestpreds[it->first] = dist;
+            }
         }
     }
-    */    
+
+    std::cout << "\nBest Prediction by PID (only top " << numLabelsToCheck << " labels):\n";
+    for(std::map<int, double>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
+        printf("[%d, %f]\n", it->first, it->second);
+    }
+} 
 
 
 
-    std::cout << "Training complete\n";
+void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const {
+    Mat query = _query.getMat();
+
+    minDist = DBL_MAX;
+    minClass = -1;
+    std::map<int, double> bestpreds;
+    for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
+        
+        bestpreds[it->first] = DBL_MAX;
+        std::vector<Mat> hists = it->second;
+
+        for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
+            double dist = compareHist(hists.at(histIdx), query, COMP_ALG);
+            if((dist < minDist) && (dist < _threshold)) {
+                minDist = dist;
+                minClass = it->first;
+            }
+
+            if(dist < bestpreds[it->first]) {
+                bestpreds[it->first] = dist;
+            }
+        }
+    }
+
+    std::cout << "\nBest Prediction by PID:\n";
+    for(std::map<int, double>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
+        printf("[%d, %f]\n", it->first, it->second);
+    }
 }
 
 /* TODO Rewrite for xLBPH
@@ -1078,6 +1145,12 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
             _grid_x, /* grid size x */
             _grid_y, /* grid size y */
             true /* normed histograms */);
+    
+    switch(algToUse) {
+        case 1: predict_avg(query, minClass, minDist); break;
+        default: predcit_std(query, minClass, minDist); break;
+    }
+
 
     // find labels to check
     /*
@@ -1093,7 +1166,8 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         std::cout << avgsdists.at(avgsdistsIdx).first << " | " << avgsdists.at(avgsdistsIdx).second << "\n";
     }
     */
-
+    
+    /*
     // find 1-nearest neighbor
     minDist = DBL_MAX;
     minClass = -1;
@@ -1153,6 +1227,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         }
         std::cout << "\n";
     }
+    */
 
     /*
     // iterate through _labelinfo
