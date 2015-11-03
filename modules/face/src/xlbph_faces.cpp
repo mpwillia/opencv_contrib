@@ -970,11 +970,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         _labelinfo[uniqueLabels.at((int)labelIdx)] = numhists.at((int)labelIdx);
     }
     
-    if(algToUse == 1 || 3)
-    {
-        std::cout << "Calculating histogram averages...\n";
-        calcHistogramAverages();
-    }
+    std::cout << "Calculating histogram averages...\n";
+    calcHistogramAverages();
 
     load();
     
@@ -1069,7 +1066,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     std::map<int, double> bestpreds;
     const int numLabelsToCheck = 5;
     for(size_t idx = 0; idx < bestlabels.size() && (int)idx < numLabelsToCheck; idx++) {
-        int label = bestlabels.at(idx).second;
+        const int label = bestlabels.at(idx).second;
         std::vector<Mat> hists = _histograms[label];
 
         for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
