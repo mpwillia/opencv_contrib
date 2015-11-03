@@ -1147,6 +1147,8 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         case 1: predict_avg(query, minClass, minDist); break;
         default: predict_std(query, minClass, minDist); break;
     }
+    
+    printf("!!! Final Prediction: [%d, %f]\n", *minClass, *minDist);
 
 
     // find labels to check
