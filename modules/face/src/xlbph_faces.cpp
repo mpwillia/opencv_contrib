@@ -106,7 +106,7 @@ private:
     bool exists(const String &filename) const;
     int getHistogramSize() const;
     bool matsEqual(const Mat &a, const Mat &b) const;
-    void averageHistograms(const std::vector<Mat> &hists, Mat &histavg);
+    void averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const;
 
 
 public:
