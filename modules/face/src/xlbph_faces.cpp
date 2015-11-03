@@ -1070,13 +1070,13 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     const int numLabelsToCheck = 5;
     for(size_t idx = 0; idx < bestlabels.size() && (int)idx < numLabelsToCheck; idx++) {
         int label = bestlabels.at(idx).second;
-        std::vector<Mat> hists = _histograms[label];
+        const std::vector<Mat> hists = _histograms[label];
 
         for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
             double dist = compareHist(hists.at(histIdx), query, COMP_ALG);
             if((dist < minDist) && (dist < _threshold)) {
                 minDist = dist;
-                minClass = it->first;
+                minClass = label;
             }
 
             if(dist < bestpreds[it->first]) {
@@ -1148,7 +1148,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     
     switch(algToUse) {
         case 1: predict_avg(query, minClass, minDist); break;
-        default: predcit_std(query, minClass, minDist); break;
+        default: predict_std(query, minClass, minDist); break;
     }
 
 
