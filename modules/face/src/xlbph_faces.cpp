@@ -106,6 +106,8 @@ private:
     bool exists(const String &filename) const;
     int getHistogramSize() const;
     bool matsEqual(const Mat &a, const Mat &b) const;
+    void averageHistograms(const std::vector<Mat> &hists, Mat &histavg);
+
 
 public:
     using FaceRecognizer::save;
@@ -484,13 +486,13 @@ bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &hist
     return true;
 }
 
-static void averageHistograms(const std::vector<Mat> &hists, Mat &histavgs) {
-    histavgs = Mat::zeros(1, getHistogramSize(), CV_64FC1);
+void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) {
+    histavg = Mat::zeros(1, getHistogramSize(), CV_64FC1);
 
     for(size_t idx = 0; idx < hists.size(); idx++) {
         Mat dst;
         hists.at((int)idx).convertTo(dst, CV_64FC1);
-        histavgs += dst; 
+        histavg += dst; 
     }
     histavg /= (int)hists.size();
     histavg.convertTo(histavg, CV_32FC1);
