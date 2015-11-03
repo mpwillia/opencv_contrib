@@ -429,7 +429,9 @@ bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &hist
     float* buffer = new float[getHistogramSize() * (int)histograms.size()];
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         float* writeptr = buffer + ((int)sampleIdx * getHistogramSize());
-        std::cout << "writing: " << matToHex(histograms.at(sampleIdx)) << "\n";
+        if(sampleIdx < 2)
+            std::cout << "writing: " << matToHex(histograms.at(sampleIdx)) << "\n";
+
         //printf("sampleIdx %d -> writeptr: %p\n", (int)sampleIdx, writeptr);
         memcpy(writeptr, histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
     }
@@ -916,6 +918,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
         uniqueLabels.push_back(it->first);
         numhists.push_back((int)imgs.size());
+        std::cout << "Writing histograms for label " << it->first << "\n";
         writeHistograms(getHistogramFile(it->first), hists, preserveData);
         hists.clear();
 
