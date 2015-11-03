@@ -202,6 +202,8 @@ public:
     CV_WRAP virtual String getHistogramsDir() const = 0;
     CV_WRAP virtual String getHistogramFile(int label) const = 0;
     CV_WRAP virtual String getHistogramAveragesFile() const = 0;
+    
+    CV_WRAP virtual void setAlgToUse(int alg) = 0;
 
     CV_WRAP virtual void load() = 0;
 };
