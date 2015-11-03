@@ -866,7 +866,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         labelImages[allLabels.at((int)matIdx)].push_back(src.at((int)matIdx));
     }
     std::cout << "Organized images for " << labelImages.size() << " labels.\n";
-    
+   
     if(!preserveData)
     {
         // create model directory
@@ -903,7 +903,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
         for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
             // calculate lbp image
-            Mat lbp_image = elbp(src[sampleIdx], _radius, _neighbors);
+            Mat lbp_image = elbp(imgs.at(sampleIdx), _radius, _neighbors);
 
             // get spatial histogram from this lbp image
             Mat p = spatial_histogram(
@@ -915,7 +915,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
             hists.push_back(p);
         }
-
+        
         uniqueLabels.push_back(it->first);
         numhists.push_back((int)imgs.size());
         std::cout << "\nWriting histograms for label " << it->first << "\n";
