@@ -976,6 +976,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     load();
     
     
+    /*
     std::cout << "Check against standard LBPH histograms...\n";
     Ptr<LBPHFaceRecognizer> check = createLBPHFaceRecognizer(_radius, _neighbors, _grid_x, _grid_y, _threshold);
     check->train(_in_src, _in_labels);
@@ -1043,6 +1044,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         }
     }
     CV_Assert(allEqual == true);
+    */
+
 
     std::cout << "Training complete\n";
 }
@@ -1082,11 +1085,13 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
             }
         }
     }
-
+    
+    /*
     std::cout << "\nBest Prediction by PID (only top " << numLabelsToCheck << " labels):\n";
     for(std::map<int, double>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
         printf("[%d, %f]\n", it->first, it->second);
     }
+    */
 } 
 
 
@@ -1114,11 +1119,13 @@ void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const
             }
         }
     }
-
+    
+    /*
     std::cout << "\nBest Prediction by PID:\n";
     for(std::map<int, double>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
         printf("[%d, %f]\n", it->first, it->second);
     }
+    */
 }
 
 /* TODO Rewrite for xLBPH
