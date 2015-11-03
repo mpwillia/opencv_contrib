@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <thread>
 
 #define COMP_ALG HISTCMP_CHISQR_ALT
 //#define COMP_ALG HISTCMP_BHATTACHARYYA
@@ -64,11 +65,20 @@ private:
 
 
 
+    //--------------------------------------------------------------------------
+    // Model Training Function
+    //--------------------------------------------------------------------------
     // Computes a LBPH model with images in src and
     // corresponding labels in labels, possibly preserving
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
+    void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads = false);
+    //void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst);
+    //void trainLabel_multithreaded(std::vector<Mat> &images, std::vector<Mat> &histsdst);
 
+    //--------------------------------------------------------------------------
+    // Prediction Functions
+    //--------------------------------------------------------------------------
     void predict_std(InputArray _src, int &label, double &dist) const;
     void predict_avg(InputArray _src, int &label, double &dist) const;
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
@@ -890,13 +900,48 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
     return dst;
 }
 
-/* TODO Rewrite for xLBPH
- * sets modelpath
- * calculates histograms
- * saves histograms
- * updates lableinfo
- * saves infofile
- */
+
+void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads) {
+    
+    if(makeThreads)
+    {
+        printf("parent images size = %d\n", (int)images.size());
+        const int numThreads = 2;
+        int step = (int)images.size() / 2;
+        
+        std::vector<std::vector<Mat> > splitImages;
+            
+        std::vector<Mat>::const_iterator start = images.begin();
+        for(int i = 0; i < numThreads; i++) {
+            std::vector<Mat>::const_iterator end
+            if(i < numThreads - 1) {
+                end = start + step;
+            }
+            else {
+                end = images.end(); 
+            }
+            splitImages.push_back(std::vector<Mat>(start, end));
+            start += step;
+        }
+        
+        std::vector<std::vector<Mat> > splitHistsDst;
+        std::vector<std::thread> threads;
+        for(int i = 0; i < numThreads; i++) {
+            threads.push_back(std::thread(calculateHistograms_multithreaded, splitImages.at(i), splitHistsDst.at(i), false));
+        }
+
+        for(size_t idx = 0; idx < threads.size(); idx++) {
+            threads.at((int)idx).join();
+        }
+
+    }
+    else {
+        printf("child images size = %d\n", (int)images.size());        
+    }
+
+}
+
+
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
 
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
@@ -969,6 +1014,13 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         //label = it->first;
         std::vector<Mat> imgs = it->second;
         std::vector<Mat> hists;
+        
+        if(it->first == 2) {
+            std::cout << "\n------------\n";
+            std::vector<Mat> histsdst;
+            calculateHistograms_multithreaded(imgs, histsdst, true);
+            std::cout << "\n------------\n";
+        }
 
         for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
             // calculate lbp image
