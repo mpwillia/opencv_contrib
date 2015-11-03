@@ -56,9 +56,14 @@ private:
 
     // histograms
     std::map<int, std::vector<Mat> > _histograms;
-   
 
+    
+
+    // defines what prediction algorithm to use
     int algToUse;
+
+
+
     // Computes a LBPH model with images in src and
     // corresponding labels in labels, possibly preserving
     // old model data.
@@ -69,24 +74,38 @@ private:
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
 
     //--------------------------------------------------------------------------
-    // Additional Private Functions
+    // Managing Histogram Binary Files 
     //--------------------------------------------------------------------------
+    // Reading/Writing Histogram Files
     bool readHistograms(const String &filename, std::vector<Mat> &histograms) const;
     bool writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const;
-
+    
+    // Saving/Loading/Updating Histogram File by Label
     bool saveHistograms(int label, const std::vector<Mat> &histograms) const;
     bool updateHistograms(int label, const std::vector<Mat> &histrograms) const;
     bool loadHistograms(int label, std::vector<Mat> &histograms) const;
+   
+    // Memory mapping histograms
+    void mmapHistograms();
+    void munmapHistograms();
+
     
+    //--------------------------------------------------------------------------
+    // Data Management Strategy/Technique Functions
+    //--------------------------------------------------------------------------
+    // Histogram Averages
     bool calcHistogramAverages() const;
     bool loadHistogramAverages(std::map<int, Mat> &histavgs) const;
 
+    // Histogram Clustering
+    void clusterHistograms();
+
+    //--------------------------------------------------------------------------
+    // Misc 
+    //--------------------------------------------------------------------------
     bool exists(const String &filename) const;
     int getHistogramSize() const;
     bool matsEqual(const Mat &a, const Mat &b) const;
-
-    void mmapHistograms();
-    void munmapHistograms();
 
 public:
     using FaceRecognizer::save;
@@ -465,6 +484,19 @@ bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &hist
     return true;
 }
 
+static void averageHistograms(const std::vector<Mat> &hists, Mat &histavgs) {
+    histavgs = Mat::zeros(1, getHistogramSize(), CV_64FC1);
+
+    for(size_t idx = 0; idx < hists.size(); idx++) {
+        Mat dst;
+        hists.at((int)idx).convertTo(dst, CV_64FC1);
+        histavgs += dst; 
+    }
+    histavg /= (int)hists.size();
+    histavg.convertTo(histavg, CV_32FC1);
+}
+
+
 bool xLBPH::calcHistogramAverages() const {
     //compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
    
@@ -472,6 +504,11 @@ bool xLBPH::calcHistogramAverages() const {
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
         std::vector<Mat> hists;
         loadHistograms(it->first, hists);
+        Mat histavg;
+        averageHistograms(hists, histavg);
+        averages.push_back(histavg);
+        
+        /*
         Mat histavg = Mat::zeros(1, getHistogramSize(), CV_64FC1); // NOTE: is 64bit to prevent overflow
         
         for(size_t labelIdx = 0; labelIdx < hists.size(); labelIdx++) {
@@ -483,7 +520,7 @@ bool xLBPH::calcHistogramAverages() const {
         histavg /= it->second;
         histavg.convertTo(histavg, CV_32FC1);
         averages.push_back(histavg);
-        
+        */        
         /*
         double distAB = compareHist(hists.at(0), hists.at(1), HISTCMP_CHISQR_ALT);
         double distAEnd = compareHist(hists.at(0), hists.at(it->second - 1), HISTCMP_CHISQR_ALT);
@@ -516,6 +553,7 @@ bool xLBPH::loadHistogramAverages(std::map<int, Mat> &histavgs) const {
 void xLBPH::mmapHistograms() {
 
     //_histograms = std::map<int, std::vector<Mat> >();
+    std::cout << "loading histograms...\n";
     _histograms.clear();
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
         // map histogram
@@ -541,6 +579,7 @@ void xLBPH::mmapHistograms() {
 
 
     // verify our mmap'd histograms 
+    /*
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
         
         std::vector<Mat> query = it->second;
@@ -559,7 +598,7 @@ void xLBPH::mmapHistograms() {
                 CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
         }
     }
-    
+    */    
     /*
     std::cout << "_histograms size: " << _histograms.size() << "\n";
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
@@ -573,6 +612,17 @@ void xLBPH::munmapHistograms() {
      
 }
 
+//------------------------------------------------------------------------------
+// Clustering Function 
+//------------------------------------------------------------------------------
+void xLBPH::clusterHistograms() {
+    /* What is Histogram Clustering?
+     * The idea is to group like histograms together
+     * Every label has a set of clusters
+     * Every cluster has an average histogram and a set of histograms
+     */
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -581,6 +631,7 @@ void xLBPH::munmapHistograms() {
 void xLBPH::load() {
      
     // load data from the info file
+    std::cout << "loading info file...\n";
     FileStorage infofile(getInfoFile(), FileStorage::READ);
     if (!infofile.isOpened())
         CV_Error(Error::StsError, "File '"+getInfoFile()+"' can't be opened for reading!");
