@@ -27,7 +27,7 @@
 
 #define COMP_ALG HISTCMP_CHISQR_ALT
 //#define COMP_ALG HISTCMP_BHATTACHARYYA
-//#define SIZEOF_CV_32FC1 4
+#define SIZEOF_CV_32FC1 4
 
 namespace cv { namespace face {
 
