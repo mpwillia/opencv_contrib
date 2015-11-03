@@ -486,7 +486,7 @@ bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &hist
     return true;
 }
 
-void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) {
+void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const {
     histavg = Mat::zeros(1, getHistogramSize(), CV_64FC1);
 
     for(size_t idx = 0; idx < hists.size(); idx++) {
