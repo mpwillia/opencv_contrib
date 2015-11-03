@@ -425,9 +425,11 @@ bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &hist
     fwrite(buffer, sizeof(unsigned char), getHistogramSize() * (int)histograms.size() * SIZEOF_CV_32FC1, fp);
     delete buffer;
     */
+
     float* buffer = new float[getHistogramSize() * (int)histograms.size()];
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
-        memcpy((buffer + sampleIdx * getHistogramSize()), histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
+        float* writeptr = buffer + (sampleIdx * getHistogramSize());
+        memcpy(writeptr, histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
     }
     fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
     delete buffer;
@@ -913,8 +915,9 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         uniqueLabels.push_back(it->first);
         numhists.push_back((int)imgs.size());
         writeHistograms(getHistogramFile(it->first), hists, preserveData);
-        labelcount++;
+        hists.clear();
 
+        labelcount++;
         // free memory
         /*
         for (std::vector<Mat>::iterator it = hists.begin() ; it != hists.end(); ++it) {
@@ -953,6 +956,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     */
 
     load();
+    std::cout << "Histogram Size: " << getHistogramSize() << "\n";
 
     std::cout << "Check against standard LBPH histograms...\n";
     Ptr<LBPHFaceRecognizer> check = createLBPHFaceRecognizer(_radius, _neighbors, _grid_x, _grid_y, _threshold);
