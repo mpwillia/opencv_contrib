@@ -1139,12 +1139,12 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     }
     std::cout << "\n";
     
-    std::cout << "\nBest Prediction by PID: ";
+    std::cout << "\nBest Prediction by PID:\n";
     for(std::map<int, double>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
         printf("[%d, %f]\n", it->first, it->second);
     }
 
-    std::cout << "\nAll Predictions by PID: ";
+    std::cout << "\nAll Predictions by PID:\n";
     for(std::map<int, std::vector<double> >::const_iterator it = alldists.begin(); it != alldists.end(); ++it) {
         std::vector<double> dists = it->second;
         std::cout << it->first << "[" << dists.size() << " total] -> ";

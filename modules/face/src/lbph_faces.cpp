@@ -863,7 +863,7 @@ void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     std::cout << "\n";
 
 
-    std::cout << "\nAll Predictions by PID: ";
+    std::cout << "\nAll Predictions by PID:\n";
     for(std::map<int, std::vector<double> >::const_iterator it = alldists.begin(); it != alldists.end(); ++it) {
         std::vector<double> dists = it->second;
         std::sort(dists.begin(), dists.end());
