@@ -429,6 +429,7 @@ bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &hist
     float* buffer = new float[getHistogramSize() * (int)histograms.size()];
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         float* writeptr = buffer + (sampleIdx * getHistogramSize());
+        printf("sampleIdx %d -> writeptr: %p", (int)sampleIdx, writeptr);
         memcpy(writeptr, histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
     }
     fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
