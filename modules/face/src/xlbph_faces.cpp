@@ -941,7 +941,6 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
             threads.at((int)idx).join();
         }
         
-        /*
         printf("combining hists\n");
         for(size_t idx = 0; idx < splitHistsDst.size(); idx++) {
             std::vector<Mat> hists = splitHistsDst.at((int)idx);
@@ -951,7 +950,7 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
         }
 
         printf("resulting in %d histograms\n", (int)histsdst.size());
-        */
+
         /*
         for(size_t idx = 0; idx < query.size(); idx++) {
             
@@ -971,9 +970,11 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
     }
     else {
         printf("child images size = %d\n", (int)images.size());
+        /*
         Mat mat = Mat::zeros(1, getHistogramSize(), CV_32FC1);
         mat += 123;
         histsdst.push_back(mat);
+        */
     }
 
 }
