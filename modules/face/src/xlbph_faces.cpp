@@ -107,6 +107,7 @@ private:
     //--------------------------------------------------------------------------
     // Histogram Averages
     bool calcHistogramAverages() const;
+    void calcHistogramAverage_thread(std::vector<int> labels, std::vector<Mat> avgsdst) const;
     bool loadHistogramAverages(std::map<int, Mat> &histavgs) const;
     void mmapHistogramAverages();
 
@@ -511,10 +512,62 @@ void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const
     histavg.convertTo(histavg, CV_32FC1);
 }
 
+void xLBPH::calcHistogramAverage_thread(std::vector<int> labels, std::vector<Mat> avgsdst) const {
+    for(size_t idx = 0; idx < labels.size(); idx++) {
+        std::vector<Mat> hists;
+        loadHistograms(labels.at((int)idx), hists);
+        Mat avg;
+        averageHistograms(hists, histavg);
+        avgsdst.push_back(avg);
+    } 
+}
+
 
 bool xLBPH::calcHistogramAverages() const {
     //compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
-   
+    
+
+    const int numThreads = 4;
+    int step = (int)_labelinfo.size() / numThreads;
+    
+    std::vector<int> allLabels;
+    for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
+        allLabels.push_back(it->first);
+
+    std::vector<std::vector<int> > splitLabels;
+    std::vector<int>::const_iterator start = allLabels.begin();
+    for(int i = 0; i < numThreads; i++) {
+        std::vector<int>::const_iterator end;
+        if(i < numThreads - 1) {
+            end = start + step;
+            if(end > allLabels.end())
+                end = allLabels.end();
+        }
+        else {
+            end = allLabels.end(); 
+        }
+        splitLabels.push_back(std::vector<int>(start, end));
+        start += step;
+    }
+    
+    std::vector<std::vector<Mat> > splitAvgsDst(numThreads, std::vector<Mat>(0));
+    std::vector<std::thread> threads;
+    for(int i = 0; i < numThreads; i++) {
+        threads.push_back(std::thread(&xLBPH::calcHistogramAverage_thread, this, std::ref(splitLabels.at(i)), std::ref(splitAvgsDst.at(i))));
+    }
+
+    for(size_t idx = 0; idx < threads.size(); idx++) {
+        threads.at((int)idx).join();
+    }
+    
+    std::vector<Mat> averages;
+    for(size_t idx = 0; idx < splitAvgsDst.size(); idx++) {
+        std::vector<Mat> hists = splitAvgsDst.at((int)idx);
+        for(size_t matidx = 0; matidx < hists.size(); matidx++) {
+            averages.push_back(hists.at((int)matidx));
+        } 
+    }
+    /*
     std::vector<Mat> averages;
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
         std::vector<Mat> hists;
@@ -522,29 +575,8 @@ bool xLBPH::calcHistogramAverages() const {
         Mat histavg;
         averageHistograms(hists, histavg);
         averages.push_back(histavg);
-        
-        /*
-        Mat histavg = Mat::zeros(1, getHistogramSize(), CV_64FC1); // NOTE: is 64bit to prevent overflow
-        
-        for(size_t labelIdx = 0; labelIdx < hists.size(); labelIdx++) {
-            Mat dst;
-            hists.at((int)labelIdx).convertTo(dst, CV_64FC1);
-            histavg += dst;
-        }
-
-        histavg /= it->second;
-        histavg.convertTo(histavg, CV_32FC1);
-        averages.push_back(histavg);
-        */        
-        /*
-        double distAB = compareHist(hists.at(0), hists.at(1), HISTCMP_CHISQR_ALT);
-        double distAEnd = compareHist(hists.at(0), hists.at(it->second - 1), HISTCMP_CHISQR_ALT);
-        double distAvg = compareHist(hists.at(0), histavg, HISTCMP_CHISQR_ALT);
-
-        std::cout << "distAB: " << distAB << " | distAEnd: " << distAEnd << " | distAvg: " << distAvg << "\n";
-        */
     }
-    
+    */ 
     return writeHistograms(getHistogramAveragesFile(), averages, false);
 }
 
@@ -982,23 +1014,6 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
         }
 
         //printf("resulting in %d histograms\n", (int)histsdst.size());
-
-        /*
-        for(size_t idx = 0; idx < query.size(); idx++) {
-            
-            std::cout << "idx: " << idx << std::flush;
-            std::cout << "  |  saved: " << matToHex(histsToSave.at(idx)) << std::flush;
-            std::cout << "  |  query: " << matToHex(query.at(idx)) << std::flush;
-            std::cout << "  |  check: " << matToHex(check.at(idx)) << std::flush;
-            std::cout << "\n";
-            //std::cout << "saved: " << matToString(histsToSave.at(idx)) <<"  |  query: " << matToString(query.at(idx)) << "  |  check: " << matToString(check.at(idx)) << "\n";
-            if(!matsEqual(query.at(idx), check.at(idx)))
-            {
-                //std::cout << "query: " << matToString(query.at(idx)) << "  |  " << matToString(check.at(idx)) << " :check" << "\n";
-                CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
-            }
-        }
-        */
     }
     else {
         //printf("child images size = %d\n", (int)images.size());
