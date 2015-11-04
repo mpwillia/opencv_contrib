@@ -970,15 +970,9 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
     }
     else {
         printf("child images size = %d\n", (int)images.size());
-        try {
-            Mat mat = Mat::zeros(1, getHistogramSize(), CV_32FC1);
-            mat += 123;
-            histsdst.push_back(mat);
-        }
-        catch(int e) {
-            std::cout << "CHILD CAUGHT EXCEPTION!!!";
-        }
-
+        Mat mat = Mat::zeros(1, getHistogramSize(), CV_32FC1);
+        mat += 123;
+        histsdst.push_back(mat);
     }
 
 }
@@ -1058,10 +1052,16 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         std::vector<Mat> hists;
         
         if(it->first == 2) {
-            std::cout << "\n------------\n";
-            std::vector<Mat> histsdst;
-            calculateHistograms_multithreaded(imgs, histsdst, true);
-            std::cout << "\n------------\n";
+            try {
+                std::cout << "\n------------\n";
+                std::vector<Mat> histsdst;
+                calculateHistograms_multithreaded(imgs, histsdst, true);
+                std::cout << "\n------------\n";
+            }
+            catch (std::bad_alloc& ba) {
+                std::cout << "CAUGHT BAD ALLOC: " << ba.what() << "\n";
+            }
+
         }
 
         for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
