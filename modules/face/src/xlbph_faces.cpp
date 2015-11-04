@@ -927,7 +927,7 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
         std::vector<std::vector<Mat> > splitHistsDst;
         std::vector<std::thread> threads;
         for(int i = 0; i < numThreads; i++) {
-            threads.push_back(std::thread(&xLBPH::calculateHistograms_multithreaded, this, splitImages.at(i), splitHistsDst.at(i), false));
+            threads.push_back(std::thread(&xLBPH::calculateHistograms_multithreaded, this, std::ref(splitImages.at(i)), std::ref(splitHistsDst.at(i)), false));
         }
 
         for(size_t idx = 0; idx < threads.size(); idx++) {
