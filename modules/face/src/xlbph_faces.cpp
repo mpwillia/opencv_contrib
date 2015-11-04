@@ -61,8 +61,7 @@ private:
     
 
     // defines what prediction algorithm to use
-    int algToUse;
-
+    int _algToUse;
 
 
     //--------------------------------------------------------------------------
@@ -137,7 +136,7 @@ public:
                 _radius(radius_),
                 _neighbors(neighbors_),
                 _threshold(threshold) {
-        algToUse = 0;
+        _algToUse = 0;
         setModelPath(modelpath);
     }
 
@@ -157,7 +156,7 @@ public:
                 _radius(radius_),
                 _neighbors(neighbors_),
                 _threshold(threshold) {
-        algToUse = 0;
+        _algToUse = 0;
         setModelPath(modelpath);
         train(src, labels);
     }
@@ -212,7 +211,7 @@ public:
 };
 
 void xLBPH::setAlgToUse(int alg) {
-    algToUse = alg; 
+    _algToUse = alg; 
 }
 
 
@@ -906,8 +905,8 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
     
     if(makeThreads) {
         printf("parent images size = %d\n", (int)images.size());
-        const int numThreads = 2;
-        int step = (int)images.size() / 2;
+        const int numThreads = 4;
+        int step = (int)images.size() / numThreads;
         
         std::vector<std::vector<Mat> > splitImages;
         
@@ -1264,7 +1263,7 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
             _grid_y, /* grid size y */
             true /* normed histograms */);
     
-    switch(algToUse) {
+    switch(_algToUse) {
         case 1: predict_avg(query, minClass, minDist); break;
         default: predict_std(query, minClass, minDist); break;
     }
