@@ -577,7 +577,7 @@ void xLBPH::mmapHistogramAverages() {
         _histavgs[i] = mat;
     }
 
-    std::cout << "test: " << matToHex(_histograms.at(2).at(0)) << "\n";
+    //std::cout << "test: " << matToHex(_histograms.at(2).at(0)) << "\n";
 } 
 
 
@@ -1254,6 +1254,8 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
         bestlabels.push_back(std::pair<double, int>(dist, it->first));
     } 
     std::sort(bestlabels.begin(), bestlabels.end());
+
+    std::cout << "test: " << matToHex(_histograms.at(2).at(0)) << "\n";
     
     std::cout << "checking best labels...\n";
     minDist = DBL_MAX;
