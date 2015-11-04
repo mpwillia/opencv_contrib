@@ -972,17 +972,20 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
     }
     else {
         printf("child images size = %d\n", (int)images.size());
-        Mat lbp_image = elbp(imgs.at(sampleIdx), _radius, _neighbors);
 
-        // get spatial histogram from this lbp image
-        Mat p = spatial_histogram(
-                lbp_image, /* lbp_image */
-                static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), /* number of possible patterns */
-                _grid_x, /* grid size x */
-                _grid_y, /* grid size y */
-                true);
-        
-        histsdst.push_back(p);
+        for(size_t idx = 0; idx < images.size(); idx++) {
+            Mat lbp_image = elbp(images.at(idx), _radius, _neighbors);
+
+            // get spatial histogram from this lbp image
+            Mat p = spatial_histogram(
+                    lbp_image, /* lbp_image */
+                    static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), /* number of possible patterns */
+                    _grid_x, /* grid size x */
+                    _grid_y, /* grid size y */
+                    true);
+            
+            histsdst.push_back(p);
+        }
     }
 
 }
