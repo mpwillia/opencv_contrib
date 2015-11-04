@@ -1249,17 +1249,13 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     //std::map<int, Mat> histavgs = _histavgs;
 
     // <double, int> so we sort by dist
-    std::cout << "sorting avgs hists...\n";
     std::vector<std::pair<double, int> > bestlabels;
     for(std::map<int, Mat>::const_iterator it = _histavgs.begin(); it != _histavgs.end(); it++) {
         double dist = compareHist(it->second, query, COMP_ALG) ;
         bestlabels.push_back(std::pair<double, int>(dist, it->first));
     } 
     std::sort(bestlabels.begin(), bestlabels.end());
-
-    //std::cout << "test: " << matToHex(_histograms.at(2).at(0)) << "\n";
     
-    std::cout << "checking best labels...\n";
     minDist = DBL_MAX;
     minClass = -1;
     std::map<int, double> bestpreds;
