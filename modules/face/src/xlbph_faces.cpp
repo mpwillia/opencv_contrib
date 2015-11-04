@@ -1053,18 +1053,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         std::vector<Mat> imgs = it->second;
         std::vector<Mat> hists;
         
-        if(it->first == 2) {
-            try {
-                std::cout << "\n------------\n";
-                std::vector<Mat> histsdst;
-                calculateHistograms_multithreaded(imgs, histsdst, true);
-                std::cout << "\n------------\n";
-            }
-            catch (std::bad_alloc& ba) {
-                std::cout << "CAUGHT BAD ALLOC: " << ba.what() << "\n";
-            }
-
-        }
 
         for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
             // calculate lbp image
@@ -1084,6 +1072,23 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         uniqueLabels.push_back(it->first);
         numhists.push_back((int)imgs.size());
         writeHistograms(getHistogramFile(it->first), hists, preserveData);
+
+        if(it->first == 2) {
+            std::cout << "\n------------\n";
+            std::vector<Mat> histsdst;
+            calculateHistograms_multithreaded(imgs, histsdst, true);
+            std::cout << "\n------------\n";
+            std::cout << "Verifying Multithreaded Histograms...";
+            CV_Assert(hists.size() == histsdst.size());
+            for(size_t idx = 0; idx < hists.size(); idx++) {
+                if(!matsEqual(hists.at(idx), histsdst.at(idx))) {
+                    CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
+                } 
+            }
+
+
+        }
+
         hists.clear();
 
         labelcount++;
