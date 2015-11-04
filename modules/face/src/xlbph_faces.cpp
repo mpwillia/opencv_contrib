@@ -107,7 +107,7 @@ private:
     //--------------------------------------------------------------------------
     // Histogram Averages
     bool calcHistogramAverages() const;
-    void calcHistogramAverage_thread(std::vector<int> labels, std::vector<Mat> avgsdst) const;
+    //void calcHistogramAverage_thread(std::vector<int> labels, std::vector<Mat> avgsdst) const;
     bool loadHistogramAverages(std::map<int, Mat> &histavgs) const;
     void mmapHistogramAverages();
 
@@ -512,6 +512,7 @@ void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const
     histavg.convertTo(histavg, CV_32FC1);
 }
 
+/*
 void xLBPH::calcHistogramAverage_thread(std::vector<int> labels, std::vector<Mat> avgsdst) const {
     for(size_t idx = 0; idx < labels.size(); idx++) {
         std::vector<Mat> hists;
@@ -521,12 +522,12 @@ void xLBPH::calcHistogramAverage_thread(std::vector<int> labels, std::vector<Mat
         avgsdst.push_back(histavg);
     } 
 }
-
+*/
 
 bool xLBPH::calcHistogramAverages() const {
     //compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
     
-
+    /*
     const int numThreads = 4;
     int step = (int)_labelinfo.size() / numThreads;
     
@@ -567,7 +568,8 @@ bool xLBPH::calcHistogramAverages() const {
             averages.push_back(hists.at((int)matidx));
         } 
     }
-    /*
+    */
+
     std::vector<Mat> averages;
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
         std::vector<Mat> hists;
@@ -576,7 +578,7 @@ bool xLBPH::calcHistogramAverages() const {
         averageHistograms(hists, histavg);
         averages.push_back(histavg);
     }
-    */ 
+    
     return writeHistograms(getHistogramAveragesFile(), averages, false);
 }
 
@@ -967,7 +969,7 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
     
     if(makeThreads) {
         //printf("parent images size = %d\n", (int)images.size());
-        const int numThreads = 4;
+        const int numThreads = 8;
         int step = (int)images.size() / numThreads;
         
         std::vector<std::vector<Mat> > splitImages;
