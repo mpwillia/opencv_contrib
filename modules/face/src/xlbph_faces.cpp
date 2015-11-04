@@ -571,10 +571,12 @@ void xLBPH::mmapHistogramAverages() {
     unsigned char* mapPtr = (unsigned char*)mmap(NULL, getHistogramSize() * (int)_labelinfo.size() * SIZEOF_CV_32FC1, PROT_READ, MAP_PRIVATE, fd, 0);
     if(mapPtr == MAP_FAILED)
         CV_Error(Error::StsError, "Cannot mem map file '"+filename+"'");
-
-    for(int i = 0; i < (int)_labelinfo.size(); i++) {
-        Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * SIZEOF_CV_32FC1 * i));
-        _histavgs[i] = mat;
+    
+    int idx = 0;
+    for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
+        Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * SIZEOF_CV_32FC1 * idx));
+        _histavgs[it->first] = mat;
+        idx++;
     }
 
     //std::cout << "test: " << matToHex(_histograms.at(2).at(0)) << "\n";
@@ -1089,22 +1091,22 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         std::vector<Mat> imgs = it->second;
         std::vector<Mat> hists;
        
-        //calculateHistograms_multithreaded(imgs, hists, true);
+        calculateHistograms_multithreaded(imgs, hists, true);
 
-        for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
-            // calculate lbp image
-            Mat lbp_image = elbp(imgs.at(sampleIdx), _radius, _neighbors);
+        //for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
+        //    // calculate lbp image
+        //    Mat lbp_image = elbp(imgs.at(sampleIdx), _radius, _neighbors);
 
-            // get spatial histogram from this lbp image
-            Mat p = spatial_histogram(
-                    lbp_image, /* lbp_image */
-                    static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), /* number of possible patterns */
-                    _grid_x, /* grid size x */
-                    _grid_y, /* grid size y */
-                    true);
+        //    // get spatial histogram from this lbp image
+        //    Mat p = spatial_histogram(
+        //            lbp_image, /* lbp_image */
+        //            static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), /* number of possible patterns */
+        //            _grid_x, /* grid size x */
+        //            _grid_y, /* grid size y */
+        //            true);
 
-            hists.push_back(p);
-        }
+        //    hists.push_back(p);
+        //}
         
         uniqueLabels.push_back(it->first);
         numhists.push_back((int)imgs.size());
@@ -1263,10 +1265,8 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     std::map<int, double> bestpreds;
     const int numLabelsToCheck = 5;
     for(size_t idx = 0; idx < bestlabels.size() && (int)idx < numLabelsToCheck; idx++) {
-        std::cout << "bestlabels.at()\n";
         const int label = bestlabels.at(idx).second;
         bestpreds[label] = DBL_MAX;
-        std::cout << "_histograms.at() - " << _histograms.size() << " - lable: " << label << "\n";
         std::vector<Mat> hists = _histograms.at(label);
 
         for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
