@@ -970,9 +970,15 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
     }
     else {
         printf("child images size = %d\n", (int)images.size());
-        Mat mat = Mat::zeros(1, getHistogramSize(), CV_32FC1);
-        mat += 123;
-        histsdst.push_back(mat);
+        try {
+            Mat mat = Mat::zeros(1, getHistogramSize(), CV_32FC1);
+            mat += 123;
+            histsdst.push_back(mat);
+        }
+        catch(int e) {
+            std::cout << "CHILD CAUGHT EXCEPTION!!!";
+        }
+
     }
 
 }
