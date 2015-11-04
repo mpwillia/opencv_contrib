@@ -80,8 +80,8 @@ private:
     //--------------------------------------------------------------------------
     void predict_std(InputArray _src, int &label, double &dist) const;
     void predict_avg(InputArray _src, int &label, double &dist) const;
-    static const int minLabelsToCheck = 5;
-    static const double labelsToCheckRatio = 0.05;
+    const int minLabelsToCheck = 5;
+    const double labelsToCheckRatio = 0.05;
 
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
 
