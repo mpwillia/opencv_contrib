@@ -57,7 +57,7 @@ private:
 
     // histograms
     std::map<int, std::vector<Mat> > _histograms;
-
+    std::map<int, Mat> _histavgs;
     
 
     // defines what prediction algorithm to use
@@ -558,6 +558,25 @@ bool xLBPH::loadHistogramAverages(std::map<int, Mat> &histavgs) const {
     return true;
 }
 
+bool xLBPH::mmapHistogramAverages() {
+    
+    std::cout << "loading histogram averages...\n";
+    String filename = getHistogramAveragesFile();
+    int fd = open(filename.c_str(), O_RDONLY);
+    if(fd < 0)
+        CV_Error(Error::StsError, "Cannot open histogram file '"+filename+"'");
+
+    unsigned char* mapPtr = (unsigned char*)mmap(NULL, getHistogramSize() * (int)_labelinfo.size() * SIZEOF_CV_32FC1, PROT_READ, MAP_PRIVATE, fd, 0);
+    if(mapPtr == MAP_FAILED)
+        CV_Error(Error::StsError, "Cannot mem map file '"+filename+"'");
+
+    for(int i = 0; i < (int)_labelinfo.size(); i++) {
+        Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * SIZEOF_CV_32FC1 * i));
+        _histavgs[i] = mat;
+    }
+} 
+
+
 //------------------------------------------------------------------------------
 // Histogram Memory Mapping
 //------------------------------------------------------------------------------
@@ -669,6 +688,8 @@ void xLBPH::load() {
 
     // mem map histograms
     mmapHistograms();
+
+    mmapHistogramAverages();
 }
 
 
@@ -1219,12 +1240,11 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const {
     Mat query = _query.getMat();
 
-    std::map<int, Mat> histavgs;
-    loadHistogramAverages(histavgs);
+    //std::map<int, Mat> histavgs = _histavgs;
 
     // <double, int> so we sort by dist
     std::vector<std::pair<double, int> > bestlabels;
-    for(std::map<int, Mat>::const_iterator it = histavgs.begin(); it != histavgs.end(); it++) {
+    for(std::map<int, Mat>::const_iterator it = _histavgs.begin(); it != _histavgs.end(); it++) {
         double dist = compareHist(it->second, query, COMP_ALG) ;
         bestlabels.push_back(std::pair<double, int>(dist, it->first));
     } 
