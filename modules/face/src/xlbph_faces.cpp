@@ -80,6 +80,9 @@ private:
     //--------------------------------------------------------------------------
     void predict_std(InputArray _src, int &label, double &dist) const;
     void predict_avg(InputArray _src, int &label, double &dist) const;
+    static const int minLabelsToCheck = 5;
+    static const double labelsToCheckRatio = 0.05;
+
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
 
     //--------------------------------------------------------------------------
@@ -1259,7 +1262,12 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     minDist = DBL_MAX;
     minClass = -1;
     std::map<int, double> bestpreds;
-    const int numLabelsToCheck = 5;
+
+    //int numLabelsToCheck = 10;
+    int numLabelsToCheck = (int)((int)_labelinfo.size() * labelsToCheckRatio);
+    if(numLabelsToCheck < minLabelsToCheck)
+        numLabelsToCheck = minLabelsToCheck;
+
     for(size_t idx = 0; idx < bestlabels.size() && (int)idx < numLabelsToCheck; idx++) {
         const int label = bestlabels.at(idx).second;
         bestpreds[label] = DBL_MAX;
