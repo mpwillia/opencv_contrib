@@ -516,9 +516,9 @@ void xLBPH::calcHistogramAverage_thread(std::vector<int> labels, std::vector<Mat
     for(size_t idx = 0; idx < labels.size(); idx++) {
         std::vector<Mat> hists;
         loadHistograms(labels.at((int)idx), hists);
-        Mat avg;
+        Mat histavg;
         averageHistograms(hists, histavg);
-        avgsdst.push_back(avg);
+        avgsdst.push_back(histavg);
     } 
 }
 
