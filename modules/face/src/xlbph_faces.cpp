@@ -910,7 +910,7 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
         
         std::vector<std::vector<Mat> > splitImages;
         
-        printf("spliting images\n");
+        //printf("spliting images\n");
         std::vector<Mat>::const_iterator start = images.begin();
         for(int i = 0; i < numThreads; i++) {
             std::vector<Mat>::const_iterator end;
@@ -926,7 +926,7 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
             start += step;
         }
         
-        printf("dispatching threads\n");
+        //printf("dispatching threads\n");
         std::vector<std::vector<Mat> > splitHistsDst(numThreads, std::vector<Mat>(0));
         std::vector<std::thread> threads;
         for(int i = 0; i < numThreads; i++) {
@@ -938,12 +938,12 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
             threads.push_back(std::thread(&xLBPH::calculateHistograms_multithreaded, this, std::ref(splitImages.at(i)), std::ref(splitHistsDst.at(i)), false));
         }
 
-        printf("waiting for threads\n");
+        //printf("waiting for threads\n");
         for(size_t idx = 0; idx < threads.size(); idx++) {
             threads.at((int)idx).join();
         }
         
-        printf("combining hists\n");
+        //printf("combining hists\n");
         for(size_t idx = 0; idx < splitHistsDst.size(); idx++) {
             std::vector<Mat> hists = splitHistsDst.at((int)idx);
             for(size_t matidx = 0; matidx < hists.size(); matidx++) {
@@ -951,7 +951,7 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
             } 
         }
 
-        printf("resulting in %d histograms\n", (int)histsdst.size());
+        //printf("resulting in %d histograms\n", (int)histsdst.size());
 
         /*
         for(size_t idx = 0; idx < query.size(); idx++) {
