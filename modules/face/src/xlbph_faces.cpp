@@ -576,6 +576,8 @@ void xLBPH::mmapHistogramAverages() {
         Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * SIZEOF_CV_32FC1 * i));
         _histavgs[i] = mat;
     }
+
+    std::cout << "test: " << _histograms[0] << "\n";
 } 
 
 
