@@ -1087,22 +1087,22 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         std::vector<Mat> imgs = it->second;
         std::vector<Mat> hists;
        
-        calculateHistograms_multithreaded(imgs, hists, true);
+        //calculateHistograms_multithreaded(imgs, hists, true);
 
-        //for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
-        //    // calculate lbp image
-        //    Mat lbp_image = elbp(imgs.at(sampleIdx), _radius, _neighbors);
+        for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
+            // calculate lbp image
+            Mat lbp_image = elbp(imgs.at(sampleIdx), _radius, _neighbors);
 
-        //    // get spatial histogram from this lbp image
-        //    Mat p = spatial_histogram(
-        //            lbp_image, /* lbp_image */
-        //            static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), /* number of possible patterns */
-        //            _grid_x, /* grid size x */
-        //            _grid_y, /* grid size y */
-        //            true);
+            // get spatial histogram from this lbp image
+            Mat p = spatial_histogram(
+                    lbp_image, /* lbp_image */
+                    static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), /* number of possible patterns */
+                    _grid_x, /* grid size x */
+                    _grid_y, /* grid size y */
+                    true);
 
-        //    hists.push_back(p);
-        //}
+            hists.push_back(p);
+        }
         
         uniqueLabels.push_back(it->first);
         numhists.push_back((int)imgs.size());
