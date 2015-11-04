@@ -691,7 +691,7 @@ void xLBPH::load() {
     // mem map histograms
     mmapHistograms();
 
-    mmapHistogramAverages();
+    //mmapHistogramAverages();
 }
 
 
