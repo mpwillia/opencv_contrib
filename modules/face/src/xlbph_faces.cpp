@@ -562,6 +562,7 @@ bool xLBPH::loadHistogramAverages(std::map<int, Mat> &histavgs) const {
 void xLBPH::mmapHistogramAverages() {
     
     std::cout << "loading histogram averages...\n";
+    _histavgs.clear();
     String filename = getHistogramAveragesFile();
     int fd = open(filename.c_str(), O_RDONLY);
     if(fd < 0)
@@ -1244,6 +1245,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     //std::map<int, Mat> histavgs = _histavgs;
 
     // <double, int> so we sort by dist
+    std::cout << "sorting avgs hists...\n";
     std::vector<std::pair<double, int> > bestlabels;
     for(std::map<int, Mat>::const_iterator it = _histavgs.begin(); it != _histavgs.end(); it++) {
         double dist = compareHist(it->second, query, COMP_ALG) ;
@@ -1251,6 +1253,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     } 
     std::sort(bestlabels.begin(), bestlabels.end());
     
+    std::cout << "checking best labels...\n";
     minDist = DBL_MAX;
     minClass = -1;
     std::map<int, double> bestpreds;
