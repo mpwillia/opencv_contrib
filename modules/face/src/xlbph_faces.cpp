@@ -910,12 +910,15 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
         int step = (int)images.size() / 2;
         
         std::vector<std::vector<Mat> > splitImages;
-            
+        
+        printf("spliting images\n");
         std::vector<Mat>::const_iterator start = images.begin();
         for(int i = 0; i < numThreads; i++) {
             std::vector<Mat>::const_iterator end;
             if(i < numThreads - 1) {
                 end = start + step;
+                if(end > images.end())
+                    end = images.end();
             }
             else {
                 end = images.end(); 
@@ -924,12 +927,14 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
             start += step;
         }
         
+        printf("dispatching threads\n");
         std::vector<std::vector<Mat> > splitHistsDst;
         std::vector<std::thread> threads;
         for(int i = 0; i < numThreads; i++) {
             threads.push_back(std::thread(&xLBPH::calculateHistograms_multithreaded, this, std::ref(splitImages.at(i)), std::ref(splitHistsDst.at(i)), false));
         }
 
+        printf("waiting for threads\n");
         for(size_t idx = 0; idx < threads.size(); idx++) {
             threads.at((int)idx).join();
         }
