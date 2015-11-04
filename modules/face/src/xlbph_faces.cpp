@@ -577,7 +577,7 @@ void xLBPH::mmapHistogramAverages() {
         _histavgs[i] = mat;
     }
 
-    std::cout << "test: " << matToHex(_histograms[0].at(0)) << "\n";
+    std::cout << "test: " << matToHex(_histograms[2].at(0)) << "\n";
 } 
 
 
