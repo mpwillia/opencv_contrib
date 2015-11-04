@@ -105,6 +105,7 @@ private:
     // Histogram Averages
     bool calcHistogramAverages() const;
     bool loadHistogramAverages(std::map<int, Mat> &histavgs) const;
+    void mmapHistogramAverages();
 
     // Histogram Clustering
     void clusterHistograms();
@@ -558,7 +559,7 @@ bool xLBPH::loadHistogramAverages(std::map<int, Mat> &histavgs) const {
     return true;
 }
 
-bool xLBPH::mmapHistogramAverages() {
+void xLBPH::mmapHistogramAverages() {
     
     std::cout << "loading histogram averages...\n";
     String filename = getHistogramAveragesFile();
