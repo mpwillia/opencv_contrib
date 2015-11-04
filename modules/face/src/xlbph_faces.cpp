@@ -901,6 +901,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 }
 
 
+
 void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads) {
     
     if(makeThreads) {
