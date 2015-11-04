@@ -940,10 +940,39 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
         for(size_t idx = 0; idx < threads.size(); idx++) {
             threads.at((int)idx).join();
         }
+        
+        printf("combining hists\n");
+        for(size_t idx = 0; idx < splitHistsDst.size(); idx++) {
+            std::vector<Mat> hists = splitHistsDst.at((int)idx);
+            for(size_t matidx = 0; matidx < hists.size(); matidx++) {
+                histsdst.push_back(hists.at((int)matidx));
+            } 
+        }
 
+        printf("resulting in %d histograms\n", (int)histsdst.size());
+
+        /*
+        for(size_t idx = 0; idx < query.size(); idx++) {
+            
+            std::cout << "idx: " << idx << std::flush;
+            std::cout << "  |  saved: " << matToHex(histsToSave.at(idx)) << std::flush;
+            std::cout << "  |  query: " << matToHex(query.at(idx)) << std::flush;
+            std::cout << "  |  check: " << matToHex(check.at(idx)) << std::flush;
+            std::cout << "\n";
+            //std::cout << "saved: " << matToString(histsToSave.at(idx)) <<"  |  query: " << matToString(query.at(idx)) << "  |  check: " << matToString(check.at(idx)) << "\n";
+            if(!matsEqual(query.at(idx), check.at(idx)))
+            {
+                //std::cout << "query: " << matToString(query.at(idx)) << "  |  " << matToString(check.at(idx)) << " :check" << "\n";
+                CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
+            }
+        }
+        */
     }
     else {
-        printf("child images size = %d\n", (int)images.size());        
+        printf("child images size = %d\n", (int)images.size());
+        Mat mat = Mat::zeros(1, getHistogramSize(), CV_32FC1);
+        mat += 123;
+        histsdst.push_back(mat);
     }
 
 }
