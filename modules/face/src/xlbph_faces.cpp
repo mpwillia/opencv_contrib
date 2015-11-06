@@ -981,7 +981,43 @@ void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, in
     else
     {
         int step = (int)src.size() / numThreads;
-        std::cout << "Would do multithreaded calc\n";
+        
+        //split src
+        std::vector<std::vector<S> > splitSrc;
+        std::vector<S>::const_iterator start = src.begin();
+        for(int i = 0; i < numThreads; i++) {
+            std::vector<S>::const_iterator end;
+            if(i < numThreads - 1) {
+                end = start + step;
+                if(end > src.end())
+                    end = src.end();
+            }
+            else {
+                end = src.end(); 
+            }
+            splitSrc.push_back(std::vector<S>(start, end));
+            start += step;
+        }
+        
+        //dispatch threads
+        std::vector<std::vector<D> > splitDst(numThreads, std::vector<D>(0));
+        std::vector<std::thread> threads;
+        for(int i = 0; i < numThreads; i++) {
+            threads.push_back(std::thread(&calcFunc, std::ref(splitSrc.at(i)), std::ref(splitDst.at(i))));
+        }
+        
+        //wait for threads
+        for(size_t idx = 0; idx < threads.size(); idx++) {
+            threads.at((int)idx).join();
+        }
+    
+        //recombine splitDst 
+        for(size_t idx = 0; idx < splitDst.size(); idx++) {
+            std::vector<D> threadDst = splitDst.at((int)idx);
+            for(size_t threadidx = 0; threadidx < threadDst.size(); threadidx++) {
+                dst.push_back(threadDst.at((int)threadidx));
+            } 
+        }
     }
 }
 
