@@ -967,13 +967,13 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 
 
 
-static void calculateHistograms(const std::vector<Mat> &images, std::vector<Mat> &dst) {
+static void calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) {
     std::cout << "CALC HISTOGRAMS\n";
 }
 
 
 template <typename S, typename D> static
-void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (* calcFunc)(const std::vector<S>, std::vector<D>)) {
+void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (* calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
     
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must be greater than 0");
