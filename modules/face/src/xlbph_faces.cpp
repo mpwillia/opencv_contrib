@@ -992,7 +992,7 @@ void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must be greater than 0");
     else if(numThreads == 1)
-        calcFunc(src, dst);
+        (this->*calcFunc)(src, dst);
     else
     {
         int step = (int)src.size() / numThreads;
