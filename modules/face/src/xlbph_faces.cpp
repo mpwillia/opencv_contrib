@@ -1018,7 +1018,7 @@ void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &
         std::vector<std::vector<D> > splitDst(numThreads, std::vector<D>(0));
         std::vector<std::thread> threads;
         for(int i = 0; i < numThreads; i++) {
-            threads.push_back(std::thread(xLBPH::calcFunc, this, std::ref(splitSrc.at(i)), std::ref(splitDst.at(i))));
+            threads.push_back(std::thread(calcFunc, this, std::ref(splitSrc.at(i)), std::ref(splitDst.at(i))));
         }
         
         //wait for threads
