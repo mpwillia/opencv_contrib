@@ -312,6 +312,7 @@ static String matToString(const Mat &mat) {
     return s;
 }
 
+/*
 void xLBPH::test() {
     // make some fake hists
     int numhists = 16;
@@ -331,14 +332,6 @@ void xLBPH::test() {
     histsToSave.push_back(matmax);
     histsToSave.push_back(matmin);
   
-    std::vector<Mat> hists;
-
-    std::cout << "Trying with 1 threads...\n";
-    performMultithreadedCalc<Mat, Mat>(histsToSave, hists, 1, &calculateHistograms);
-    std::cout << "\nTrying with 4 threads...\n";
-    performMultithreadedCalc<Mat, Mat>(histsToSave, hists, 4, &calculateHistograms);
-
-    /*
     std::cout << "Saving test hists...\n";
     String testhistsfile = getHistogramsDir() + "/testhists.bin";
     // write them to a fake file
@@ -409,9 +402,8 @@ void xLBPH::test() {
             CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
         }
     }
-    */
 }
-
+*/
 
 bool xLBPH::matsEqual(const Mat &a, const Mat &b) const {
     return countNonZero(a!=b) == 0; 
@@ -995,6 +987,33 @@ void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, in
 
 
 
+void xLBPH::test() {
+    // make some fake hists
+    int numhists = 16;
+    int size = 4;
+    std::vector<Mat> src;
+    
+    std::cout << "Making test hists...\n";
+    for(int i = 0; i < numhists - 2; i++) {
+        Mat mat = Mat::zeros(1, size, CV_32FC1);
+        mat += i;
+        histsToSave.push_back(mat);
+    }
+    Mat matmax = Mat::zeros(1, size, CV_32FC1);
+    Mat matmin = Mat::zeros(1, size, CV_32FC1);
+    matmax = FLT_MAX;
+    matmin = FLT_MIN;
+    histsToSave.push_back(matmax);
+    histsToSave.push_back(matmin);
+  
+    std::vector<Mat> dst;
+
+    std::cout << "Trying with 1 threads...\n";
+    performMultithreadedCalc<Mat, Mat>(src, dst, 1, &calculateHistograms);
+    std::cout << "\nTrying with 4 threads...\n";
+    performMultithreadedCalc<Mat, Mat>(src, dst, 4, &calculateHistograms);
+
+}
 
 /*
 void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads) {
