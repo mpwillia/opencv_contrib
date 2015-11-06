@@ -973,7 +973,7 @@ static void calculateHistograms(const std::vector<Mat> &images, std::vector<Mat>
 
 
 template <typename S, typename D> static
-void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (* calcFunc)(std::vector<S>, std::vector<D>)) {
+void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (* calcFunc)(const std::vector<S>, std::vector<D>)) {
     
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must be greater than 0");
