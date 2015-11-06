@@ -969,7 +969,7 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
     
     if(makeThreads) {
         //printf("parent images size = %d\n", (int)images.size());
-        const int numThreads = 8;
+        const int numThreads = 4;
         int step = (int)images.size() / numThreads;
         
         std::vector<std::vector<Mat> > splitImages;
@@ -1110,7 +1110,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         //label = it->first;
         std::vector<Mat> imgs = it->second;
         std::vector<Mat> hists;
-       
+        
         calculateHistograms_multithreaded(imgs, hists, true);
 
         //for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
