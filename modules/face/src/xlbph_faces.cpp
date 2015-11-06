@@ -71,6 +71,7 @@ private:
     // corresponding labels in labels, possibly preserving
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
+    void calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst);
     void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads = false);
     //void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst);
     //void trainLabel_multithreaded(std::vector<Mat> &images, std::vector<Mat> &histsdst);
@@ -965,7 +966,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 }
 
 
-static void calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) {
+void LBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) {
 
     for(size_t idx = 0; idx < src.size(); idx++) {
         Mat lbp_image = elbp(src.at(idx), _radius, _neighbors);
@@ -984,7 +985,7 @@ static void calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &d
 
 
 template <typename S, typename D> static
-void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (* calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
+void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (*LBPH::calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
     
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must be greater than 0");
@@ -1015,7 +1016,7 @@ void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, in
         std::vector<std::vector<D> > splitDst(numThreads, std::vector<D>(0));
         std::vector<std::thread> threads;
         for(int i = 0; i < numThreads; i++) {
-            threads.push_back(std::thread(calcFunc, std::ref(splitSrc.at(i)), std::ref(splitDst.at(i))));
+            threads.push_back(std::thread(LBPH::calcFunc, std::ref(splitSrc.at(i)), std::ref(splitDst.at(i))));
         }
         
         //wait for threads
@@ -1206,7 +1207,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         std::vector<Mat> hists;
         
         //performMultithreadedCalc(const std::vector<Mat> &images, std::vector<Mat> &dst, int numThreads, void (* calcFunc)(std::vector<S>, std::vector<D>));
-        performMultithreadedCalc<Mat, Mat>(imgs, hists, 8, &calculateHistograms);
+        performMultithreadedCalc<Mat, Mat>(imgs, hists, 8, &LBPH::calculateHistograms);
         //calculateHistograms_multithreaded(imgs, hists, true);
 
         //for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
