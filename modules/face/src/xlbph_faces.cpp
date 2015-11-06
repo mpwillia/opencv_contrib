@@ -314,7 +314,6 @@ static String matToString(const Mat &mat) {
 
 void xLBPH::test() {
     // make some fake hists
-    /*
     int numhists = 16;
     int size = 4;
     std::vector<Mat> histsToSave;
@@ -331,7 +330,15 @@ void xLBPH::test() {
     matmin = FLT_MIN;
     histsToSave.push_back(matmax);
     histsToSave.push_back(matmin);
-    
+  
+    std::vector<Mat> hists;
+
+    std::cout << "Trying with 1 threads...\n";
+    performMultithreadedCalc<Mat, Mat>(histsToSave, hists, 1, &calculateHistograms);
+    std::cout << "\nTrying with 4 threads...\n";
+    performMultithreadedCalc<Mat, Mat>(histsToSave, hists, 4, &calculateHistograms);
+
+    /*
     std::cout << "Saving test hists...\n";
     String testhistsfile = getHistogramsDir() + "/testhists.bin";
     // write them to a fake file
