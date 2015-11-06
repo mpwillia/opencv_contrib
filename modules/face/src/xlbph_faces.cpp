@@ -966,7 +966,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 }
 
 
-void LBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) {
+void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) {
 
     for(size_t idx = 0; idx < src.size(); idx++) {
         Mat lbp_image = elbp(src.at(idx), _radius, _neighbors);
@@ -985,7 +985,7 @@ void LBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &ds
 
 
 template <typename S, typename D> static
-void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (*LBPH::calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
+void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (*xLBPH::calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
     
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must be greater than 0");
@@ -1016,7 +1016,7 @@ void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, in
         std::vector<std::vector<D> > splitDst(numThreads, std::vector<D>(0));
         std::vector<std::thread> threads;
         for(int i = 0; i < numThreads; i++) {
-            threads.push_back(std::thread(LBPH::calcFunc, std::ref(splitSrc.at(i)), std::ref(splitDst.at(i))));
+            threads.push_back(std::thread(xLBPH::calcFunc, std::ref(splitSrc.at(i)), std::ref(splitDst.at(i))));
         }
         
         //wait for threads
