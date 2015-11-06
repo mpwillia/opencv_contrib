@@ -984,9 +984,9 @@ void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, in
         
         //split src
         std::vector<std::vector<S> > splitSrc;
-        std::vector<S>::const_iterator start = src.begin();
+        typename std::vector<S>::const_iterator start = src.begin();
         for(int i = 0; i < numThreads; i++) {
-            std::vector<S>::const_iterator end;
+            typename std::vector<S>::const_iterator end;
             if(i < numThreads - 1) {
                 end = start + step;
                 if(end > src.end())
