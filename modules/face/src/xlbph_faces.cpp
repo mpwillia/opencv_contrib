@@ -978,10 +978,10 @@ void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, in
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must be greater than 0");
     else if(numThreads == 1)
-        calcFunc(images, dst);
+        calcFunc(src, dst);
     else
     {
-        int step = (int)images.size() / numThreads;
+        int step = (int)src.size() / numThreads;
         std::cout << "Would do multithreaded calc\n";
     }
 }
@@ -1131,7 +1131,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         std::vector<Mat> hists;
         
         //performMultithreadedCalc(const std::vector<Mat> &images, std::vector<Mat> &dst, int numThreads, void (* calcFunc)(std::vector<S>, std::vector<D>));
-        performMultithreadedCalc(imgs, hists, 4, &calculateHistograms);
+        performMultithreadedCalc<Mat, Mat>(imgs, hists, 4, &calculateHistograms);
         //calculateHistograms_multithreaded(imgs, hists, true);
 
         //for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
