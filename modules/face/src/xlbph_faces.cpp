@@ -985,7 +985,7 @@ void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &d
 
 
 template <typename S, typename D> static
-void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (*xLBPH::calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
+void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
     
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must be greater than 0");
