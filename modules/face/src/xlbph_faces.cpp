@@ -1003,7 +1003,7 @@ void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, in
         std::vector<std::vector<D> > splitDst(numThreads, std::vector<D>(0));
         std::vector<std::thread> threads;
         for(int i = 0; i < numThreads; i++) {
-            threads.push_back(std::thread(&calcFunc, std::ref(splitSrc.at(i)), std::ref(splitDst.at(i))));
+            threads.push_back(std::thread(calcFunc, std::ref(splitSrc.at(i)), std::ref(splitDst.at(i))));
         }
         
         //wait for threads
