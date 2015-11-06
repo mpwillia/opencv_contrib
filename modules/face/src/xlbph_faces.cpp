@@ -965,9 +965,21 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 }
 
 
-
 static void calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) {
-    std::cout << "CALC HISTOGRAMS\n";
+
+    for(size_t idx = 0; idx < src.size(); idx++) {
+        Mat lbp_image = elbp(src.at(idx), _radius, _neighbors);
+
+        // get spatial histogram from this lbp image
+        Mat p = spatial_histogram(
+                lbp_image, // lbp_image
+                static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), // number of possible patterns
+                _grid_x, // grid size x
+                _grid_y, // grid size y
+                true);
+        
+        dst.push_back(p);
+    }
 }
 
 
@@ -1022,7 +1034,7 @@ void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, in
 }
 
 
-
+/*
 void xLBPH::test() {
     // make some fake hists
     int numhists = 16;
@@ -1050,6 +1062,7 @@ void xLBPH::test() {
     performMultithreadedCalc<Mat, Mat>(src, dst, 4, &calculateHistograms);
 
 }
+*/
 
 /*
 void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads) {
@@ -1193,7 +1206,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         std::vector<Mat> hists;
         
         //performMultithreadedCalc(const std::vector<Mat> &images, std::vector<Mat> &dst, int numThreads, void (* calcFunc)(std::vector<S>, std::vector<D>));
-        performMultithreadedCalc<Mat, Mat>(imgs, hists, 4, &calculateHistograms);
+        performMultithreadedCalc<Mat, Mat>(imgs, hists, 8, &calculateHistograms);
         //calculateHistograms_multithreaded(imgs, hists, true);
 
         //for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
