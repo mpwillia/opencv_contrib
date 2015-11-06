@@ -74,7 +74,7 @@ private:
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
     void calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst);
-    void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads = false);
+    //void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads = false);
     //void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst);
     //void trainLabel_multithreaded(std::vector<Mat> &images, std::vector<Mat> &histsdst);
 
