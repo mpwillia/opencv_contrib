@@ -1207,7 +1207,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         std::vector<Mat> hists;
         
         //performMultithreadedCalc(const std::vector<Mat> &images, std::vector<Mat> &dst, int numThreads, void (* calcFunc)(std::vector<S>, std::vector<D>));
-        performMultithreadedCalc<Mat, Mat>(imgs, hists, 8, &LBPH::calculateHistograms);
+        performMultithreadedCalc<Mat, Mat>(imgs, hists, 8, &xLBPH::calculateHistograms);
         //calculateHistograms_multithreaded(imgs, hists, true);
 
         //for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
