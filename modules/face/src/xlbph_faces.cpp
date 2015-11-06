@@ -314,6 +314,7 @@ static String matToString(const Mat &mat) {
 
 void xLBPH::test() {
     // make some fake hists
+    /*
     int numhists = 16;
     int size = 4;
     std::vector<Mat> histsToSave;
@@ -401,6 +402,7 @@ void xLBPH::test() {
             CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
         }
     }
+    */
 }
 
 
@@ -965,6 +967,29 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 
 
 
+static void calculateHistograms(const std::vector<Mat> &images, std::vector<Mat> &dst) {
+    std::cout << "CALC HISTOGRAMS\n";
+}
+
+
+template <typename S, typename D> static
+void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (* calcFunc)(std::vector<S>, std::vector<D>)) {
+    
+    if(numThreads <= 0)
+        CV_Error(Error::StsBadArg, "numThreads must be greater than 0");
+    else if(numThreads == 1)
+        calcFunc(images, dst);
+    else
+    {
+        int step = (int)images.size() / numThreads;
+        std::cout << "Would do multithreaded calc\n";
+    }
+}
+
+
+
+
+/*
 void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads) {
     
     if(makeThreads) {
@@ -994,11 +1019,6 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
         std::vector<std::vector<Mat> > splitHistsDst(numThreads, std::vector<Mat>(0));
         std::vector<std::thread> threads;
         for(int i = 0; i < numThreads; i++) {
-            //std::vector<Mat> threadImages = splitImages.at(i);
-            /*
-            std::vector<Mat> threadHistsDst;
-            splitHistsDst.push_back(threadHistsDst);
-            */
             threads.push_back(std::thread(&xLBPH::calculateHistograms_multithreaded, this, std::ref(splitImages.at(i)), std::ref(splitHistsDst.at(i)), false));
         }
 
@@ -1025,18 +1045,17 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
 
             // get spatial histogram from this lbp image
             Mat p = spatial_histogram(
-                    lbp_image, /* lbp_image */
-                    static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), /* number of possible patterns */
-                    _grid_x, /* grid size x */
-                    _grid_y, /* grid size y */
+                    lbp_image, // lbp_image
+                    static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), // number of possible patterns
+                    _grid_x, // grid size x
+                    _grid_y, // grid size y
                     true);
             
             histsdst.push_back(p);
         }
     }
-
 }
-
+*/
 
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
 
@@ -1111,7 +1130,9 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         std::vector<Mat> imgs = it->second;
         std::vector<Mat> hists;
         
-        calculateHistograms_multithreaded(imgs, hists, true);
+        //performMultithreadedCalc(const std::vector<Mat> &images, std::vector<Mat> &dst, int numThreads, void (* calcFunc)(std::vector<S>, std::vector<D>));
+        performMultithreadedCalc(imgs, hists, 4, &calculateHistograms);
+        //calculateHistograms_multithreaded(imgs, hists, true);
 
         //for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
         //    // calculate lbp image
