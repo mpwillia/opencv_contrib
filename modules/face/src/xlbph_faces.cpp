@@ -953,10 +953,10 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 // Multithreading 
 //------------------------------------------------------------------------------
 template <typename _Tp> static
-void splitVector(const std::vector<_Tp> &src, std::vector<std::vector<S> > &dst, int numParts) {
-    typename std::vector<S>::const_iterator start = src.begin();
+void splitVector(const std::vector<_Tp> &src, std::vector<std::vector<_Tp> > &dst, int numParts) {
+    typename std::vector<_Tp>::const_iterator start = src.begin();
     for(int i = 0; i < numParts; i++) {
-        typename std::vector<S>::const_iterator end;
+        typename std::vector<_Tp>::const_iterator end;
         if(i < numParts - 1) {
             end = start + step;
             if(end > src.end())
@@ -965,7 +965,7 @@ void splitVector(const std::vector<_Tp> &src, std::vector<std::vector<S> > &dst,
         else {
             end = src.end(); 
         }
-        dst.push_back(std::vector<S>(start, end));
+        dst.push_back(std::vector<_Tp>(start, end));
         start += step;
     }
 }
@@ -1019,7 +1019,7 @@ void performMultithreadedComp(const S &query, const std::vector<S> &src, std::ve
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must greater than 0!");
     else if(numThreads == 1)
-        (this->*calcFunc)(src, dst);
+        (this->*compFunc)(query, src, dst);
     else
     {
         int step = (int)src.size() / numThreads;
