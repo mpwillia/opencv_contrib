@@ -64,7 +64,7 @@ private:
     int _algToUse;
     
     template <typename S, typename D>
-    void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst));
+    void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, const void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst));
 
     //--------------------------------------------------------------------------
     // Model Training Function
@@ -110,7 +110,7 @@ private:
     //--------------------------------------------------------------------------
     // Histogram Averages
     bool calcHistogramAverages() const;
-    void calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst);
+    void calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) const;
     bool loadHistogramAverages(std::map<int, Mat> &histavgs) const;
     void mmapHistogramAverages();
 
