@@ -83,7 +83,7 @@ private:
     //--------------------------------------------------------------------------
     void predict_std(InputArray _src, int &label, double &dist) const;
     void predict_avg(InputArray _src, int &label, double &dist) const;
-    void calcHistsDist(const std::vector<std::pair<Mat, Mat> > &src, std::vector<double> &dists) const;
+    void calcHistsDist(const std::vector<std::pair<Mat*, Mat> > &src, std::vector<double> &dists) const;
     const int minLabelsToCheck = 5;
     const double labelsToCheckRatio = 0.05;
 
