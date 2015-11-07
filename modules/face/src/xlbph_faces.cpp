@@ -518,7 +518,7 @@ void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const
 void xLBPH::calcHistogramAverages_thread(std::vector<int> labels, std::vector<Mat> avgsdst) const {
     for(size_t idx = 0; idx < labels.size(); idx++) {
         Mat histavg;
-        averageHistograms(_histograms[idx], histavg);
+        averageHistograms(_histograms.at(labels.at(idx)), histavg);
         avgsdst.push_back(histavg);
     } 
 }
