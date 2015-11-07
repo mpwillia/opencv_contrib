@@ -954,6 +954,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 //------------------------------------------------------------------------------
 template <typename _Tp> static
 void splitVector(const std::vector<_Tp> &src, std::vector<std::vector<_Tp> > &dst, int numParts) {
+    int step = (int)src.size() / numParts;
     typename std::vector<_Tp>::const_iterator start = src.begin();
     for(int i = 0; i < numParts; i++) {
         typename std::vector<_Tp>::const_iterator end;
@@ -982,8 +983,6 @@ void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &
         (this->*calcFunc)(src, dst);
     else
     {
-        int step = (int)src.size() / numThreads;
-        
         //split src
         std::vector<std::vector<S> > splitSrc;
         splitVector<S>(src, splitSrc, numThreads);
@@ -1012,7 +1011,7 @@ void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &
 
 
 template <typename S, typename D>
-void performMultithreadedComp(const S &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const S &query, const std::vector<S> &src, std::vector<D> &dst) const) const {
+void xLBPH::performMultithreadedComp(const S &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const S &query, const std::vector<S> &src, std::vector<D> &dst) const) const {
     if(numThreads > _maxThreads)
         numThreads = _maxThreads;
 
@@ -1022,8 +1021,6 @@ void performMultithreadedComp(const S &query, const std::vector<S> &src, std::ve
         (this->*compFunc)(query, src, dst);
     else
     {
-        int step = (int)src.size() / numThreads;
-        
         //split src
         std::vector<std::vector<S> > splitSrc;
         splitVector<S>(src, splitSrc, numThreads);
