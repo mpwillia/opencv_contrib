@@ -515,7 +515,7 @@ void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const
     histavg.convertTo(histavg, CV_32FC1);
 }
 
-void xLBPH::calcHistogramAverages_thread(std::vector<int> labels, std::vector<Mat> avgsdst) const {
+void xLBPH::calcHistogramAverages_thread(const std::vector<int> labels, std::vector<Mat> avgsdst) const {
     for(size_t idx = 0; idx < labels.size(); idx++) {
         Mat histavg;
         averageHistograms(_histograms.at(labels.at(idx)), histavg);
@@ -529,7 +529,7 @@ bool xLBPH::calcHistogramAverages() const {
 
     std::vector<Mat> averages;
     std::vector<int> labels; 
-    for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); i++)
+    for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
         labels.push_back(it->first);
     
     //performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
