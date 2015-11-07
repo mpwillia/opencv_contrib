@@ -62,9 +62,11 @@ private:
 
     // defines what prediction algorithm to use
     int _algToUse;
-
+    
+    /*
     template <typename S, typename D>
     void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst));
+    */
 
     //--------------------------------------------------------------------------
     // Model Training Function
@@ -73,8 +75,8 @@ private:
     // corresponding labels in labels, possibly preserving
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
-    void calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst);
-    //void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads = false);
+    //void calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst);
+    void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads = false);
     //void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst);
     //void trainLabel_multithreaded(std::vector<Mat> &images, std::vector<Mat> &histsdst);
 
@@ -967,7 +969,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
     return dst;
 }
 
-
+/*
 void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) {
 
     for(size_t idx = 0; idx < src.size(); idx++) {
@@ -1035,7 +1037,7 @@ void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &
         }
     }
 }
-
+*/
 
 /*
 void xLBPH::test() {
@@ -1067,7 +1069,6 @@ void xLBPH::test() {
 }
 */
 
-/*
 void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads) {
     
     if(makeThreads) {
@@ -1133,7 +1134,7 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
         }
     }
 }
-*/
+
 
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
 
@@ -1209,8 +1210,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         std::vector<Mat> hists;
         
         //performMultithreadedCalc(const std::vector<Mat> &images, std::vector<Mat> &dst, int numThreads, void (* calcFunc)(std::vector<S>, std::vector<D>));
-        performMultithreadedCalc<Mat, Mat>(imgs, hists, 8, &xLBPH::calculateHistograms);
-        //calculateHistograms_multithreaded(imgs, hists, true);
+        //performMultithreadedCalc<Mat, Mat>(imgs, hists, 8, &xLBPH::calculateHistograms);
+        calculateHistograms_multithreaded(imgs, hists, true);
 
         //for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
         //    // calculate lbp image
