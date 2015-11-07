@@ -1327,9 +1327,9 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     std::cout << "Training complete\n";
 }
 
-void xLBPH::calcHistsDist(const std::vector<std::pair<Mat, Mat> > &src, std::vector<double> &dists) const {
+void xLBPH::calcHistsDist(const std::vector<std::pair<Mat*, Mat> > &src, std::vector<double> &dists) const {
     for(size_t idx = 0; idx < src.size(); idx++) {
-        dists.push_back(compareHist(src.at(idx).first, src.at(idx).second, COMP_ALG));
+        dists.push_back(compareHist(*(src.at(idx).first), src.at(idx).second, COMP_ALG));
     }
 }
 
@@ -1366,13 +1366,13 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
         
 
         //void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const{
-        std::vector<std::pair<Mat, Mat> > src;
+        std::vector<std::pair<Mat*, Mat> > src;
         for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
-            src.push_back(std::pair<Mat, Mat>(query, hists.at(histIdx)));
+            src.push_back(std::pair<Mat*, Mat>(&query, hists.at(histIdx)));
         }
         
         std::vector<double> dists;
-        performMultithreadedCalc<std::pair<Mat,Mat>, double>(src, dists, 8, &xLBPH::calcHistsDist);
+        performMultithreadedCalc<std::pair<Mat*,Mat>, double>(src, dists, 8, &xLBPH::calcHistsDist);
         std::sort(dists.begin(), dists.end());
         
         if((dists.at(0) < minDist) && (dists.at(0) < _threshold)) {
