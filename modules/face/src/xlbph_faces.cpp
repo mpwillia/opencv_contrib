@@ -1216,8 +1216,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         */
     }
     std::cout << "Finished calculating histograms for " << labelImages.size() << " labels.            \n";
-    mmapHistograms();    
-
 
     std::cout << "Writing infofile\n";
     String infofilepath(_modelpath + "/" + getModelName() + ".yml");
@@ -1242,7 +1240,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     for(size_t labelIdx = 0; labelIdx < uniqueLabels.size(); labelIdx++) {
         _labelinfo[uniqueLabels.at((int)labelIdx)] = numhists.at((int)labelIdx);
     }
-       
+    mmapHistograms();
 
     std::cout << "Calculating histogram averages...\n";
     calcHistogramAverages();
