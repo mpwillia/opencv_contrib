@@ -932,7 +932,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 
 
 template <typename S, typename D>
-void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, const void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const{
+void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const{
     
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must be greater than 0");
