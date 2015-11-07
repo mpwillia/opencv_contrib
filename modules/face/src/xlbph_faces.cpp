@@ -64,7 +64,7 @@ private:
     int _algToUse;
     
     template <typename S, typename D>
-    void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, const void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst));
+    void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const;
 
     //--------------------------------------------------------------------------
     // Model Training Function
@@ -932,7 +932,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 
 
 template <typename S, typename D>
-void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, const void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
+void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, const void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const{
     
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must be greater than 0");
