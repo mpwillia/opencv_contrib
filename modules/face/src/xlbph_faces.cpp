@@ -110,7 +110,7 @@ private:
     //--------------------------------------------------------------------------
     // Histogram Averages
     bool calcHistogramAverages() const;
-    //void calcHistogramAverage_thread(std::vector<int> labels, std::vector<Mat> avgsdst) const;
+    void calcHistogramAverages_thread(const std::vector<int> labels, std::vector<Mat> avgsdst) const;
     bool loadHistogramAverages(std::map<int, Mat> &histavgs) const;
     void mmapHistogramAverages();
 
@@ -515,65 +515,25 @@ void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const
     histavg.convertTo(histavg, CV_32FC1);
 }
 
-/*
-void xLBPH::calcHistogramAverage_thread(std::vector<int> labels, std::vector<Mat> avgsdst) const {
+void xLBPH::calcHistogramAverages_thread(std::vector<int> labels, std::vector<Mat> avgsdst) const {
     for(size_t idx = 0; idx < labels.size(); idx++) {
-        std::vector<Mat> hists;
-        loadHistograms(labels.at((int)idx), hists);
         Mat histavg;
-        averageHistograms(hists, histavg);
+        averageHistograms(_histograms[idx], histavg);
         avgsdst.push_back(histavg);
     } 
 }
-*/
 
 bool xLBPH::calcHistogramAverages() const {
     //compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
     
+
+    std::vector<Mat> averages;
+    std::vector<int> labels = std::vector<int>(_labelinfo.begin(), _labelinfo.end());
+    
+    //performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
+    performMultithreadedCalc<int, Mat>(labels, averages, 4, &xLBPH::calcHisogramAverages_thread);
+
     /*
-    const int numThreads = 4;
-    int step = (int)_labelinfo.size() / numThreads;
-    
-    std::vector<int> allLabels;
-    for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
-        allLabels.push_back(it->first);
-
-    std::vector<std::vector<int> > splitLabels;
-    std::vector<int>::const_iterator start = allLabels.begin();
-    for(int i = 0; i < numThreads; i++) {
-        std::vector<int>::const_iterator end;
-        if(i < numThreads - 1) {
-            end = start + step;
-            if(end > allLabels.end())
-                end = allLabels.end();
-        }
-        else {
-            end = allLabels.end(); 
-        }
-        splitLabels.push_back(std::vector<int>(start, end));
-        start += step;
-    }
-    
-    std::vector<std::vector<Mat> > splitAvgsDst(numThreads, std::vector<Mat>(0));
-    std::vector<std::thread> threads;
-    for(int i = 0; i < numThreads; i++) {
-        threads.push_back(std::thread(&xLBPH::calcHistogramAverage_thread, this, std::ref(splitLabels.at(i)), std::ref(splitAvgsDst.at(i))));
-    }
-
-    for(size_t idx = 0; idx < threads.size(); idx++) {
-        threads.at((int)idx).join();
-    }
-    
-    std::vector<Mat> averages;
-    for(size_t idx = 0; idx < splitAvgsDst.size(); idx++) {
-        std::vector<Mat> hists = splitAvgsDst.at((int)idx);
-        for(size_t matidx = 0; matidx < hists.size(); matidx++) {
-            averages.push_back(hists.at((int)matidx));
-        } 
-    }
-    */
-
-    std::vector<Mat> averages;
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
         std::vector<Mat> hists;
         loadHistograms(it->first, hists);
@@ -581,7 +541,8 @@ bool xLBPH::calcHistogramAverages() const {
         averageHistograms(hists, histavg);
         averages.push_back(histavg);
     }
-    
+    */ 
+
     return writeHistograms(getHistogramAveragesFile(), averages, false);
 }
 
@@ -734,7 +695,6 @@ void xLBPH::load() {
 
     // mem map histograms
     mmapHistograms();
-
     mmapHistogramAverages();
 }
 
@@ -966,22 +926,6 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
     return dst;
 }
 
-void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) {
-
-    for(size_t idx = 0; idx < src.size(); idx++) {
-        Mat lbp_image = elbp(src.at(idx), _radius, _neighbors);
-
-        // get spatial histogram from this lbp image
-        Mat p = spatial_histogram(
-                lbp_image, // lbp_image
-                static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), // number of possible patterns
-                _grid_x, // grid size x
-                _grid_y, // grid size y
-                true);
-        
-        dst.push_back(p);
-    }
-}
 
 
 template <typename S, typename D>
@@ -1132,6 +1076,23 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
 }
 */
 
+void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) {
+
+    for(size_t idx = 0; idx < src.size(); idx++) {
+        Mat lbp_image = elbp(src.at(idx), _radius, _neighbors);
+
+        // get spatial histogram from this lbp image
+        Mat p = spatial_histogram(
+                lbp_image, // lbp_image
+                static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), // number of possible patterns
+                _grid_x, // grid size x
+                _grid_y, // grid size y
+                true);
+        
+        dst.push_back(p);
+    }
+}
+
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
 
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
@@ -1255,6 +1216,9 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         */
     }
     std::cout << "Finished calculating histograms for " << labelImages.size() << " labels.            \n";
+    mmapHistograms();    
+
+
     std::cout << "Writing infofile\n";
     String infofilepath(_modelpath + "/" + getModelName() + ".yml");
     FileStorage infofile(infofilepath, FileStorage::WRITE);
@@ -1278,11 +1242,13 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     for(size_t labelIdx = 0; labelIdx < uniqueLabels.size(); labelIdx++) {
         _labelinfo[uniqueLabels.at((int)labelIdx)] = numhists.at((int)labelIdx);
     }
-    
+       
+
     std::cout << "Calculating histogram averages...\n";
     calcHistogramAverages();
+    mmapHistogramAverages();    
 
-    load();
+    //load();
     
     
     /*
