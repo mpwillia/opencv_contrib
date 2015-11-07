@@ -1329,7 +1329,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
 void xLBPH::calcHistsDist(const std::vector<std::pair<Mat, Mat> > src, std::vector<double> dists) const {
     for(size_t idx = 0; idx < src.size(); idx++) {
-        dists.push_back(compareHist(it->first, it->second, COMP_ALG));
+        dists.push_back(compareHist(src.at(idx).first, src.at(idx).second, COMP_ALG));
     }
 }
 
