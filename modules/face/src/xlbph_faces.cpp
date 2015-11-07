@@ -73,7 +73,7 @@ private:
     // corresponding labels in labels, possibly preserving
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
-    void calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst);
+    void calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) const;
     //void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads = false);
     //void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst);
     //void trainLabel_multithreaded(std::vector<Mat> &images, std::vector<Mat> &histsdst);
@@ -515,7 +515,7 @@ void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const
     histavg.convertTo(histavg, CV_32FC1);
 }
 
-void xLBPH::calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) {
+void xLBPH::calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) const {
     for(size_t idx = 0; idx < labels.size(); idx++) {
         Mat histavg;
         averageHistograms(_histograms.at(labels.at(idx)), histavg);
@@ -932,7 +932,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 
 
 template <typename S, typename D>
-void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
+void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, const void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
     
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must be greater than 0");
@@ -1079,7 +1079,7 @@ void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, st
 }
 */
 
-void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) {
+void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) const {
 
     for(size_t idx = 0; idx < src.size(); idx++) {
         Mat lbp_image = elbp(src.at(idx), _radius, _neighbors);
