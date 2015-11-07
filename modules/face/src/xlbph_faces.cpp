@@ -317,7 +317,6 @@ static String matToString(const Mat &mat) {
     return s;
 }
 
-/*
 void xLBPH::test() {
     // make some fake hists
     int numhists = 16;
@@ -408,7 +407,7 @@ void xLBPH::test() {
         }
     }
 }
-*/
+
 
 bool xLBPH::matsEqual(const Mat &a, const Mat &b) const {
     return countNonZero(a!=b) == 0; 
@@ -1039,6 +1038,7 @@ void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &
 }
 */
 
+/*
 void xLBPH::test() {
     // make some fake hists
     int numhists = 16;
@@ -1066,6 +1066,7 @@ void xLBPH::test() {
     performMultithreadedCalc<Mat, Mat>(src, dst, 4, &calculateHistograms);
 
 }
+*/
 
 void xLBPH::calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads) {
     
