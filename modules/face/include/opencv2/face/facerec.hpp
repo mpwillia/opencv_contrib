@@ -204,7 +204,7 @@ public:
     CV_WRAP virtual String getHistogramAveragesFile() const = 0;
     
     CV_WRAP virtual void setAlgToUse(int alg) = 0;
-    CV_WARP virtual void setMaxThreads(int numThreads) = 0;
+    CV_WRAP virtual void setMaxThreads(int numThreads) = 0;
 
     CV_WRAP virtual void load() = 0;
 };
