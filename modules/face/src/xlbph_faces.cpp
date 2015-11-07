@@ -83,7 +83,7 @@ private:
     //--------------------------------------------------------------------------
     void predict_std(InputArray _src, int &label, double &dist) const;
     void predict_avg(InputArray _src, int &label, double &dist) const;
-    void calcHistsDist(const std::vector<std::pair<Mat, Mat> > src, std::vector<double> dists) const;
+    void calcHistsDist(const std::vector<std::pair<Mat, Mat> > &src, std::vector<double> &dists) const;
     const int minLabelsToCheck = 5;
     const double labelsToCheckRatio = 0.05;
 
@@ -1327,7 +1327,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     std::cout << "Training complete\n";
 }
 
-void xLBPH::calcHistsDist(const std::vector<std::pair<Mat, Mat> > src, std::vector<double> dists) const {
+void xLBPH::calcHistsDist(const std::vector<std::pair<Mat, Mat> > &src, std::vector<double> &dists) const {
     for(size_t idx = 0; idx < src.size(); idx++) {
         dists.push_back(compareHist(src.at(idx).first, src.at(idx).second, COMP_ALG));
     }
