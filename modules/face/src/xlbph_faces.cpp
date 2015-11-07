@@ -528,10 +528,12 @@ bool xLBPH::calcHistogramAverages() const {
     
 
     std::vector<Mat> averages;
-    std::vector<int> labels = std::vector<int>(_labelinfo.begin(), _labelinfo.end());
+    std::vector<int> labels; 
+    for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); i++)
+        labels.push_back(it->first);
     
     //performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
-    performMultithreadedCalc<int, Mat>(labels, averages, 4, &xLBPH::calcHisogramAverages_thread);
+    performMultithreadedCalc<int, Mat>(labels, averages, 4, &xLBPH::calcHistogramAverages_thread);
 
     /*
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
