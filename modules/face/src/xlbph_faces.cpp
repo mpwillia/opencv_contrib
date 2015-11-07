@@ -1372,7 +1372,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
         }
         
         std::vector<double> dists;
-        performMultithreadedCalc(src, dists, 8, &xLBPH::calcHistsDist);
+        performMultithreadedCalc<std::pair<Mat,Mat>, double>(src, dists, 8, &xLBPH::calcHistsDist);
         std::sort(dists.begin(), dists.end());
         
         if((dists.at(0) < minDist) && (dists.at(0) < _threshold)) {
