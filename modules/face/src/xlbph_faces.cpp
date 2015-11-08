@@ -69,7 +69,6 @@ private:
     // Multithreading
     //--------------------------------------------------------------------------
     int _maxThreads;
-    int _usedThreads;
     template <typename S, typename D>
     void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const;
     template <typename Q, typename S, typename D>
@@ -238,6 +237,8 @@ public:
     
     void test();
 };
+
+int _usedThreads = 0;
 
 void xLBPH::setMaxThreads(int numThreads) {
     _maxThreads = numThreads; 
