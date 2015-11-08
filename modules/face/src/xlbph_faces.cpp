@@ -1074,7 +1074,7 @@ void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &d
 void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat> > > &labelImages, std::vector<std::pair<int, int> > &labelinfo) const {
     
     for(size_t idx = 0; idx < labelImages.size(); idx++) {
-        std::cout << "Calculating histograms " << (int)idx << " / " << (int)labelImages.size() << "     \r";
+        std::cout << "Calculating histograms " << (int)idx << " / " << (int)labelImages.size() << "     \r" << std::flush;
         int label = labelImages.at((int)idx).first;
         std::vector<Mat> imgs = labelImages.at((int)idx).second;
         
