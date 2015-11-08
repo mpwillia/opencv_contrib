@@ -1377,7 +1377,7 @@ void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const
         //bestpreds[it->first] = DBL_MAX;
         std::vector<Mat> hists = it->second;
         std::vector<double> dists;
-        performMultithreadedComp<Mat, double>(query, hists, dists, _maxThreads, &xLBPH::compareHistograms);
+        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, _maxThreads, &xLBPH::compareHistograms);
         std::sort(dists.begin(), dists.end());
         
         bestpreds.push_back(std::pair<double, int>(dists.at(0), it->first));
