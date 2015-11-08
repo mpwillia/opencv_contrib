@@ -158,7 +158,6 @@ public:
                 _neighbors(neighbors_),
                 _threshold(threshold) {
         _algToUse = 0;
-        _maxThreads = 16;
         setModelPath(modelpath);
     }
 
