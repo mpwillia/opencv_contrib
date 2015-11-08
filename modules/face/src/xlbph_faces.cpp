@@ -74,8 +74,8 @@ private:
     template <typename Q, typename S, typename D>
     void performMultithreadedComp(const Q &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const Q &query, const std::vector<S> &src, std::vector<D> &dst) const) const;
     
-    int getAvailableThreads();
-    int requestThreads(int numThreads);
+    int getAvailableThreads() const;
+    int requestThreads(int numThreads) const;
 
     //--------------------------------------------------------------------------
     // Model Training Function
@@ -961,11 +961,11 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 //------------------------------------------------------------------------------
 // Multithreading 
 //------------------------------------------------------------------------------
-int xLBPH::getAvailableThreads() {
+int xLBPH::getAvailableThreads() const {
     return _maxThreads - _usedThreads; 
 }
 
-int xLBPH::requestThreads(int numThreads) {
+int xLBPH::requestThreads(int numThreads) const {
     if(numThreads > getAvailableThreads()) 
         numThreads = getAvailableThreads();
     if(numThreads <= 0)
