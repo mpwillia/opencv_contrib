@@ -222,7 +222,6 @@ public:
     String getHistogramAveragesFile() const;
 
     void setAlgToUse(int alg);
-    void setMaxThreads(int numThreads);
 
     //--------------------------------------------------------------------------
     // Additional Public Functions 
