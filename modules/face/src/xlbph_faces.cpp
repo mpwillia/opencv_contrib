@@ -68,15 +68,11 @@ private:
     //--------------------------------------------------------------------------
     // Multithreading
     //--------------------------------------------------------------------------
-    int _maxThreads;
     template <typename S, typename D>
     void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const;
     template <typename Q, typename S, typename D>
     void performMultithreadedComp(const Q &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const Q &query, const std::vector<S> &src, std::vector<D> &dst) const) const;
     
-    int getAvailableThreads() const;
-    int requestThreads(int numThreads) const;
-
     //--------------------------------------------------------------------------
     // Model Training Function
     //--------------------------------------------------------------------------
@@ -183,7 +179,6 @@ public:
                 _neighbors(neighbors_),
                 _threshold(threshold) {
         _algToUse = 0;
-        _maxThreads = 16;
         setModelPath(modelpath);
         train(src, labels);
     }
@@ -237,12 +232,6 @@ public:
     
     void test();
 };
-
-int _usedThreads = 0;
-
-void xLBPH::setMaxThreads(int numThreads) {
-    _maxThreads = numThreads; 
-}
 
 
 void xLBPH::setAlgToUse(int alg) {
@@ -560,7 +549,7 @@ bool xLBPH::calcHistogramAverages() const {
         labels.push_back(it->first);
     
     //performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
-    performMultithreadedCalc<int, Mat>(labels, averages, requestThreads(_maxThreads), &xLBPH::calcHistogramAverages_thread);
+    performMultithreadedCalc<int, Mat>(labels, averages, 16, &xLBPH::calcHistogramAverages_thread);
     //performMultithreadedCalc<Mat, Mat>(imgs, hists, 8, &xLBPH::calculateHistograms);
 
     /*
@@ -961,19 +950,6 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 //------------------------------------------------------------------------------
 // Multithreading 
 //------------------------------------------------------------------------------
-int xLBPH::getAvailableThreads() const {
-    return _maxThreads - _usedThreads; 
-}
-
-int xLBPH::requestThreads(int numThreads) const {
-    if(numThreads > getAvailableThreads()) 
-        numThreads = getAvailableThreads();
-    if(numThreads <= 0)
-        return 1;
-    return numThreads;
-}
-
-
 template <typename _Tp> static
 void splitVector(const std::vector<_Tp> &src, std::vector<std::vector<_Tp> > &dst, int numParts) {
     int step = (int)src.size() / numParts;
@@ -996,11 +972,6 @@ void splitVector(const std::vector<_Tp> &src, std::vector<std::vector<_Tp> > &ds
 
 template <typename S, typename D>
 void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const {
-    if(numThreads > getAvailableThreads())
-        numThreads = getAvailableThreads();
-    if(numThreads <= 0)
-        numThreads = 1;
-
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must greater than 0!");
     else if(numThreads == 1)
@@ -1012,7 +983,6 @@ void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &
         splitVector<S>(src, splitSrc, numThreads);
 
         //dispatch threads
-        _usedThreads += numThreads;
         std::vector<std::vector<D> > splitDst(numThreads, std::vector<D>(0));
         std::vector<std::thread> threads;
         for(int i = 0; i < numThreads; i++) {
@@ -1032,18 +1002,12 @@ void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &
             } 
         }
 
-        _usedThreads -= numThreads;
     }
 }
 
 
 template <typename Q, typename S, typename D>
 void xLBPH::performMultithreadedComp(const Q &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const Q &query, const std::vector<S> &src, std::vector<D> &dst) const) const {
-    if(numThreads > getAvailableThreads())
-        numThreads = getAvailableThreads();
-    if(numThreads <= 0)
-        numThreads = 1;
-
     if(numThreads <= 0)
         CV_Error(Error::StsBadArg, "numThreads must greater than 0!");
     else if(numThreads == 1)
@@ -1055,7 +1019,6 @@ void xLBPH::performMultithreadedComp(const Q &query, const std::vector<S> &src, 
         splitVector<S>(src, splitSrc, numThreads);
 
         //dispatch threads
-        _usedThreads += numThreads;
         std::vector<std::vector<D> > splitDst(numThreads, std::vector<D>(0));
         std::vector<std::thread> threads;
         for(int i = 0; i < numThreads; i++) {
@@ -1075,7 +1038,6 @@ void xLBPH::performMultithreadedComp(const Q &query, const std::vector<S> &src, 
             } 
         }
 
-        _usedThreads -= numThreads;
     }
 }
 
@@ -1109,7 +1071,7 @@ void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat> > 
         std::vector<Mat> imgs = labelImages.at((int)idx).second;
         
         std::vector<Mat> hists;
-        performMultithreadedCalc<Mat, Mat>(imgs, hists, requestThreads(_maxThreads / 4), &xLBPH::calculateHistograms);
+        performMultithreadedCalc<Mat, Mat>(imgs, hists, 4, &xLBPH::calculateHistograms);
 
         labelinfo.push_back(std::pair<int, int>(label, (int)hists.size()));
         
@@ -1194,7 +1156,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
             std::vector<Mat> imgs = it->second;
             std::vector<Mat> hists;
            
-            performMultithreadedCalc<Mat, Mat>(imgs, hists, requestThreads(_maxThreads / 4), &xLBPH::calculateHistograms);
+            performMultithreadedCalc<Mat, Mat>(imgs, hists, 16, &xLBPH::calculateHistograms);
 
             uniqueLabels.push_back(it->first);
             numhists.push_back((int)imgs.size());
@@ -1270,7 +1232,7 @@ void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair
         int label = labelhists.at((int)idx).first;
         std::vector<Mat> hists = labelhists.at((int)idx).second;
         std::vector<double> dists;
-        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, requestThreads(_maxThreads / 4), &xLBPH::compareHistograms);
+        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, 4, &xLBPH::compareHistograms);
         std::sort(dists.begin(), dists.end());
 
         labeldists.push_back(std::pair<int, std::vector<double> >(label, dists));
@@ -1317,7 +1279,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
 
 //void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair<int, std::vector<Mat> > > &labelhists, std::vector<std::pair<int, std::vector<double> > > &labeldists) const {
 
-    performMultithreadedComp<Mat, std::pair<int, std::vector<Mat> >, std::pair<int, std::vector<double> > >(query, labelhists, labeldists, requestThreads(_maxThreads / 4), &xLBPH::compareLabelHistograms);
+    performMultithreadedComp<Mat, std::pair<int, std::vector<Mat> >, std::pair<int, std::vector<double> > >(query, labelhists, labeldists, 4, &xLBPH::compareLabelHistograms);
 
     std::vector<std::pair<double, int> > bestpreds;
     for(size_t idx = 0; idx < labeldists.size(); idx++) {
@@ -1405,7 +1367,7 @@ void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const
         //bestpreds[it->first] = DBL_MAX;
         std::vector<Mat> hists = it->second;
         std::vector<double> dists;
-        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, requestThreads(_maxThreads), &xLBPH::compareHistograms);
+        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, 16, &xLBPH::compareHistograms);
         std::sort(dists.begin(), dists.end());
         
         bestpreds.push_back(std::pair<double, int>(dists.at(0), it->first));
