@@ -81,6 +81,8 @@ private:
     // corresponding labels in labels, possibly preserving
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
+
+    void calculateLabels(const std::vector<std::pair<int, std::vector<Mat> > > &labelImages, std::vector<std::pair<int, int> > &labelinfo) const;
     void calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) const;
     //void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads = false);
     //void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst);
@@ -1069,6 +1071,22 @@ void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &d
     }
 }
 
+void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat> > > &labelImages, std::vector<std::pair<int, int> > &labelinfo) const {
+    
+    for(size_t idx = 0; idx < labelImages.size(); idx++) {
+        int label = lableImages.at((int)idx).first;
+        std::vector<Mat> imgs = labelImages.at((int)idx).second;
+        
+        std::vector<Mat> hists;
+        performMultithreadedCalc<Mat, Mat>(imgs, hists, 4, &xLBPH::calculateHistograms);
+
+        labelinfo.push_back(std::pair<int, int>(label, (int)hists.size()));
+
+        writeHistograms(getHistogramFile(label), hists, false);
+    }
+}
+
+
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
 
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
@@ -1134,41 +1152,40 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     std::vector<int> numhists;
 
     // start training
-    int labelcount = 1;
-    for(std::map<int, std::vector<Mat> >::const_iterator it = labelImages.begin(); it != labelImages.end(); ++it) {
-        std::cout << "Calculating histograms for label " << labelcount << " / " << labelImages.size() << " [" << it->first << "]\r" << std::flush;
+    if(preserveData)
+    {
+        for(std::map<int, std::vector<Mat> >::const_iterator it = labelImages.begin(); it != labelImages.end(); ++it) {
+            std::cout << "Calculating histograms for label " << labelcount << " / " << labelImages.size() << " [" << it->first << "]\r" << std::flush;
 
-        //label = it->first;
-        std::vector<Mat> imgs = it->second;
-        std::vector<Mat> hists;
-        
-        //performMultithreadedCalc(const std::vector<Mat> &images, std::vector<Mat> &dst, int numThreads, void (* calcFunc)(std::vector<S>, std::vector<D>));
-        performMultithreadedCalc<Mat, Mat>(imgs, hists, 8, &xLBPH::calculateHistograms);
-        //calculateHistograms_multithreaded(imgs, hists, true);
+            //label = it->first;
+            std::vector<Mat> imgs = it->second;
+            std::vector<Mat> hists;
+            
+            performMultithreadedCalc<Mat, Mat>(imgs, hists, _maxThreads, &xLBPH::calculateHistograms);
 
-        //for(size_t sampleIdx = 0; sampleIdx < imgs.size(); sampleIdx++) {
-        //    // calculate lbp image
-        //    Mat lbp_image = elbp(imgs.at(sampleIdx), _radius, _neighbors);
+            uniqueLabels.push_back(it->first);
+            numhists.push_back((int)imgs.size());
+            writeHistograms(getHistogramFile(it->first), hists, preserveData);
+            
+            hists.clear();
 
-        //    // get spatial histogram from this lbp image
-        //    Mat p = spatial_histogram(
-        //            lbp_image, /* lbp_image */
-        //            static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), /* number of possible patterns */
-        //            _grid_x, /* grid size x */
-        //            _grid_y, /* grid size y */
-        //            true);
-
-        //    hists.push_back(p);
-        //}
-        
-        uniqueLabels.push_back(it->first);
-        numhists.push_back((int)imgs.size());
-        writeHistograms(getHistogramFile(it->first), hists, preserveData);
-        
-        hists.clear();
-
-        labelcount++;
+            labelcount++;
+        }
     }
+    else {
+        std::cout << "Multithreaded label calcs\n";
+        std::vector<std::pair<int, std::vector<Mat> > > labelImagesVec(labelImages.begin(), labelImages.end());
+        std::vector<std::pair<int, int> > labelInfoVec;
+        //void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat> > > &labelImages, std::vector<std::pair<int, int> > &labelinfo) const {
+        performMultithreadedCalc<std::pair<int, std::vector<Mat> >, std::pair<int, int> >(labelImagesVec, labelInfoVec, 2, &xLBPH::calculateLabels);
+
+        for(size_t idx = 0; idx < labelInfoVec.size(); idx++) {
+            uniqueLabels.push_back(labelInfoVec.at((int)idx).first);
+            numhists.push_back(labelInfoVec.at((int)idx).second);
+        }
+    }
+
+    
     std::cout << "Finished calculating histograms for " << labelImages.size() << " labels.            \n";
 
     std::cout << "Writing infofile\n";
@@ -1280,7 +1297,7 @@ void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const
         //bestpreds[it->first] = DBL_MAX;
         std::vector<Mat> hists = it->second;
         std::vector<double> dists;
-        performMultithreadedComp(query, hists, dists, 4, &xLBPH::compareHistograms);
+        performMultithreadedComp(query, hists, dists, _maxThreads, &xLBPH::compareHistograms);
         std::sort(dists.begin(), dists.end());
         
         bestpreds.push_back(std::pair<double, int>(dists.at(0), it->first));
