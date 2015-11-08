@@ -1075,7 +1075,7 @@ void xLBPH::performMultithreadedComp(const Q &query, const std::vector<S> &src, 
             } 
         }
 
-        _usedThreads += numThreads;
+        _usedThreads -= numThreads;
     }
 }
 
