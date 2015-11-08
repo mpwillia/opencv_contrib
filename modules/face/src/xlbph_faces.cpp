@@ -1075,7 +1075,7 @@ void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat> > 
         
         writeHistograms(getHistogramFile(label), hists, false);
     }
-    std::cout << "One thread done\n";
+    std::cout << "\nOne thread done\n";
 }
 
 
