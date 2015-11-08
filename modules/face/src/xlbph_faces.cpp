@@ -19,6 +19,7 @@
 #include "opencv2/face.hpp"
 #include "face_basic.hpp"
 
+#include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <sys/stat.h>
@@ -73,6 +74,12 @@ private:
     template <typename Q, typename S, typename D>
     void performMultithreadedComp(const Q &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const Q &query, const std::vector<S> &src, std::vector<D> &dst) const) const;
     
+    int _numThreads;
+
+    int getMaxThreads();
+    int getLabelThreads(); // threads that iterate through labels
+    int getHistThreads(); // threads that iterate through histograms
+
     //--------------------------------------------------------------------------
     // Model Training Function
     //--------------------------------------------------------------------------
@@ -92,6 +99,7 @@ private:
     //--------------------------------------------------------------------------
     void predict_std(InputArray _src, int &label, double &dist) const;
     void predict_avg(InputArray _src, int &label, double &dist) const;
+    void predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const;
 
     void compareLabelHistograms(const Mat &query, const std::vector<std::pair<int, std::vector<Mat> > > &labelhists, std::vector<std::pair<int, std::vector<double> > > &labeldists) const;
     void compareHistograms(const Mat &query, const std::vector<Mat> &hists, std::vector<double> &dists) const;
@@ -157,6 +165,8 @@ public:
                 _radius(radius_),
                 _neighbors(neighbors_),
                 _threshold(threshold) {
+
+        _numThreads = 16;
         _algToUse = 0;
         setModelPath(modelpath);
     }
@@ -177,6 +187,7 @@ public:
                 _radius(radius_),
                 _neighbors(neighbors_),
                 _threshold(threshold) {
+        _numThreads = 16;
         _algToUse = 0;
         setModelPath(modelpath);
         train(src, labels);
@@ -222,6 +233,7 @@ public:
     String getHistogramAveragesFile() const;
 
     void setAlgToUse(int alg);
+    void setNumThreads(int numThreads);
 
     //--------------------------------------------------------------------------
     // Additional Public Functions 
@@ -230,6 +242,28 @@ public:
     
     void test();
 };
+
+    int getMaxThreads();
+    int getLabelThreads(); // threads that iterate through labels
+    int getHistThreads(); // threads that iterate through histograms
+
+int xLBPH::getMaxThreads() {
+    return _numThreads; 
+}
+
+int xLBPH::getLabelThreads() {
+    int threads = (int)floor(sqrt(_numThreads));
+    return threads <= 0 ? 1 : threads;
+}
+
+int xLBPH::getHistThreads() {
+    int threads = (int)ceil(sqrt(_numThreads));
+    return threads <= 0 ? 1 : threads;
+}
+
+void xLBPH::setNumThreads(int numThreads) {
+    _numThreads = numThreads; 
+}
 
 
 void xLBPH::setAlgToUse(int alg) {
@@ -547,7 +581,7 @@ bool xLBPH::calcHistogramAverages() const {
         labels.push_back(it->first);
     
     //performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
-    performMultithreadedCalc<int, Mat>(labels, averages, 16, &xLBPH::calcHistogramAverages_thread);
+    performMultithreadedCalc<int, Mat>(labels, averages, getMaxThreads(), &xLBPH::calcHistogramAverages_thread);
     //performMultithreadedCalc<Mat, Mat>(imgs, hists, 8, &xLBPH::calculateHistograms);
 
     /*
@@ -1069,7 +1103,7 @@ void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat> > 
         std::vector<Mat> imgs = labelImages.at((int)idx).second;
         
         std::vector<Mat> hists;
-        performMultithreadedCalc<Mat, Mat>(imgs, hists, 4, &xLBPH::calculateHistograms);
+        performMultithreadedCalc<Mat, Mat>(imgs, hists, getHistThreads(), &xLBPH::calculateHistograms);
 
         labelinfo.push_back(std::pair<int, int>(label, (int)hists.size()));
         
@@ -1154,7 +1188,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
             std::vector<Mat> imgs = it->second;
             std::vector<Mat> hists;
            
-            performMultithreadedCalc<Mat, Mat>(imgs, hists, 16, &xLBPH::calculateHistograms);
+            performMultithreadedCalc<Mat, Mat>(imgs, hists, getMaxThreads(), &xLBPH::calculateHistograms);
 
             uniqueLabels.push_back(it->first);
             numhists.push_back((int)imgs.size());
@@ -1170,7 +1204,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         std::vector<std::pair<int, std::vector<Mat> > > labelImagesVec(labelImages.begin(), labelImages.end());
         std::vector<std::pair<int, int> > labelInfoVec;
         //void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat> > > &labelImages, std::vector<std::pair<int, int> > &labelinfo) const {
-        performMultithreadedCalc<std::pair<int, std::vector<Mat> >, std::pair<int, int> >(labelImagesVec, labelInfoVec, 4, &xLBPH::calculateLabels);
+        performMultithreadedCalc<std::pair<int, std::vector<Mat> >, std::pair<int, int> >(labelImagesVec, labelInfoVec, getLabelThreads(), &xLBPH::calculateLabels);
 
         for(size_t idx = 0; idx < labelInfoVec.size(); idx++) {
             uniqueLabels.push_back(labelInfoVec.at((int)idx).first);
@@ -1230,13 +1264,20 @@ void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair
         int label = labelhists.at((int)idx).first;
         std::vector<Mat> hists = labelhists.at((int)idx).second;
         std::vector<double> dists;
-        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, 4, &xLBPH::compareHistograms);
+        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, getHistThreads(), &xLBPH::compareHistograms);
         std::sort(dists.begin(), dists.end());
 
         labeldists.push_back(std::pair<int, std::vector<double> >(label, dists));
     }
 }
 
+
+void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const {
+    Mat query = _query.getMat();
+
+    minClass = -1;
+    minDist = DBL_MAX;
+} 
 
 void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const {
     Mat query = _query.getMat();
@@ -1253,7 +1294,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
 
     // perform calc
     std::vector<double> avgdists;
-    performMultithreadedComp<Mat, Mat, double>(query, histavgs, avgdists, 16, &xLBPH::compareHistograms);
+    performMultithreadedComp<Mat, Mat, double>(query, histavgs, avgdists, getMaxThreads(), &xLBPH::compareHistograms);
     
     // reassociate each dist with it's label
     std::vector<std::pair<double, int> > bestlabels;
@@ -1277,7 +1318,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
 
 //void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair<int, std::vector<Mat> > > &labelhists, std::vector<std::pair<int, std::vector<double> > > &labeldists) const {
 
-    performMultithreadedComp<Mat, std::pair<int, std::vector<Mat> >, std::pair<int, std::vector<double> > >(query, labelhists, labeldists, 4, &xLBPH::compareLabelHistograms);
+    performMultithreadedComp<Mat, std::pair<int, std::vector<Mat> >, std::pair<int, std::vector<double> > >(query, labelhists, labeldists, getLabelThreads(), &xLBPH::compareLabelHistograms);
 
     std::vector<std::pair<double, int> > bestpreds;
     for(size_t idx = 0; idx < labeldists.size(); idx++) {
@@ -1365,7 +1406,7 @@ void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const
         //bestpreds[it->first] = DBL_MAX;
         std::vector<Mat> hists = it->second;
         std::vector<double> dists;
-        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, 16, &xLBPH::compareHistograms);
+        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, getMaxThreads(), &xLBPH::compareHistograms);
         std::sort(dists.begin(), dists.end());
         
         bestpreds.push_back(std::pair<double, int>(dists.at(0), it->first));
@@ -1421,137 +1462,11 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     
     switch(_algToUse) {
         case 1: predict_avg(query, minClass, minDist); break;
+        case 2: predict_avg_clustering(query, minClass, minDist); break;
         default: predict_std(query, minClass, minDist); break;
     }
     
     //printf("!!! Final Prediction: [%d, %f]\n", minClass, minDist);
-
-
-    // find labels to check
-    /*
-    std::map<int, Mat> histavgs;
-    std::vector<std::pair<double, int> > avgsdists;
-    loadHistogramAverages(histavgs);
-    for(std::map<int, Mat>::const_iterator it = histavgs.begin(); it != histavgs.end(); ++it) {
-        avgsdists.push_back(std::pair<double, int>(compareHist(it->second, query, COMP_ALG), it->first));
-    }
-    std::sort(avgsdists.begin(), avgsdists.end());
-
-    for(size_t avgsdistsIdx = 0; avgsdistsIdx < avgsdists.size(); avgsdistsIdx++) {
-        std::cout << avgsdists.at(avgsdistsIdx).first << " | " << avgsdists.at(avgsdistsIdx).second << "\n";
-    }
-    */
-    
-    /*
-    // find 1-nearest neighbor
-    minDist = DBL_MAX;
-    minClass = -1;
-    
-    //NOTE: <double, int> instead of <int, double> so we sort by dist not label
-    std::vector<std::pair<double, int> > preds;
-    std::map<int, double> bestpreds;
-    std::map<int, std::vector<double> > alldists;
-
-    //int labelcount = 0;
-    for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
-        
-        bestpreds[it->first] = DBL_MAX;
-        std::vector<Mat> hists = it->second;
-
-        for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
-            double dist = compareHist(hists.at(histIdx), query, COMP_ALG);
-            alldists[it->first].push_back(dist);
-            if((dist < minDist) && (dist < _threshold)) {
-                minDist = dist;
-                minClass = it->first;
-                preds.push_back(std::pair<double, int>(dist, it->first));
-
-                //std::cout << "[" << minClass << " | " << minDist << "], ";
-            }
-
-            if(dist < bestpreds[it->first]) {
-                bestpreds[it->first] = dist;
-            }
-
-        }
-
-        std::sort(alldists[it->first].begin(), alldists[it->first].end());
-    }
-    std::sort(preds.begin(), preds.end());
-    
-    std::cout << "\nPredictions: ";
-    for(size_t idx = 0; idx < preds.size() ; idx++) {
-        std::pair<double, int> pred = preds.at(idx);
-        printf("[%d, %f], ", pred.second, pred.first);
-        //std::cout << pred->second << ", " << pred->first
-        //std::cout << preds.at(idx)  << ", ";
-    }
-    std::cout << "\n";
-    
-    std::cout << "\nBest Prediction by PID:\n";
-    for(std::map<int, double>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
-        printf("[%d, %f]\n", it->first, it->second);
-    }
-
-    std::cout << "\nAll Predictions by PID:\n";
-    for(std::map<int, std::vector<double> >::const_iterator it = alldists.begin(); it != alldists.end(); ++it) {
-        std::vector<double> dists = it->second;
-        std::cout << it->first << "[" << dists.size() << " total] -> ";
-        for(size_t distIdx = 0; distIdx < dists.size() && (int)distIdx < 10; distIdx++) {
-            std::cout << dists.at(distIdx) << ", ";
-        }
-        std::cout << "\n";
-    }
-    */
-
-    /*
-    // iterate through _labelinfo
-    int labelcount = 0;
-    for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
-        //std::cout << "Calculating histogram distance for label " << labelcount << " / " << _labelinfo.size() << " [" << it->first << "]\r" << std::flush;
-
-        std::vector<Mat> histograms;
-        loadHistograms(it->first, histograms);
-
-        CV_Assert((int)histograms.size() == it->second);
-
-        if((int)histograms.size() > 0) {
-            double avgDist = 0;
-            for(size_t histIdx = 0; histIdx < histograms.size(); histIdx++) {
-                avgDist += compareHist(histograms.at(histIdx), query, COMP_ALG);
-
-                //check if it is even possible for us to be better
-                if(avgDist / it->second > minDist) {
-                    // if it's not then stop comparing histograms, set invalid avg dist and break
-                    //std::cout << "\nTerminated calcuation early\n";
-                    avgDist = -1;
-                    break;
-                }
-            }
-
-            if(avgDist >= 0)
-            {
-                avgDist /= it->second;
-                if(avgDist < minDist) {
-                    minDist = avgDist;
-                    minClass = it->first;
-                }
-            }
-            
-            for(size_t histIdx = 0; histIdx < histograms.size(); histIdx++) {
-                double dist = compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
-                if((dist < minDist) && (dist < _threshold)) {
-                    minDist = dist;
-                    minClass = it->first;
-                }
-
-            }
-        }
-
-        labelcount++;
-    }
-    */
-    //std::cout << "Finished calculating histogram distance for  " << _labelinfo.size() << " labels.            \n";
 }
 
 int xLBPH::predict(InputArray _src) const {
