@@ -1254,7 +1254,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
 
     // perform calc
     std::vector<double> avgdists;
-    performMultithreadedComp<Mat, Mat, double>(query, histavgs, avgdists, requestThreads(_maxThreads), &xLBPH::compareHistograms);
+    performMultithreadedComp<Mat, Mat, double>(query, histavgs, avgdists, 16, &xLBPH::compareHistograms);
     
     // reassociate each dist with it's label
     std::vector<std::pair<double, int> > bestlabels;
