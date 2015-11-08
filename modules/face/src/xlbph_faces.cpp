@@ -159,7 +159,7 @@ public:
                 _neighbors(neighbors_),
                 _threshold(threshold) {
         _algToUse = 0;
-        _maxThreads = 8;
+        _maxThreads = 16;
         setModelPath(modelpath);
     }
 
@@ -180,7 +180,7 @@ public:
                 _neighbors(neighbors_),
                 _threshold(threshold) {
         _algToUse = 0;
-        _maxThreads = 8;
+        _maxThreads = 16;
         setModelPath(modelpath);
         train(src, labels);
     }
@@ -1081,7 +1081,10 @@ void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat> > 
         std::vector<Mat> imgs = labelImages.at((int)idx).second;
         
         std::vector<Mat> hists;
-        performMultithreadedCalc<Mat, Mat>(imgs, hists, _maxThreads / 2, &xLBPH::calculateHistograms);
+        int numThreads = _maxThreads / 2;
+        if(numThreads <= 0)
+            numThreads = 1;
+        performMultithreadedCalc<Mat, Mat>(imgs, hists, numThreads, &xLBPH::calculateHistograms);
 
         labelinfo.push_back(std::pair<int, int>(label, (int)hists.size()));
         
@@ -1181,7 +1184,10 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         std::vector<std::pair<int, std::vector<Mat> > > labelImagesVec(labelImages.begin(), labelImages.end());
         std::vector<std::pair<int, int> > labelInfoVec;
         //void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat> > > &labelImages, std::vector<std::pair<int, int> > &labelinfo) const {
-        performMultithreadedCalc<std::pair<int, std::vector<Mat> >, std::pair<int, int> >(labelImagesVec, labelInfoVec, _maxThreads / 4, &xLBPH::calculateLabels);
+        int numThreads = _maxThreads / 4;
+        if(numThreads <= 0)
+            numThreads = 1;
+        performMultithreadedCalc<std::pair<int, std::vector<Mat> >, std::pair<int, int> >(labelImagesVec, labelInfoVec, numThreads, &xLBPH::calculateLabels);
 
         for(size_t idx = 0; idx < labelInfoVec.size(); idx++) {
             uniqueLabels.push_back(labelInfoVec.at((int)idx).first);
@@ -1241,7 +1247,10 @@ void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair
         int label = labelhists.at((int)idx).first;
         std::vector<Mat> hists = labelhists.at((int)idx).second;
         std::vector<double> dists;
-        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, _maxThreads / 2, &xLBPH::compareHistograms);
+        int numThreads = _maxThreads / 2;
+        if(numThreads <= 0)
+            numThreads = 1;
+        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, numThreads, &xLBPH::compareHistograms);
         std::sort(dists.begin(), dists.end());
 
         labeldists.push_back(std::pair<int, std::vector<double> >(label, dists));
@@ -1289,7 +1298,10 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
 
 //void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair<int, std::vector<Mat> > > &labelhists, std::vector<std::pair<int, std::vector<double> > > &labeldists) const {
 
-    performMultithreadedComp<Mat, std::pair<int, std::vector<Mat> >, std::pair<int, std::vector<double> > >(query, labelhists, labeldists, _maxThreads / 4, &xLBPH::compareLabelHistograms);
+    int numThreads = _maxThreads / 4;
+    if(numThreads <= 0)
+        numThreads = 1;
+    performMultithreadedComp<Mat, std::pair<int, std::vector<Mat> >, std::pair<int, std::vector<double> > >(query, labelhists, labeldists, numThreads, &xLBPH::compareLabelHistograms);
 
     std::vector<std::pair<double, int> > bestpreds;
     for(size_t idx = 0; idx < labeldists.size(); idx++) {
