@@ -76,9 +76,9 @@ private:
     
     int _numThreads;
 
-    int getMaxThreads();
-    int getLabelThreads(); // threads that iterate through labels
-    int getHistThreads(); // threads that iterate through histograms
+    int getMaxThreads() const;
+    int getLabelThreads() const; // threads that iterate through labels
+    int getHistThreads() const; // threads that iterate through histograms
 
     //--------------------------------------------------------------------------
     // Model Training Function
@@ -243,20 +243,16 @@ public:
     void test();
 };
 
-    int getMaxThreads();
-    int getLabelThreads(); // threads that iterate through labels
-    int getHistThreads(); // threads that iterate through histograms
-
-int xLBPH::getMaxThreads() {
+int xLBPH::getMaxThreads() const {
     return _numThreads; 
 }
 
-int xLBPH::getLabelThreads() {
+int xLBPH::getLabelThreads() const {
     int threads = (int)floor(sqrt(_numThreads));
     return threads <= 0 ? 1 : threads;
 }
 
-int xLBPH::getHistThreads() {
+int xLBPH::getHistThreads() const {
     int threads = (int)ceil(sqrt(_numThreads));
     return threads <= 0 ? 1 : threads;
 }
