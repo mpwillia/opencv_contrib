@@ -1241,7 +1241,7 @@ void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair
         int label = labelhists.at((int)idx).first;
         std::vector<Mat> hists = labelhists.at((int)idx).second;
         std::vector<double> dists;
-        performMultithreadedComp<Mat, double>(query, hists, dists, _maxThreads / 2, &xLBPH::compareHistograms);
+        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, _maxThreads / 2, &xLBPH::compareHistograms);
         std::sort(dists.begin(), dists.end());
 
         labeldists.push_back(std::pair<int, std::vector<double> >(label, dists));
