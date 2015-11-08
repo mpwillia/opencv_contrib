@@ -93,6 +93,8 @@ private:
     //--------------------------------------------------------------------------
     void predict_std(InputArray _src, int &label, double &dist) const;
     void predict_avg(InputArray _src, int &label, double &dist) const;
+
+    void compareLabelHistograms(const Mat &query, const std::vector<std::pair<int, std::vector<Mat> > > &labelhists, std::vector<std::pair<int, std::vector<double> > > &labeldists) const;
     void compareHistograms(const Mat &query, const std::vector<Mat> &hists, std::vector<double> &dists) const;
     
     const int minLabelsToCheck = 5;
