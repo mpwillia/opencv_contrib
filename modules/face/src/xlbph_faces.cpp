@@ -653,6 +653,7 @@ void xLBPH::clusterHistograms() {
      * Every cluster has an average histogram and a set of histograms
      */
 
+    Mat zero = Mat::zeros(1, getHistogramSize(), CV_32FC1);
 
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
@@ -660,7 +661,10 @@ void xLBPH::clusterHistograms() {
         Mat distmat = Mat::zeros((int)hists.size(), (int)hists.size(), CV_32FC1);
         std::vector<double> ranges;
         std::cout << "Hist dists from eachother:\n";
-        for(size_t i = 0; i < hists.size() - 1; i++) {
+        for(size_t i = 0; i < hists.size(); i++) {
+
+            double zerodist = compareHist(hists.at((int)i), zero, COMP_ALG);
+
             std::cout << "Dists from " << i << " -> ";
             std::vector<double> dists;
             for(size_t j = i + 1; j < hists.size(); j++) {
@@ -678,8 +682,9 @@ void xLBPH::clusterHistograms() {
             
             double range = dists.at((int)dists.size()-1) - dists.at(0);
             ranges.push_back(range);
-            std::cout << "Best: " << dists.at(0) << "  |  Worst: " << dists.at((int)dists.size()-1) << "  |  Avg: " << avg << "  |  Range: " << range;
-            std::cout << "\n";
+            printf("Best: %7.3f  |  Worst: %7.3f  |  Avg: %7.3f  |  Range: %7.3f  |  Zeros: %7.3f\n", dists.at(0), dists.at((int)dists.size()-1), avg, range, zerodist);
+            //std::cout << "Best: " << dists.at(0) << "  |  Worst: " << dists.at((int)dists.size()-1) << "  |  Avg: " << avg << "  |  Range: " << range;
+            //std::cout << "\n";
         }
         
         _distmats[it->first] = distmat;
