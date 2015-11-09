@@ -668,16 +668,16 @@ void xLBPH::clusterHistograms() {
         avg /= (int)ranges.size();
         std::cout << "Average Range: " << avg << "\n";
         
-        printf("    ");
+        printf("     ");
         for(int x = 0; x < distmat.cols; x++) {
-            printf("___%2d___|", x);
+            printf("___%3d___|", x);
         }
         printf("\n");
 
         for(int y = 0; y < distmat.rows; y++) {
             printf(" %2d | ", y);
             for(int x = 0; x < distmat.cols; x++) {
-                printf("%6.3f | ", distmat.at<float>(x,y));
+                printf("%7.3f | ", distmat.at<float>(x,y));
             }
             printf("\n");
         }
