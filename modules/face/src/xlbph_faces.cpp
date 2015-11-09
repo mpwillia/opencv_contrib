@@ -644,6 +644,17 @@ void xLBPH::clusterHistograms() {
             std::cout << dist << "\n";
         }
 
+        std::cout << "Hist dists from eachother:\n";
+        for(size_t i = 0; i < hists.size(); i++) {
+            std::cout << "Dists from " << i << " -> ";
+            for(size_t j = i + 1; j < hists.size(); j++) {
+                double dist = compareHist(hists.at((int)i), hists.at((int)j), COMP_ALG);
+                std::cout << dist << ", ";
+            } 
+            std::cout << "\n";
+        }
+
+
         break;
     }
 
