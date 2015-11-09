@@ -59,7 +59,7 @@ private:
     // histograms
     std::map<int, std::vector<Mat> > _histograms;
     std::map<int, Mat> _histavgs;
-    
+    std::map<int, Mat> _distmats;    
 
     // defines what prediction algorithm to use
     int _algToUse;
@@ -626,6 +626,25 @@ void xLBPH::munmapHistograms() {
 //------------------------------------------------------------------------------
 // Clustering Function 
 //------------------------------------------------------------------------------
+
+static void printMat(const Mat &mat, int label) {
+    printf("%4d_", label);
+    for(int x = 0; x < mat.cols; x++) {
+        printf("___%3d___|", x);
+    }
+    printf("\n");
+
+    for(int y = 0; y < mat.rows; y++) {
+        printf(" %2d | ", y);
+        for(int x = 0; x < mat.cols; x++) {
+            printf("%7.3f | ", mat.at<float>(x,y));
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+
 void xLBPH::clusterHistograms() {
     /* What is Histogram Clustering?
      * The idea is to group like histograms together
@@ -661,6 +680,8 @@ void xLBPH::clusterHistograms() {
             std::cout << "Best: " << dists.at(0) << "  |  Worst: " << dists.at((int)dists.size()-1) << "  |  Avg: " << avg << "  |  Range: " << range;
             std::cout << "\n";
         }
+        
+        _distmats[it->first] = distmat;
 
         double avg = 0;
         for(size_t idx = 0; idx < ranges.size(); idx++)
@@ -668,20 +689,6 @@ void xLBPH::clusterHistograms() {
         avg /= (int)ranges.size();
         std::cout << "Average Range: " << avg << "\n";
         
-        printf("%4d_", it->first);
-        for(int x = 0; x < distmat.cols; x++) {
-            printf("___%3d___|", x);
-        }
-        printf("\n");
-
-        for(int y = 0; y < distmat.rows; y++) {
-            printf(" %2d | ", y);
-            for(int x = 0; x < distmat.cols; x++) {
-                printf("%7.3f | ", distmat.at<float>(x,y));
-            }
-            printf("\n");
-        }
-        printf("\n");
         
         break;
     }
@@ -1254,6 +1261,24 @@ void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair
 
 void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const {
     Mat query = _query.getMat();
+    
+
+    //static void printMat(const Mat &mat, int label) {
+
+    for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
+        std::cout << "Dists from query to hists for label " << it->first;
+        printMat(_distmats[it->first], it->first);
+        
+        std::vector<Mat> hists = it->second;
+        
+        for(size_t idx = 0; idx < hists.size(); idx++) {
+            double dist = compareHist(hists.at((int)idx), query, COMP_ALG);
+            printf("%d -> %7.3f\n", (int)idx, dist);
+        } 
+
+        break;
+    }
+
 
     minClass = -1;
     minDist = DBL_MAX;
