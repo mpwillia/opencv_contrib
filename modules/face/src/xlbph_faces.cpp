@@ -681,7 +681,7 @@ void xLBPH::clusterHistograms() {
             }
             printf("\n");
         }
-
+        printf("\n");
 
         break;
     }
