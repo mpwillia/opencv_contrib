@@ -653,6 +653,7 @@ void xLBPH::clusterHistograms() {
                 dists.push_back(dist);
                 //std::cout << dist << ", ";
             } 
+            std::sort(dists.begin(), dists.end());
             double avg = 0;
             for(size_t idx = 0; idx < dists.size(); idx++)
                 avg += dists.at((int)idx);
