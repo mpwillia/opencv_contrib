@@ -645,12 +645,20 @@ void xLBPH::clusterHistograms() {
         }
 
         std::cout << "Hist dists from eachother:\n";
-        for(size_t i = 0; i < hists.size(); i++) {
+        for(size_t i = 0; i < hists.size() - 1; i++) {
             std::cout << "Dists from " << i << " -> ";
+            std::vector<double> dists;
             for(size_t j = i + 1; j < hists.size(); j++) {
                 double dist = compareHist(hists.at((int)i), hists.at((int)j), COMP_ALG);
-                std::cout << dist << ", ";
+                dists.push_back(dist);
+                //std::cout << dist << ", ";
             } 
+            double avg = 0;
+            for(size_t idx = 0; idx < dists.size(); idx++)
+                avg += dists.at((int)idx);
+            avg /= (int)dists.size();
+
+            std::cout << "Best: " << dists.at(0) << "  |  Worst: " << dists.at((int)dists.size()-1) << "  |  Avg: " << avg;
             std::cout << "\n";
         }
 
