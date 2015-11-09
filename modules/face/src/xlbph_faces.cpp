@@ -661,7 +661,7 @@ void xLBPH::clusterHistograms() {
         Mat distmat = Mat::zeros((int)hists.size(), (int)hists.size(), CV_32FC1);
         std::vector<double> ranges;
         std::cout << "Hist dists from eachother:\n";
-        for(size_t i = 0; i < hists.size(); i++) {
+        for(size_t i = 0; i < hists.size() - 1; i++) {
 
             double zerodist = compareHist(hists.at((int)i), zero, COMP_ALG);
 
