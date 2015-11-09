@@ -628,7 +628,7 @@ void xLBPH::munmapHistograms() {
 // Clustering Function 
 //------------------------------------------------------------------------------
 
-void xLBPH::printMat(Mat &mat, int label) {
+void xLBPH::printMat(const Mat &mat, int label) const {
     printf("%4d_", label);
     for(int x = 0; x < mat.cols; x++) {
         printf("___%3d___|", x);
