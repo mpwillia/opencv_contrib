@@ -690,7 +690,7 @@ void xLBPH::clusterHistograms() {
         avg /= (int)ranges.size();
         std::cout << "Average Range: " << avg << "\n";
        
-        
+        break; 
     }
 
 }
