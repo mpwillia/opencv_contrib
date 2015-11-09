@@ -486,16 +486,6 @@ bool xLBPH::readHistograms(const String &filename, std::vector<Mat> &histograms)
         //std::cout << "cannot open file at '" << filename << "'\n";
         return false;
     }
-    //SIZEOF_CV_32FC1
-    
-    /*
-    unsigned char buffer[getHistogramSize() * SIZEOF_CV_32FC1];
-    while(fread(buffer, sizeof(unsigned char), getHistogramSize() * SIZEOF_CV_32FC1, fp) > 0) {
-        Mat hist = Mat::zeros(1, getHistogramSize(), CV_32FC1);
-        memcpy(hist.ptr<unsigned char>(), buffer, getHistogramSize() * SIZEOF_CV_32FC1);
-        histograms.push_back(hist);
-    }
-    */
     
     float buffer[getHistogramSize()];
     while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
@@ -514,35 +504,15 @@ bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &hist
         //std::cout << "cannot open file at '" << filename << "'\n";
         return false;
     }
-    /*   
-    unsigned char* buffer = new unsigned char[getHistogramSize() * (int)histograms.size() * SIZEOF_CV_32FC1];
-    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
-        memcpy(buffer + (sampleIdx * getHistogramSize() * SIZEOF_CV_32FC1), histograms.at((int)sampleIdx).ptr<unsigned char>(), getHistogramSize() * SIZEOF_CV_32FC1);
-    }
-    fwrite(buffer, sizeof(unsigned char), getHistogramSize() * (int)histograms.size() * SIZEOF_CV_32FC1, fp);
-    delete buffer;
-    */
 
     float* buffer = new float[getHistogramSize() * (int)histograms.size()];
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
         float* writeptr = buffer + ((int)sampleIdx * getHistogramSize());
-        /*
-        if(sampleIdx < 5)
-            std::cout << "writing: " << matToHex(histograms.at(sampleIdx)) << "\n";
-        */
-        //printf("sampleIdx %d -> writeptr: %p\n", (int)sampleIdx, writeptr);
         memcpy(writeptr, histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
     }
     fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
     delete buffer;
 
-    //TODO: Either increase write buffer or group all hists into one write call
-    /*
-    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
-        Mat hist = histograms.at((int)sampleIdx);
-        fwrite(hist.ptr<float>(), sizeof(float), getHistogramSize(), fp);
-    }
-    */
     fclose(fp);
     return true;
 }
@@ -568,27 +538,13 @@ void xLBPH::calcHistogramAverages_thread(const std::vector<int> &labels, std::ve
 }
 
 bool xLBPH::calcHistogramAverages() const {
-    //compareHist(histograms.at(histIdx), query, HISTCMP_CHISQR_ALT);
     
-
     std::vector<Mat> averages;
     std::vector<int> labels; 
     for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
         labels.push_back(it->first);
     
-    //performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst)) {
     performMultithreadedCalc<int, Mat>(labels, averages, getMaxThreads(), &xLBPH::calcHistogramAverages_thread);
-    //performMultithreadedCalc<Mat, Mat>(imgs, hists, 8, &xLBPH::calculateHistograms);
-
-    /*
-    for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
-        std::vector<Mat> hists;
-        loadHistograms(it->first, hists);
-        Mat histavg;
-        averageHistograms(hists, histavg);
-        averages.push_back(histavg);
-    }
-    */ 
 
     return writeHistograms(getHistogramAveragesFile(), averages, false);
 }
@@ -661,35 +617,6 @@ void xLBPH::mmapHistograms() {
 
     }
 
-
-    // verify our mmap'd histograms 
-    /*
-    for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
-        
-        std::vector<Mat> query = it->second;
-        std::vector<Mat> check;
-        loadHistograms(it->first, check);
-        
-        if(query.size() != check.size()) {
-            std::cout << "query.size() = " << query.size() << "  |  check.size() = " << check.size() << "\n";
-            CV_Error(Error::StsError, "query.size() != check.size()");
-        }
-
-        //CV_Assert(query.size() == check.size());
-
-        for(size_t idx = 0; idx < query.size(); idx++) {
-            if(!matsEqual(query.at(idx), check.at(idx)))
-                CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
-        }
-    }
-    */    
-    /*
-    std::cout << "_histograms size: " << _histograms.size() << "\n";
-    for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
-        std::cout << it->first << " -> numhists: " << (it->second).size() << "\n";
-    }
-    */
-    //std::cout << "_histograms size: " << _histograms.size() << "\n";
 }
 
 void xLBPH::munmapHistograms() {
@@ -705,6 +632,21 @@ void xLBPH::clusterHistograms() {
      * Every label has a set of clusters
      * Every cluster has an average histogram and a set of histograms
      */
+
+    Mat zeros = Mat::zeros(1, getHistogramSize(), CV_32FC1);
+
+    for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
+        std::vector<Mat> hists = it->second;
+
+        std::cout << "Hist dists from zeros:\n";
+        for(size_t idx = 0; idx < hists.size(); idx++) {
+            double dist = compareHist(hists.at((int)idx), zeros, COMP_ALG);
+            std::cout << dist << "\n";
+        }
+
+        break;
+    }
+
 }
 
 
@@ -1238,6 +1180,9 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     std::cout << "Calculating histogram averages...\n";
     calcHistogramAverages();
     mmapHistogramAverages();    
+
+    std::cout << "Clustering Histograms...\n";
+    clusterHistograms();
 
     //load();
 
