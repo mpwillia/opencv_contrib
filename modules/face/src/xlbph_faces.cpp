@@ -1280,6 +1280,10 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
             printf("%d -> %7.3f\n", (int)idx, dist);
         } 
 
+        Mat zero = Mat::zeros(1, getHistogramSize(), CV_32FC1);
+        double dist = compareHist(zero, query, COMP_ALG);
+        printf("zeros -> %7.3f\n", dist);
+
         break;
     }
 
