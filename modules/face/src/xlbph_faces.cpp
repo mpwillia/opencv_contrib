@@ -1268,7 +1268,8 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
 
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::cout << "Dists from query to hists for label " << it->first;
-        printMat(_distmats[it->first], it->first);
+        Mat distmat = _distmats[it->first];
+        printMat(distmat, it->first);
         
         std::vector<Mat> hists = it->second;
         
