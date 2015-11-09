@@ -668,7 +668,7 @@ void xLBPH::clusterHistograms() {
         avg /= (int)ranges.size();
         std::cout << "Average Range: " << avg << "\n";
         
-        printf("     ");
+        printf("%4d_", it->first);
         for(int x = 0; x < distmat.cols; x++) {
             printf("___%3d___|", x);
         }
@@ -682,7 +682,7 @@ void xLBPH::clusterHistograms() {
             printf("\n");
         }
         printf("\n");
-
+        
         break;
     }
 
@@ -1310,6 +1310,10 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     minDist = bestpreds.at(0).first;
     minClass = bestpreds.at(0).second;
 
+    std::cout << "\nBest Prediction by PID:\n";
+    for(std::vector<std::pair<double, int> >::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
+        printf("[%d, %f]\n", it->first, it->second);
+    }
 } 
 
 
@@ -1356,6 +1360,7 @@ void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const
     }
     */
 }
+
 
 
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
