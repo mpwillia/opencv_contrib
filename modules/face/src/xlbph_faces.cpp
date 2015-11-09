@@ -627,7 +627,7 @@ void xLBPH::munmapHistograms() {
 // Clustering Function 
 //------------------------------------------------------------------------------
 
-static void printMat(const Mat &mat, int label) {
+static void printMat(Mat &mat, int label) {
     printf("%4d_", label);
     for(int x = 0; x < mat.cols; x++) {
         printf("___%3d___|", x);
@@ -1262,7 +1262,6 @@ void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair
 void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const {
     Mat query = _query.getMat();
     
-
     //static void printMat(const Mat &mat, int label) {
 
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
