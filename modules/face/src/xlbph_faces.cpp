@@ -137,6 +137,7 @@ private:
 
     // Histogram Clustering
     void clusterHistograms();
+    void printMat(const Mat &mat, int label) const;
 
     //--------------------------------------------------------------------------
     // Misc 
@@ -627,7 +628,7 @@ void xLBPH::munmapHistograms() {
 // Clustering Function 
 //------------------------------------------------------------------------------
 
-static void printMat(Mat &mat, int label) {
+void xLBPH::printMat(Mat &mat, int label) {
     printf("%4d_", label);
     for(int x = 0; x < mat.cols; x++) {
         printf("___%3d___|", x);
@@ -688,8 +689,9 @@ void xLBPH::clusterHistograms() {
             avg += ranges.at((int)idx);
         avg /= (int)ranges.size();
         std::cout << "Average Range: " << avg << "\n";
+       
         
-        
+       
         break;
     }
 
