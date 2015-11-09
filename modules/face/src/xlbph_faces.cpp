@@ -670,14 +670,14 @@ void xLBPH::clusterHistograms() {
         
         printf("    ");
         for(int x = 0; x < distmat.cols; x++) {
-            printf("__%2d__", x);
+            printf("___%2d___|", x);
         }
-
+        printf("\n");
 
         for(int y = 0; y < distmat.rows; y++) {
             printf(" %2d | ", y);
             for(int x = 0; x < distmat.cols; x++) {
-                printf("%3.3f | ", distmat.at<float>(x,y));
+                printf("%6.3f | ", distmat.at<float>(x,y));
             }
             printf("\n");
         }
