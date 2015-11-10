@@ -748,10 +748,17 @@ void xLBPH::clusterHistograms() {
             }
 
             for(int i = 0; i < mclmat.cols; i++) {
+                printf("%d -> looking at %d", j, i);
                 if((int)round(mclmat.at<double>(i,j)) == 1) {
                     // add mat i
+                    printf(" - adding");
                     cluster.insert(i);
                 }
+                else {
+                    printf(" - not adding");
+                }
+                printf("\n");
+
             }
         }
         
