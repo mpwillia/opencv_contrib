@@ -668,7 +668,7 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
     switch(e) {
         case 0: src = Mat::eye(src.rows, src.cols, src.type()); break; // return identity matrix
         case 1: break; // do nothing
-        case 2: src = src * src;
+        case 2: src = src * src; break;
         default:
             Mat a = src.clone();
             while(--e > 0)
