@@ -699,12 +699,17 @@ void xLBPH::clusterHistograms() {
         printf("Raw Dists:\n");
         printMat(mclmat, it->first);
         printf("\n");
-        
+
         mcl_normalize(mclmat);
         printf("Normalized:\n");
         printMat(mclmat, it->first);
         printf("\n");
         
+        mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
+        printf("Inverted Probs:\n");
+        printMat(mclmat, it->first);
+        printf("\n");
+
         for(int i = 0; i < mcl_iterations; i++) {
             printf("=== Iteration %d ===\n", i);
             mcl_inflate(mclmat, mcl_inflation_power);
