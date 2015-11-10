@@ -139,6 +139,7 @@ private:
     void clusterHistograms();
     void printMat(const Mat &mat, int label) const;
     void mcl_normalize(Mat &src);
+    void mcl_expand(Mat &src, unsigned int e);
     void mcl_inflate(Mat &src, double power);
 
     //--------------------------------------------------------------------------
@@ -663,8 +664,14 @@ void xLBPH::mcl_normalize(Mat &src) {
     } 
 }
 
-void xLBPH::mcl_inflate(Mat &src, double power) {
-    pow(src, power, src);
+void xLBPH::mcl_expand(Mat &src, unsigned int e) {
+    for(int i = 0; i < e; i++)
+        src *= src;
+}
+
+
+void xLBPH::mcl_inflate(Mat &src, double r) {
+    pow(src, r, src);
     /*
     printf("Squared:\n");
     printMat(src,-1);
@@ -686,6 +693,7 @@ void xLBPH::clusterHistograms() {
      * Every cluster has an average histogram and a set of histograms
      */
     const int mcl_iterations = 4;    
+    const int mcl_expansion_power = 2;
     const double mcl_inflation_power = 2;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
@@ -750,6 +758,7 @@ void xLBPH::clusterHistograms() {
 
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
+            mcl_expand(mclmat, mcl_expansion_power);
             mcl_inflate(mclmat, mcl_inflation_power);
         }
        
