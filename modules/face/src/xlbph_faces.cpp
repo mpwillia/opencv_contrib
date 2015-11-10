@@ -665,8 +665,17 @@ void xLBPH::mcl_normalize(Mat &src) {
 }
 
 void xLBPH::mcl_expand(Mat &src, unsigned int e) {
-    for(int i = 0; i < e; i++)
-        src *= src;
+    switch(e) {
+        case 0: src = Mat::eye(src.rows, src.cols, src.type()); break; // return identity matrix
+        case 1: break; // do nothing
+        case 2: src *= src;
+        default:
+            Mat a = src.clone();
+            while(--e > 0)
+                src *= a;
+            a.release();
+            break;
+    }
 }
 
 
@@ -693,19 +702,31 @@ void xLBPH::clusterHistograms() {
      * Every cluster has an average histogram and a set of histograms
      */
 
-    Mat test = Mat::zeros(4,4,CV_64FC1);
+    Mat test = Mat::zeros(2,2,CV_64FC1);
     test.at<double>(0,0) = 0.6;
     test.at<double>(1,0) = 0.2;
     test.at<double>(0,1) = 0.4;
     test.at<double>(1,1) = 0.8;
+    Mat test2 = test.clone();
     printf("Test Pre Expand:\n");
     printMat(test, -1);
 
     mcl_expand(test, 2);
 
-    printf("Test Post Expand:\n");
+    printf("Test Post Expand - Power 2::\n");
     printMat(test, -1);
     printf("\n");
+    
+    printf("\n");
+    printf("Test2 Pre Expand:\n");
+    printMat(test, -1);
+
+    mcl_expand(test, 2);
+
+    printf("Test2 Post Expand - Power 3:\n");
+    printMat(test, -1);
+    printf("\n");
+    printf("\n=========\n");
 
     const int mcl_iterations = 4;    
     const int mcl_expansion_power = 2;
