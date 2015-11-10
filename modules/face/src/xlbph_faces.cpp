@@ -699,7 +699,8 @@ void xLBPH::clusterHistograms() {
                 mclmat.at<double>(j, i) = dist;
             } 
         }
-
+        
+        /*
         printf("Raw Dists:\n");
         printMat(mclmat, it->first);
         printf("\n");
@@ -709,24 +710,30 @@ void xLBPH::clusterHistograms() {
         printf("Normalized:\n");
         printMat(mclmat, it->first);
         printf("\n");
-        
+        */
+
         // invert the probs, we want closer mat to cluster together
         mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
         // clear self references
         for(size_t i = 0; i < hists.size(); i++) 
             mclmat.at<double>(i,i) = 0;
+
+        /*
         printf("Inverted Probs:\n");
         printMat(mclmat, it->first);
         printf("\n");
-        
+        */
+
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
             mcl_inflate(mclmat, mcl_inflation_power);
         }
-
+        
+        /*
         printf("Final Iteration:\n");
         printMat(mclmat, it->first);
         printf("\n");
+        */
 
         // interpret clusters
         std::vector<std::set<int> > clusters;
@@ -756,7 +763,7 @@ void xLBPH::clusterHistograms() {
             }
         }
         
-        printf("Clusters:\n", (int)clusters.size());
+        printf("Clusters for %d:\n", it->first);
         for(size_t idx = 0; idx < clusters.size(); idx++) {
             std::set<int> cluster = clusters.at(idx);
             for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
@@ -764,10 +771,6 @@ void xLBPH::clusterHistograms() {
             }
             printf("\n");
         }
-
-
-
-        break;
     }
 
     /*
