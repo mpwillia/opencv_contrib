@@ -660,6 +660,7 @@ void xLBPH::mcl_normalize(Mat &src) {
 
         //col /= sum(col)[0];
         printMat(src, i);
+        printf("\n");
         printMat(src.col(i), i);
         printf("=====\n");
         //double s = (int)sum(col);
