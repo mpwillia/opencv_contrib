@@ -685,7 +685,7 @@ void xLBPH::clusterHistograms() {
      * Every label has a set of clusters
      * Every cluster has an average histogram and a set of histograms
      */
-    const int mcl_iterations = 10;    
+    const int mcl_iterations = 4;    
     const double mcl_inflation_power = 2;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
@@ -753,11 +753,9 @@ void xLBPH::clusterHistograms() {
             mcl_inflate(mclmat, mcl_inflation_power);
         }
        
-        /*
         printf("Final Iteration:\n");
         printMat(mclmat, it->first);
         printf("\n");
-        */
 
         // interpret clusters
         std::vector<std::set<int> > clusters;
