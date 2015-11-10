@@ -691,7 +691,7 @@ void xLBPH::clusterHistograms() {
         std::vector<Mat> hists = it->second;
 
         Mat mclmat = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
-        //get raw dists
+        // get raw dists
         for(size_t i = 0; i < hists.size()-1; i++) {
             for(size_t j = i; j < hists.size(); j++) {
                 double dist = compareHist(hists.at((int)i), hists.at((int)j), COMP_ALG);
@@ -700,6 +700,18 @@ void xLBPH::clusterHistograms() {
             } 
         }
         
+        // find smallest
+        for(size_t i = 0; i < mclmat.rows; i++) {
+            int worstIdx = 0;
+            for(size_t j = 0; j < mclmat.cols; j++) {
+                if(mclmat.at<double>(i,j) > mclmat.at<double>(i, worstIdx)) {
+                    worstIdx = j; 
+                }
+            }
+            mclmat.at<double>(i,worstIdx) = 0;
+        }
+
+
         /*
         printf("Raw Dists:\n");
         printMat(mclmat, it->first);
@@ -717,8 +729,16 @@ void xLBPH::clusterHistograms() {
         // invert the probs, we want closer mat to cluster together
         mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
         // clear self references
-        for(size_t i = 0; i < hists.size(); i++) 
-            mclmat.at<double>(i,i) = 0;
+
+        for(int i = 0; i < mclmat.rows; i++) {
+            for(int j = 0; j < mclmat.cols; j++) {
+                if(mclmat.at<double>(i,j) == 1.0) {
+                    mclmat.at<double>(i,j) = 0; 
+                }
+            } 
+        } 
+        
+            //mclmat.at<double>(i,i) = 0;
 
         /*
         printf("Inverted Probs:\n");
