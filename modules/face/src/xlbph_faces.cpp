@@ -739,6 +739,7 @@ void xLBPH::clusterHistograms() {
                 if(check.find(j) != check.end()) {
                     cluster = check;
                     found = true;
+                    break;
                 }
             }
 
@@ -753,6 +754,12 @@ void xLBPH::clusterHistograms() {
                     // add mat i
                     printf(" - adding");
                     cluster.insert(i);
+
+                    for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
+                        printf("%d, ", *it);
+                    }
+                    printf("\n");
+
                 }
                 else {
                     printf(" - not adding");
