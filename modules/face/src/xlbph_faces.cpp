@@ -638,7 +638,11 @@ void xLBPH::printMat(const Mat &mat, int label) const {
     for(int y = 0; y < mat.rows; y++) {
         printf(" %2d | ", y);
         for(int x = 0; x < mat.cols; x++) {
-            printf("%7.3f | ", mat.at<float>(x,y));
+            switch (mat.type()) {
+                case CV_32FC1: printf("%7.3f | ", mat.at<float>(x,y)); break;
+                case CV_64FC1: printf("%7.3f | ", mat.at<double>(x,y)); break;
+                default: printf("       "); break;
+            }
         }
         printf("\n");
     }
@@ -670,7 +674,7 @@ void xLBPH::clusterHistograms() {
         //get raw dists
         for(size_t i = 0; i < hists.size()-1; i++) {
             for(size_t j = i; j < hists.size(); j++) {
-                double dist = compareHist(hists.at(i), hists.at(j), COMP_ALG);
+                double dist = compareHist(hists.at((int)i), hists.at((int)j), COMP_ALG);
                 mclmat.at<double>(i, j) = dist;
                 mclmat.at<double>(j, i) = dist;
             } 
