@@ -724,6 +724,10 @@ void xLBPH::clusterHistograms() {
             mcl_inflate(mclmat, mcl_inflation_power);
         }
 
+        printf("Final Iteration:\n");
+        printMat(mclmat, it->first);
+        printf("\n");
+
         // interpret clusters
         std::vector<std::set<int> > clusters;
         for(int j = 0; j < mclmat.rows; j++) {
@@ -743,9 +747,7 @@ void xLBPH::clusterHistograms() {
                 clusters.push_back(cluster);
             }
 
-
             for(int i = 0; i < mclmat.cols; i++) {
-                
                 if((int)round(mclmat.at<double>(i,j)) == 1) {
                     // add mat i
                     cluster.insert(i);
