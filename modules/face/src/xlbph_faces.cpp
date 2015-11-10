@@ -759,7 +759,7 @@ void xLBPH::clusterHistograms() {
             }
             
             if(!found) {
-                std::cout << "j not found\n";
+                printf("%d not found\n", j);
                 cluster.insert(j);
                 clusters.push_back(cluster);
             }
@@ -773,10 +773,10 @@ void xLBPH::clusterHistograms() {
                 cluster.insert(j);
                 clusters.push_back(cluster);
             }
-            printf("\n====");
+            printf("\n=====\n");
         }
         
-        printf("Clusters:\n");
+        printf("Clusters [%d]:\n", (int)clusters.size());
         for(size_t idx = 0; idx < clusters.size(); idx++) {
             std::set<int> cluster = clusters.at(idx);
             for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
