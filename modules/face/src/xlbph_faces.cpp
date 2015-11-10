@@ -675,8 +675,11 @@ void xLBPH::mcl_normalize(Mat &src) {
         for(int j = 0; j < src.rows; j++) {
             sum += src.at<double>(i,j);
         }
-        for(int j = 0; j < src.rows; j++) {
-            src.at<double>(i,j) /= sum;
+        if(sum <= 0)
+        {
+            for(int j = 0; j < src.rows; j++) {
+                src.at<double>(i,j) /= sum;
+            }
         }
     } 
 }
