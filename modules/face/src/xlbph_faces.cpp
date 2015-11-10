@@ -660,11 +660,8 @@ void xLBPH::mcl_normalize(Mat &src) {
 
         //col /= sum(col)[0];
         printMat(src, i);
-        /*
-        printf("Col %d [Sum: %7.3f]:\n", i, s);
-        printMat(col, i);
-        printf("\n");
-        */
+        printMat(src.col(i), i);
+        printf("=====\n");
         //double s = (int)sum(col);
         //col /= s;
         //in theory col shares data with src so this should be all we need to do
