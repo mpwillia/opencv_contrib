@@ -759,6 +759,7 @@ void xLBPH::clusterHistograms() {
             }
             
             if(!found) {
+                std::cout << "j not found\n";
                 cluster.insert(j);
                 clusters.push_back(cluster);
             }
