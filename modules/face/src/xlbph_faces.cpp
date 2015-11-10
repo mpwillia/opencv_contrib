@@ -704,7 +704,7 @@ void xLBPH::clusterHistograms() {
         for(size_t i = 0; i < mclmat.rows; i++) {
             int worstIdx = 0;
             for(size_t j = 0; j < mclmat.cols; j++) {
-                if(mclmat.at<double>(i,j) > mclmat.at<double>(i, worstIdx)) {
+                if(mclmat.at<double>(j,i) > mclmat.at<double>(worstIdx, i)) {
                     worstIdx = j; 
                 }
             }
