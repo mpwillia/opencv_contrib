@@ -783,6 +783,10 @@ void xLBPH::clusterHistograms() {
         printf("Inverted Probs:\n");
         printMat(mclmat, it->first);
 
+        mclmat *= (int)hists.size();
+        printf("Inverted Scaled Probs:\n");
+        printMat(mclmat, it->first);
+
         mcl_normalize(mclmat);
         printf("Inverted Normalized Probs:\n");
         printMat(mclmat, it->first);
