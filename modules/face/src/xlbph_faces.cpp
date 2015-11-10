@@ -649,7 +649,7 @@ void xLBPH::printMat(const Mat &mat, int label) const {
         }
         printf("\n");
     }
-    printf("\n");
+    printf("\n\n");
 }
 
 void xLBPH::mcl_normalize(Mat &src) {
@@ -692,6 +692,21 @@ void xLBPH::clusterHistograms() {
      * Every label has a set of clusters
      * Every cluster has an average histogram and a set of histograms
      */
+
+    Mat test = Mat::zeros(4,4,CV_64FC1);
+    test.at<double>(0,0) = 0.6;
+    test.at<double>(1,0) = 0.2;
+    test.at<double>(0,1) = 0.4;
+    test.at<double>(1,1) = 0.8;
+    printf("Test Pre Expand:\n");
+    printMat(test, -1);
+
+    mcl_expand(test, 2);
+
+    printf("Test Post Expand:\n");
+    printMat(test, -1);
+    printf("\n");
+
     const int mcl_iterations = 4;    
     const int mcl_expansion_power = 2;
     const double mcl_inflation_power = 2;
@@ -724,13 +739,11 @@ void xLBPH::clusterHistograms() {
         /*
         printf("Raw Dists:\n");
         printMat(mclmat, it->first);
-        printf("\n");
 
         // initial normalization
         mcl_normalize(mclmat);
         printf("Normalized:\n");
         printMat(mclmat, it->first);
-        printf("\n");
         */
 
         // invert the probs, we want closer mat to cluster together
@@ -753,18 +766,19 @@ void xLBPH::clusterHistograms() {
         /*
         printf("Inverted Probs:\n");
         printMat(mclmat, it->first);
-        printf("\n");
         */
 
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
             mcl_expand(mclmat, mcl_expansion_power);
             mcl_inflate(mclmat, mcl_inflation_power);
+
+            printf("Iteration %d\n", i);
+            printMat(mclmat, it->first);
         }
        
         printf("Final Iteration:\n");
         printMat(mclmat, it->first);
-        printf("\n");
 
         // interpret clusters
         std::vector<std::set<int> > clusters;
