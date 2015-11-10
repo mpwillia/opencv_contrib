@@ -138,6 +138,8 @@ private:
     // Histogram Clustering
     void clusterHistograms();
     void printMat(const Mat &mat, int label) const;
+    void mcl_normalize(Mat &src);
+    void mcl_inflate(Mat &src, double power);
 
     //--------------------------------------------------------------------------
     // Misc 
@@ -649,17 +651,20 @@ void xLBPH::printMat(const Mat &mat, int label) const {
     printf("\n");
 }
 
-static void mcl_normalize(Mat &src) {
-    for(int i = 0; i < src.rows; i++) {
+void xLBPH::mcl_normalize(Mat &src) {
+    for(int i = 0; i < src.col; i++) {
         Mat col = src.col(i);
         col /= sum(col)[0];
+        printf("Col %d:\n", i);
+        printMat(col, i);
+        printf("\n");
         //double s = (int)sum(col);
         //col /= s;
         //in theory col shares data with src so this should be all we need to do
     } 
 }
 
-static void mcl_inflate(Mat &src, double power) {
+void xLBPH::mcl_inflate(Mat &src, double power) {
     pow(src, power, src);
     /*
     printf("Squared:\n");
@@ -700,22 +705,13 @@ void xLBPH::clusterHistograms() {
         printMat(mclmat, it->first);
         printf("\n");
         
-        Mat col = mclmat.col(0);
-        printf("Col:\n");
-        printMat(col, it->first);
-        printf("\n");
-
-        Mat row = mclmat.row(0);
-        printf("Row:\n");
-        printMat(row, it->first);
-        printf("\n");
-
         // initial normalization
         mcl_normalize(mclmat);
         printf("Normalized:\n");
         printMat(mclmat, it->first);
         printf("\n");
         
+        /*
         // invert the probs, we want closer mat to cluster together
         mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
         // clear self references
@@ -733,7 +729,7 @@ void xLBPH::clusterHistograms() {
             printMat(mclmat, it->first);
             printf("\n");
         }
-
+        */
 
         break;
     }
