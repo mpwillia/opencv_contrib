@@ -641,7 +641,7 @@ void xLBPH::printMat(const Mat &mat, int label) const {
             switch (mat.type()) {
                 case CV_32FC1: printf("%7.3f | ", mat.at<float>(x,y)); break;
                 case CV_64FC1: printf("%7.3f | ", mat.at<double>(x,y)); break;
-                default: printf("       "); break;
+                default: printf(" type! "); break;
             }
         }
         printf("\n");
