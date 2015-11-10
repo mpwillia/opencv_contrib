@@ -724,7 +724,7 @@ void xLBPH::clusterHistograms() {
     printMat(test2, -1);
     mcl_expand(test2, 3);
     printf("Test2 Post Expand - Power 3:\n");
-    printMat(test, -1);
+    printMat(test2, -1);
     printf("\n");
     printf("\n=========\n");
 
