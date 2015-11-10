@@ -700,23 +700,25 @@ void xLBPH::clusterHistograms() {
             } 
         }
         
+        /*
         printf("Raw Dists:\n");
         printMat(mclmat, it->first);
         printf("\n");
-        
+        */
+
         // initial normalization
         mcl_normalize(mclmat);
+        /*
         printf("Normalized:\n");
         printMat(mclmat, it->first);
         printf("\n");
-        
-        /*
+        */
+
         // invert the probs, we want closer mat to cluster together
         mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
         // clear self references
         for(size_t i = 0; i < hists.size(); i++) 
             mclmat.at<double>(i,i) = 0;
-        */
 
         /*
         printf("Inverted Probs:\n");
@@ -729,9 +731,11 @@ void xLBPH::clusterHistograms() {
             mcl_inflate(mclmat, mcl_inflation_power);
         }
         
+        /*
         printf("Final Iteration:\n");
         printMat(mclmat, it->first);
         printf("\n");
+        */
 
         // interpret clusters
         std::vector<std::set<int> > clusters;
@@ -769,7 +773,6 @@ void xLBPH::clusterHistograms() {
             }
             printf("\n");
         }
-        break;
     }
 
     /*
