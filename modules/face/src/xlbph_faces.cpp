@@ -743,10 +743,6 @@ void xLBPH::clusterHistograms() {
                 }
             }
 
-            if(!found) {
-                cluster.insert(j);
-                clusters.push_back(cluster);
-            }
 
             for(int i = 0; i < mclmat.cols; i++) {
                 printf("%d -> looking at %d", j, i);
@@ -762,6 +758,12 @@ void xLBPH::clusterHistograms() {
 
             }
             
+            if(!found) {
+                cluster.insert(j);
+                clusters.push_back(cluster);
+            }
+
+
             printf("\n");
             for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
                 printf("%d, ", *it);
