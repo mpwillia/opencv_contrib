@@ -659,6 +659,18 @@ static void mcl_normalize(Mat &src) {
     } 
 }
 
+static void mcl_inflate(Mat &src, double power) {
+    pow(src, power, src);
+    printf("Squared:\n");
+    printMat(src);
+    printf("\n");
+
+    mcl_normalize(src);
+    printf("Normalized:\n");
+    printMat(src);
+    printf("\n");
+}
+
 
 void xLBPH::clusterHistograms() {
     /* What is Histogram Clustering?
@@ -666,7 +678,8 @@ void xLBPH::clusterHistograms() {
      * Every label has a set of clusters
      * Every cluster has an average histogram and a set of histograms
      */
-    
+    const int mcl_iterations = 5;    
+    const double mcl_inflation_power = 5.0;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
 
@@ -688,6 +701,11 @@ void xLBPH::clusterHistograms() {
         printf("Normalized:\n");
         printMat(mclmat, it->first);
         printf("\n");
+        
+        for(int i = 0; i < mcl_iterations; i++) {
+            printf("=== Iteration %d ===\n", i);
+            mcl_inflate(mclmat, mcl_inflation_power);
+        }
 
 
         break;
