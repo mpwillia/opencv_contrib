@@ -142,6 +142,10 @@ private:
     void mcl_expand(Mat &src, unsigned int e);
     void mcl_inflate(Mat &src, double power);
 
+    int mcl_iterations = 25;    
+    int mcl_expansion_power = 2;
+    double mcl_inflation_power = 1.8;
+
     //--------------------------------------------------------------------------
     // Misc 
     //--------------------------------------------------------------------------
@@ -244,8 +248,25 @@ public:
     // NOTE: Remember to add header to opencv2/face/facerec.hpp
     //--------------------------------------------------------------------------
     
+
+    void setMCL_Iterations(int num);
+    void setMCL_Expansion(unsigned int e);
+    void setMCL_Inflation(double r);
+
     void test();
 };
+
+void xLBPH::setMCL_Iterations(int num) {
+    mcl_iterations = num; 
+}
+
+void setMCL_Expansion(int e) {
+    mcl_expansion_power = e; 
+}
+
+void setMCL_Inflation(double r) {
+    mcl_inflation_power = r; 
+}
 
 int xLBPH::getMaxThreads() const {
     return _numThreads; 
@@ -727,9 +748,6 @@ void xLBPH::clusterHistograms() {
     printf("\n=========\n");
     */
 
-    const int mcl_iterations = 25;    
-    const int mcl_expansion_power = 2;
-    const double mcl_inflation_power = 2;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
 

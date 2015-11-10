@@ -206,6 +206,10 @@ public:
     CV_WRAP virtual void setAlgToUse(int alg) = 0;
     CV_WRAP virtual void setNumThreads(int numThreads) = 0;
 
+    CV_WRAP virtual void setMCL_Iterations(int num) = 0;
+    CV_WRAP virtual void setMCL_Expansion(unsigned int e) = 0;
+    CV_WRAP virtual void setMCL_Inflation(double r) = 0;
+
     CV_WRAP virtual void load() = 0;
 };
 CV_EXPORTS_W Ptr<xLBPHFaceRecognizer> createxLBPHFaceRecognizer(int radius=1, int neighbors=8, int grid_x=8, int grid_y=8, double threshold = DBL_MAX, String modelpath="");
