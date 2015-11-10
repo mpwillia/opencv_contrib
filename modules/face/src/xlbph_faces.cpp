@@ -645,6 +645,15 @@ void xLBPH::printMat(const Mat &mat, int label) const {
     printf("\n");
 }
 
+static void mcl_normalize(Mat &src) {
+    for(int i = 0; i < src.cols; i++) {
+        Mat col = src.col(i);
+        double sum = (int)sum(col);
+        col /= sum;
+        //in theory col shares data with src so this should be all we need to do
+    } 
+}
+
 
 void xLBPH::clusterHistograms() {
     /* What is Histogram Clustering?
@@ -652,9 +661,35 @@ void xLBPH::clusterHistograms() {
      * Every label has a set of clusters
      * Every cluster has an average histogram and a set of histograms
      */
+    
+    for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
+        std::vector<Mat> hists = it->second;
 
+        Mat mclmat = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
+        //get raw dists
+        for(size_t i = 0; i < hists.size()-1; i++) {
+            for(size_t j = i; j < hists.size(); j++) {
+                double dist = compareHist(hists.at(i), hists.at(j), COMP_ALG);
+                mclmat.at<double>(i, j) = dist;
+                mclmat.at<double>(j, i) = dist;
+            } 
+        }
+
+        printf("Raw Dists:\n");
+        printMat(mclmat, it->first);
+        printf("\n");
+        
+        mcl_normalize(mclmat);
+        printf("Normalized:\n");
+        printMat(mclmat, it->first);
+        printf("\n");
+
+
+        break;
+    }
+
+    /*
     Mat zero = Mat::zeros(1, getHistogramSize(), CV_32FC1);
-
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
 
@@ -697,6 +732,7 @@ void xLBPH::clusterHistograms() {
        
         break; 
     }
+    */
 
 }
 
