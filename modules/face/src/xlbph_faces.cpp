@@ -661,14 +661,17 @@ static void mcl_normalize(Mat &src) {
 
 static void mcl_inflate(Mat &src, double power) {
     pow(src, power, src);
+    /*
     printf("Squared:\n");
-    printMat(src);
+    printMat(src,-1);
     printf("\n");
-
+    */
     mcl_normalize(src);
+    /*
     printf("Normalized:\n");
-    printMat(src);
+    printMat(src,-1);
     printf("\n");
+    */
 }
 
 
@@ -705,6 +708,9 @@ void xLBPH::clusterHistograms() {
         for(int i = 0; i < mcl_iterations; i++) {
             printf("=== Iteration %d ===\n", i);
             mcl_inflate(mclmat, mcl_inflation_power);
+            printf("Normalized:\n");
+            printMat(mclmat, it->first);
+            printf("\n");
         }
 
 
