@@ -668,7 +668,7 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
     switch(e) {
         case 0: src = Mat::eye(src.rows, src.cols, src.type()); break; // return identity matrix
         case 1: break; // do nothing
-        case 2: src *= src;
+        case 2: src = src * src;
         default:
             Mat a = src.clone();
             while(--e > 0)
@@ -708,25 +708,23 @@ void xLBPH::clusterHistograms() {
     test.at<double>(0,1) = 0.4;
     test.at<double>(1,1) = 0.8;
     Mat test2 = test.clone();
+
     printf("Test Pre Expand:\n");
     printMat(test, -1);
-
     mcl_expand(test, 2);
-
-    printf("Test Post Expand - Power 2::\n");
+    printf("Test Post Expand - Power 2:\n");
     printMat(test, -1);
     printf("\n");
     
     printf("\n");
     printf("Test2 Pre Expand:\n");
-    printMat(test, -1);
-
-    mcl_expand(test, 2);
-
+    printMat(test2, -1);
+    mcl_expand(test2, 3);
     printf("Test2 Post Expand - Power 3:\n");
     printMat(test, -1);
     printf("\n");
     printf("\n=========\n");
+
 
     const int mcl_iterations = 4;    
     const int mcl_expansion_power = 2;
