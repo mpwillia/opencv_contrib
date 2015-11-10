@@ -743,38 +743,20 @@ void xLBPH::clusterHistograms() {
                 }
             }
 
-
             for(int i = 0; i < mclmat.cols; i++) {
-                printf("%d -> looking at %d", j, i);
                 if((int)round(mclmat.at<double>(i,j)) == 1) {
                     // add mat i
-                    printf(" - adding");
                     cluster.insert(i);
                 }
-                else {
-                    printf(" - not adding");
-                }
-                printf("\n");
-
             }
             
             if(!found) {
-                printf("%d not found\n", j);
                 cluster.insert(j);
                 clusters.push_back(cluster);
             }
-
-
-            printf("\n");
-            for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
-                printf("%d, ", *it);
-            }
-            
-            printf("num clusters %d\n", (int)clusters.size());
-            printf("\n=====\n");
         }
         
-        printf("Clusters [%d]:\n", (int)clusters.size());
+        printf("Clusters:\n", (int)clusters.size());
         for(size_t idx = 0; idx < clusters.size(); idx++) {
             std::set<int> cluster = clusters.at(idx);
             for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
