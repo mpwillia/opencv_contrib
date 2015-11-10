@@ -754,12 +754,6 @@ void xLBPH::clusterHistograms() {
                     // add mat i
                     printf(" - adding");
                     cluster.insert(i);
-
-                    for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
-                        printf("%d, ", *it);
-                    }
-                    printf("\n");
-
                 }
                 else {
                     printf(" - not adding");
@@ -767,6 +761,12 @@ void xLBPH::clusterHistograms() {
                 printf("\n");
 
             }
+            
+            printf("\n");
+            for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
+                printf("%d, ", *it);
+            }
+            printf("\n");
         }
         
         printf("Clusters:\n");
