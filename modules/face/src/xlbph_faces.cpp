@@ -685,8 +685,8 @@ void xLBPH::clusterHistograms() {
      * Every label has a set of clusters
      * Every cluster has an average histogram and a set of histograms
      */
-    const int mcl_iterations = 5;    
-    const double mcl_inflation_power = 5.0;
+    const int mcl_iterations = 10;    
+    const double mcl_inflation_power = 2;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
 
