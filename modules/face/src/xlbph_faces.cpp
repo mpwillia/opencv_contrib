@@ -763,7 +763,7 @@ void xLBPH::clusterHistograms() {
             }
         }
         
-        printf("Clusters for %d:\n", it->first);
+        printf("%d Clusters for %d:\n", (int)clusters.size(), it->first);
         for(size_t idx = 0; idx < clusters.size(); idx++) {
             std::set<int> cluster = clusters.at(idx);
             for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
