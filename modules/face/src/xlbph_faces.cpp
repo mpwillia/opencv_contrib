@@ -721,12 +721,48 @@ void xLBPH::clusterHistograms() {
         
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
-            printf("=== Iteration %d ===\n", i);
             mcl_inflate(mclmat, mcl_inflation_power);
-            printf("Normalized:\n");
-            printMat(mclmat, it->first);
+        }
+
+        // interpret clusters
+        std::vector<std::set<int> > clusters;
+        for(int j = 0; j < mclmat.rows; j++) {
+            // check if mat j is already in a cluster 
+            bool found = false;
+            std::set<int> cluster;
+            for(size_t idx = 0; idx < clusters.size(); idx++) {
+                std::set<int> check = clusters.at(idx);
+                if(check.find(j) != check.end()) {
+                    cluster = check;
+                    found = true;
+                }
+            }
+
+            if(!found) {
+                cluster.insert(j);
+                clusters.push_back(cluster);
+            }
+
+
+            for(int i = 0; i < mclmat.cols; i++) {
+                
+                if((int)round(mclmat.at(i,j)) == 1) {
+                    // add mat i
+                    cluster.insert(i);
+                }
+            }
+        }
+        
+        printf("Clusters:\n");
+        for(size_t idx = 0; idx < clusters.size(); idx++) {
+            std::set<int> cluster = clusters.at(idx);
+            for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
+                printf("%d, ", *it);
+            }
             printf("\n");
         }
+
+
 
         break;
     }
