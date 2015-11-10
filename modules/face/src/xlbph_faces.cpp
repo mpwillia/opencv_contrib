@@ -673,9 +673,6 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
             Mat a = src.clone();
             while(--e > 0) {
                 src = src * a;
-                printf("After Iteration %d\n", e);
-                printMat(src, e);
-            }
             a.release();
             break;
     }
@@ -704,7 +701,8 @@ void xLBPH::clusterHistograms() {
      * Every label has a set of clusters
      * Every cluster has an average histogram and a set of histograms
      */
-
+    
+    /*
     Mat test = Mat::zeros(2,2,CV_64FC1);
     test.at<double>(0,0) = 0.6;
     test.at<double>(1,0) = 0.2;
@@ -727,9 +725,9 @@ void xLBPH::clusterHistograms() {
     printMat(test2, -1);
     printf("\n");
     printf("\n=========\n");
+    */
 
-
-    const int mcl_iterations = 4;    
+    const int mcl_iterations = 10;    
     const int mcl_expansion_power = 2;
     const double mcl_inflation_power = 2;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
