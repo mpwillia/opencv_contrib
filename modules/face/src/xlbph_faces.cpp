@@ -677,6 +677,13 @@ void xLBPH::mcl_normalize(Mat &src) {
 }
 
 void xLBPH::mcl_expand(Mat &src, unsigned int e) {
+    printf("== Expand:\n");
+    printf("src:\n");
+    printMat(src,-1);
+    Mat zeroed = src > 0.025; 
+    printf("zeroed:\n");
+    printMat(zeroed,-1);
+
     switch(e) {
         case 0: src = Mat::eye(src.rows, src.cols, src.type()); break; // return identity matrix
         case 1: break; // do nothing
@@ -782,7 +789,8 @@ void xLBPH::clusterHistograms() {
         
         printf("Inverted Probs:\n");
         printMat(mclmat, it->first);
-
+        
+        /*
         mclmat *= (int)hists.size();
         printf("Inverted Scaled Probs:\n");
         printMat(mclmat, it->first);
@@ -794,6 +802,7 @@ void xLBPH::clusterHistograms() {
         mcl_inflate(mclmat, mcl_inflation_power);
         printf("Inverted Normalized Inflated Probs:\n");
         printMat(mclmat, it->first);
+        */
 
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
