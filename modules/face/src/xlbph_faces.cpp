@@ -648,8 +648,9 @@ void xLBPH::printMat(const Mat &mat, int label) const {
 static void mcl_normalize(Mat &src) {
     for(int i = 0; i < src.cols; i++) {
         Mat col = src.col(i);
-        double sum = (int)sum(col);
-        col /= sum;
+        col /= sum(col);
+        //double s = (int)sum(col);
+        //col /= s;
         //in theory col shares data with src so this should be all we need to do
     } 
 }
