@@ -671,8 +671,10 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
         case 2: src = src * src; break;
         default:
             Mat a = src.clone();
-            while(e-- > 0)
-                src *= a;
+            while(e-- > 0) {
+                printf("%d", e);
+                src = src * a;
+            }
             a.release();
             break;
     }
