@@ -651,8 +651,8 @@ void xLBPH::printMat(const Mat &mat, int label) const {
 
 static void mcl_normalize(Mat &src) {
     for(int i = 0; i < src.rows; i++) {
-        Mat row = src.row(i);
-        row /= sum(row)[0];
+        Mat col = src.col(i);
+        col /= sum(col)[0];
         //double s = (int)sum(col);
         //col /= s;
         //in theory col shares data with src so this should be all we need to do
@@ -700,6 +700,16 @@ void xLBPH::clusterHistograms() {
         printMat(mclmat, it->first);
         printf("\n");
         
+        Mat col = src.col(0);
+        printf("Col:\n");
+        printMat(col, it->first);
+        printf("\n");
+
+        Mat row = src.row(0);
+        printf("Row:\n");
+        printMat(row, it->first);
+        printf("\n");
+
         // initial normalization
         mcl_normalize(mclmat);
         printf("Normalized:\n");
@@ -709,7 +719,7 @@ void xLBPH::clusterHistograms() {
         // invert the probs, we want closer mat to cluster together
         mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
         // clear self references
-        for(size_t i = 0; i < hists.size()-1; i++) 
+        for(size_t i = 0; i < hists.size(); i++) 
             mclmat.at<double>(i,i) = 0;
         printf("Inverted Probs:\n");
         printMat(mclmat, it->first);
