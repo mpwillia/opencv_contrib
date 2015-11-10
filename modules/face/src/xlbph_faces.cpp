@@ -773,6 +773,7 @@ void xLBPH::clusterHistograms() {
                 cluster.insert(j);
                 clusters.push_back(cluster);
             }
+            printf("num clusters %d\n", (int)clusters.size());
             printf("\n=====\n");
         }
         
