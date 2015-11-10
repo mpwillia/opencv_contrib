@@ -687,6 +687,7 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
     printMat(src,-1);
     Mat zeroed = src > 0.025; 
     zeroed /= 255;
+    zeroed.convertTo(zeroed, src.type());
     printf("zeroed:\n");
     printMat(zeroed,-1);
 
@@ -701,7 +702,7 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
             a.release();
             break;
     }
-
+    
     src = src.mul(zeroed);
 }
 
