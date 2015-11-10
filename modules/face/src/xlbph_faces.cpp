@@ -701,6 +701,7 @@ void xLBPH::clusterHistograms() {
         }
         
         // find smallest
+        /*
         for(size_t i = 0; i < mclmat.rows; i++) {
             int worstIdx = 0;
             for(size_t j = 0; j < mclmat.cols; j++) {
@@ -710,8 +711,9 @@ void xLBPH::clusterHistograms() {
             }
             mclmat.at<double>(i,worstIdx) = 0;
         }
-
-
+        */
+        
+        /*
         printf("Raw Dists:\n");
         printMat(mclmat, it->first);
         printf("\n");
@@ -721,11 +723,16 @@ void xLBPH::clusterHistograms() {
         printf("Normalized:\n");
         printMat(mclmat, it->first);
         printf("\n");
+        */
 
         // invert the probs, we want closer mat to cluster together
         mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
         // clear self references
-
+        for(int i = 0; i < hists.size(); i++) {
+            mclmat.at<double>(i,i) = 0;             
+        }
+        
+        /*
         for(int i = 0; i < mclmat.rows; i++) {
             for(int j = 0; j < mclmat.cols; j++) {
                 if(mclmat.at<double>(i,j) == 1.0) {
@@ -733,21 +740,24 @@ void xLBPH::clusterHistograms() {
                 }
             } 
         } 
+        */   
         
-            //mclmat.at<double>(i,i) = 0;
-
+        /*
         printf("Inverted Probs:\n");
         printMat(mclmat, it->first);
         printf("\n");
+        */
 
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
             mcl_inflate(mclmat, mcl_inflation_power);
         }
-        
+       
+        /*
         printf("Final Iteration:\n");
         printMat(mclmat, it->first);
         printf("\n");
+        */
 
         // interpret clusters
         std::vector<std::set<int> > clusters;
