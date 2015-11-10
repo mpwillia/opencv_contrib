@@ -700,12 +700,12 @@ void xLBPH::clusterHistograms() {
         printMat(mclmat, it->first);
         printf("\n");
         
-        Mat col = src.col(0);
+        Mat col = mclmat.col(0);
         printf("Col:\n");
         printMat(col, it->first);
         printf("\n");
 
-        Mat row = src.row(0);
+        Mat row = mclmat.row(0);
         printf("Row:\n");
         printMat(row, it->first);
         printf("\n");
