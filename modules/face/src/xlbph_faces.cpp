@@ -774,7 +774,6 @@ void xLBPH::clusterHistograms() {
         printMat(mclmat, it->first);
 
         // invert the probs, we want closer mat to cluster together
-        /*
         mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
         // clear self references
         for(int i = 0; i < hists.size(); i++) {
@@ -783,7 +782,10 @@ void xLBPH::clusterHistograms() {
         
         printf("Inverted Probs:\n");
         printMat(mclmat, it->first);
-        */
+
+        mcl_normalize(mclmat);
+        printf("Inverted Normalized Probs:\n");
+        printMat(mclmat, it->first);
 
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
