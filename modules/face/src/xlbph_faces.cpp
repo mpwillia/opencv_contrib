@@ -693,6 +693,8 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
     zeroed.convertTo(zeroed, src.type());
     printf("zeroed:\n");
     printMat(zeroed,-1);
+    
+    src = src.mul(zeroed);
 
     switch(e) {
         case 0: src = Mat::eye(src.rows, src.cols, src.type()); break; // return identity matrix
@@ -771,6 +773,8 @@ void xLBPH::clusterHistograms() {
             } 
         }
         
+        mclmat /= 10;
+
         // find smallest
         /*
         for(size_t i = 0; i < mclmat.rows; i++) {
