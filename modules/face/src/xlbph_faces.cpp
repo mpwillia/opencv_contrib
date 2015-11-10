@@ -660,15 +660,6 @@ void xLBPH::mcl_normalize(Mat &src) {
         for(int j = 0; j < src.rows; j++) {
             src.at<double>(i,j) /= sum;
         }
-
-        //col /= sum(col)[0];
-        printMat(src, i);
-        printf("\n");
-        printMat(src.col(i), i);
-        printf("=====\n");
-        //double s = (int)sum(col);
-        //col /= s;
-        //in theory col shares data with src so this should be all we need to do
     } 
 }
 
@@ -719,7 +710,6 @@ void xLBPH::clusterHistograms() {
         printMat(mclmat, it->first);
         printf("\n");
         
-        /*
         // invert the probs, we want closer mat to cluster together
         mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
         // clear self references
@@ -737,7 +727,6 @@ void xLBPH::clusterHistograms() {
             printMat(mclmat, it->first);
             printf("\n");
         }
-        */
 
         break;
     }
