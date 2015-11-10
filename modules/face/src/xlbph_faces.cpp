@@ -746,7 +746,7 @@ void xLBPH::clusterHistograms() {
 
             for(int i = 0; i < mclmat.cols; i++) {
                 
-                if((int)round(mclmat.at(i,j)) == 1) {
+                if((int)round(mclmat.at<double>(i,j)) == 1) {
                     // add mat i
                     cluster.insert(i);
                 }
