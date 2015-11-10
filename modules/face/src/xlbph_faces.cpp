@@ -727,7 +727,7 @@ void xLBPH::clusterHistograms() {
     printf("\n=========\n");
     */
 
-    const int mcl_iterations = 10;    
+    const int mcl_iterations = 25;    
     const int mcl_expansion_power = 2;
     const double mcl_inflation_power = 2;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
