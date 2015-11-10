@@ -787,6 +787,10 @@ void xLBPH::clusterHistograms() {
         printf("Inverted Normalized Probs:\n");
         printMat(mclmat, it->first);
 
+        mcl_inflate(mclmat, mcl_inflation_power);
+        printf("Inverted Normalized Inflated Probs:\n");
+        printMat(mclmat, it->first);
+
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
             mcl_expand(mclmat, mcl_expansion_power);
