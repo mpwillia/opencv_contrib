@@ -206,9 +206,7 @@ public:
     CV_WRAP virtual void setAlgToUse(int alg) = 0;
     CV_WRAP virtual void setNumThreads(int numThreads) = 0;
 
-    CV_WRAP virtual void setMCL_Iterations(int num) = 0;
-    CV_WRAP virtual void setMCL_Expansion(unsigned int e) = 0;
-    CV_WRAP virtual void setMCL_Inflation(double r) = 0;
+    CV_WRAP virtual void set_mcl_settings(int numIters, int e, double r) = 0;
 
     CV_WRAP virtual void load() = 0;
 };

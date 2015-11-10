@@ -248,24 +248,15 @@ public:
     // NOTE: Remember to add header to opencv2/face/facerec.hpp
     //--------------------------------------------------------------------------
     
-
-    void setMCL_Iterations(int num);
-    void setMCL_Expansion(unsigned int e);
-    void setMCL_Inflation(double r);
+    void set_mcl_settings(int numIters, int e, double r);
 
     void test();
 };
 
-void xLBPH::setMCL_Iterations(int num) {
-    mcl_iterations = num; 
-}
-
-void setMCL_Expansion(int e) {
-    mcl_expansion_power = e; 
-}
-
-void setMCL_Inflation(double r) {
-    mcl_inflation_power = r; 
+void set_mcl_settings(int numIters, int e, double r) {
+    mcl_iterations = numIters;
+    mcl_expansion_power = e;
+    mcl_inflation_power = r;
 }
 
 int xLBPH::getMaxThreads() const {
