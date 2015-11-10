@@ -253,7 +253,7 @@ public:
     void test();
 };
 
-void set_mcl_settings(int numIters, int e, double r) {
+void xLBPH::set_mcl_settings(int numIters, int e, double r) {
     mcl_iterations = numIters;
     mcl_expansion_power = e;
     mcl_inflation_power = r;
