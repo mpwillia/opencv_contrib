@@ -856,14 +856,6 @@ void xLBPH::clusterHistograms() {
         printf("Normalized:\n");
         printMat(mclmat, it->first);
         
-        /*
-        Mat mask = (mclmat >= mcl_prune_min) / 255; 
-        mask.convertTo(mask, mclmat.type());
-        mcl_expand(mclmat, mcl_expansion_power);
-        mclmat = mclmat.mul(mask);
-        printf("Expanded:\n");
-        printMat(mclmat, it->first);
-        */
 
         /*
         // invert the probs, we want closer mat to cluster together
@@ -895,6 +887,13 @@ void xLBPH::clusterHistograms() {
 
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
+
+            Mat mask = (mclmat >= mcl_prune_min) / 255; 
+            mask.convertTo(mask, mclmat.type());
+            mcl_expand(mclmat, mcl_expansion_power);
+            mclmat = mclmat.mul(mask);
+            printf("Expanded - Iteration %d:\n", i);
+            printMat(mclmat, it->first);
 
             mcl_inflate(mclmat, mcl_inflation_power);
             printf("Inflated - Iteration %d\n", i);
