@@ -141,10 +141,12 @@ private:
     void mcl_normalize(Mat &src);
     void mcl_expand(Mat &src, unsigned int e);
     void mcl_inflate(Mat &src, double power);
+    void mcl_prune(Mat &src, double min);
 
     int mcl_iterations = 25;    
     int mcl_expansion_power = 2;
     double mcl_inflation_power = 1.8;
+    double mcl_prune_min = 0.025;
 
     //--------------------------------------------------------------------------
     // Misc 
@@ -712,12 +714,17 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
     //src = src.mul(zeroed);
 }
 
-
 void xLBPH::mcl_inflate(Mat &src, double r) {
     pow(src, r, src);
     printf("Inflate Pre-Normalize\n");
     printMat(src, -1);
     mcl_normalize(src);
+}
+
+void xLBPH::mcl_prune(Mat &src, double min) {
+    Mat mask = (src >= min) / 255; 
+    mask.convertTo(mask, src.type());
+    src = src.mul(mask);
 }
 
 
@@ -867,8 +874,11 @@ void xLBPH::clusterHistograms() {
             printMat(mclmat, it->first);
 
             mcl_inflate(mclmat, mcl_inflation_power);
+            printf("Inflated - Iteration %d\n", i);
+            printMat(mclmat, it->first);
 
-            printf("Inflated - Result of Iteration %d\n", i);
+            mcl_prune(mclmat, mcl_prune_min);
+            printf("Pruned - Result of Iteration %d\n", i);
             printMat(mclmat, it->first);
 
             printf("=-=-=\n");
