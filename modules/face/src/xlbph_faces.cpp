@@ -884,6 +884,9 @@ void xLBPH::clusterHistograms() {
         */
         
 
+        mcl_inflate(mclmat, mcl_inflation_power*2);
+        printf("Pre-Inflated:\n");
+        printMat(mclmat, it->first);
 
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
