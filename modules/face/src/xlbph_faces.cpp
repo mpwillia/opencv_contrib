@@ -811,6 +811,7 @@ void xLBPH::clusterHistograms() {
         for(size_t i = 0; i < hists.size()-1; i++) {
             for(size_t j = i; j < hists.size(); j++) {
                 double dist = compareHist(hists.at((int)i), hists.at((int)j), COMP_ALG);
+                dist = round(dist/10);
                 mclmat.at<double>(i, j) = dist;
                 mclmat.at<double>(j, i) = dist;
             } 
@@ -883,14 +884,16 @@ void xLBPH::clusterHistograms() {
         printMat(mclmat, it->first);
         */
         
-
+        /*
         mcl_inflate(mclmat, mcl_inflation_power*2);
         printf("Pre-Inflated:\n");
         printMat(mclmat, it->first);
+        */
 
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
-
+            
+            /*
             Mat mask = (mclmat >= mcl_prune_min) / 255; 
             mask.convertTo(mask, mclmat.type());
             int e = mcl_expansion_power - i;
@@ -900,6 +903,7 @@ void xLBPH::clusterHistograms() {
             mclmat = mclmat.mul(mask);
             printf("Expanded - Iteration %d:\n", i);
             printMat(mclmat, it->first);
+            */
 
             mcl_inflate(mclmat, (mcl_inflation_power+i));
             printf("Inflated - Iteration %d\n", i);
