@@ -763,6 +763,7 @@ void xLBPH::clusterHistograms() {
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
         
+        /*
         Mat mclmat = Mat::zeros(4,4,CV_64FC1);
         mclmat.at<double>(0,0) = 1;
         mclmat.at<double>(1,0) = 1;
@@ -783,6 +784,7 @@ void xLBPH::clusterHistograms() {
         mclmat.at<double>(1,3) = 1;
         mclmat.at<double>(2,3) = 0;
         mclmat.at<double>(3,3) = 1;
+        */
 
         /*
         mclmat.at<double>(0,0) = 0.25;
@@ -806,7 +808,6 @@ void xLBPH::clusterHistograms() {
         mclmat.at<double>(3,3) = 1.0/3.0;
         */
 
-        /*
         Mat mclmat = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
         // get raw dists
         for(size_t i = 0; i < hists.size()-1; i++) {
@@ -817,7 +818,6 @@ void xLBPH::clusterHistograms() {
                 mclmat.at<double>(j, i) = dist;
             } 
         }
-        */ 
 
         // find smallest
         /*
