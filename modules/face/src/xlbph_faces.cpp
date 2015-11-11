@@ -716,8 +716,6 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
 
 void xLBPH::mcl_inflate(Mat &src, double r) {
     pow(src, r, src);
-    printf("Inflate Pre-Normalize\n");
-    printMat(src, -1);
     mcl_normalize(src);
 }
 
@@ -840,6 +838,9 @@ void xLBPH::clusterHistograms() {
         printf("Normalized:\n");
         printMat(mclmat, it->first);
         
+        mcl_expand(mclmat, mcl_expansion_power);
+        printf("Expanded:\n");
+        printMat(mclmat, it->first);
         
         // invert the probs, we want closer mat to cluster together
         mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
@@ -866,9 +867,7 @@ void xLBPH::clusterHistograms() {
         printMat(mclmat, it->first);
         */
         
-        mcl_expand(mclmat, mcl_expansion_power);
-        printf("Expanded:\n");
-        printMat(mclmat, it->first);
+
 
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
