@@ -855,14 +855,16 @@ void xLBPH::clusterHistograms() {
         mcl_prune(mclmat, mcl_prune_min);
         printf("Normalized:\n");
         printMat(mclmat, it->first);
-
+        
+        /*
         Mat mask = (mclmat >= mcl_prune_min) / 255; 
         mask.convertTo(mask, mclmat.type());
         mcl_expand(mclmat, mcl_expansion_power);
         mclmat = mclmat.mul(mask);
         printf("Expanded:\n");
         printMat(mclmat, it->first);
-        
+        */
+
         /*
         // invert the probs, we want closer mat to cluster together
         mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
