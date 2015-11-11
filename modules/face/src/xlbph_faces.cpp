@@ -811,7 +811,6 @@ void xLBPH::clusterHistograms() {
         for(size_t i = 0; i < hists.size()-1; i++) {
             for(size_t j = i; j < hists.size(); j++) {
                 double dist = compareHist(hists.at((int)i), hists.at((int)j), COMP_ALG);
-                dist = round(dist / 10);
                 mclmat.at<double>(i, j) = dist;
                 mclmat.at<double>(j, i) = dist;
             } 
@@ -833,6 +832,24 @@ void xLBPH::clusterHistograms() {
         printf("Raw Dists:\n");
         printMat(mclmat, it->first);
 
+        for(size_t i = 0; i < mclmat.rows; i++) {
+            int largestDist = 0;
+            for(size_t j = 0; j < mclmat.cols; j++) {
+                double check = mclmat.at<double>(j,i);
+                if(check > largestDist) 
+                    largestDist = check;
+            }
+
+            for(size_t j = 0; j < mclmat.cols; j++) {
+                if(i!=j) {
+                    mclmat.at<double>(j,i) = largestDist - mclmat.at<double>(j,i);
+                }
+            }
+        }
+        printf("Inverted Dists:\n");
+        printMat(mclmat, it->first);
+       
+
         // initial normalization
         mcl_normalize(mclmat);
         printf("Normalized:\n");
@@ -842,6 +859,7 @@ void xLBPH::clusterHistograms() {
         printf("Expanded:\n");
         printMat(mclmat, it->first);
         
+        /*
         // invert the probs, we want closer mat to cluster together
         mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
         // clear self references
@@ -851,7 +869,7 @@ void xLBPH::clusterHistograms() {
 
         printf("Inverted Probs:\n");
         printMat(mclmat, it->first);
-
+        */
 
         /*
         mclmat *= (int)hists.size();
