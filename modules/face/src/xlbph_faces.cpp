@@ -715,6 +715,8 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
 
 void xLBPH::mcl_inflate(Mat &src, double r) {
     pow(src, r, src);
+    printf("Inflate Pre-Normalize\n");
+    printMat(src, -1);
     mcl_normalize(src);
 }
 
