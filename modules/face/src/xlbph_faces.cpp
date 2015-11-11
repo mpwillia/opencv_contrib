@@ -833,7 +833,7 @@ void xLBPH::clusterHistograms() {
         printMat(mclmat, it->first);
 
         for(size_t i = 0; i < mclmat.rows; i++) {
-            int largestDist = 0;
+            double largestDist = 0;
             for(size_t j = 0; j < mclmat.cols; j++) {
                 double check = mclmat.at<double>(j,i);
                 if(check > largestDist) 
