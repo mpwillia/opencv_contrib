@@ -685,6 +685,7 @@ void xLBPH::mcl_normalize(Mat &src) {
 }
 
 void xLBPH::mcl_expand(Mat &src, unsigned int e) {
+    /*
     printf("== Expand:\n");
     printf("src:\n");
     printMat(src,-1);
@@ -695,7 +696,7 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
     printMat(zeroed,-1);
     
     src = src.mul(zeroed);
-
+    */
     switch(e) {
         case 0: src = Mat::eye(src.rows, src.cols, src.type()); break; // return identity matrix
         case 1: break; // do nothing
@@ -707,8 +708,8 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
             a.release();
             break;
     }
-    
-    src = src.mul(zeroed);
+     
+    //src = src.mul(zeroed);
 }
 
 
