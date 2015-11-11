@@ -715,17 +715,7 @@ void xLBPH::mcl_expand(Mat &src, unsigned int e) {
 
 void xLBPH::mcl_inflate(Mat &src, double r) {
     pow(src, r, src);
-    /*
-    printf("Squared:\n");
-    printMat(src,-1);
-    printf("\n");
-    */
     mcl_normalize(src);
-    /*
-    printf("Normalized:\n");
-    printMat(src,-1);
-    printf("\n");
-    */
 }
 
 
@@ -765,6 +755,27 @@ void xLBPH::clusterHistograms() {
         std::vector<Mat> hists = it->second;
         
         Mat mclmat = Mat::zeros(4,4,CV_64FC1);
+        mclmat.at<double>(0,0) = 1;
+        mclmat.at<double>(1,0) = 1;
+        mclmat.at<double>(2,0) = 1;
+        mclmat.at<double>(3,0) = 1;
+        
+        mclmat.at<double>(0,1) = 1;
+        mclmat.at<double>(1,1) = 1;
+        mclmat.at<double>(2,1) = 0;
+        mclmat.at<double>(3,1) = 1;
+        
+        mclmat.at<double>(0,2) = 1;
+        mclmat.at<double>(1,2) = 0;
+        mclmat.at<double>(2,2) = 1;
+        mclmat.at<double>(3,2) = 0;
+
+        mclmat.at<double>(0,3) = 1;
+        mclmat.at<double>(1,3) = 1;
+        mclmat.at<double>(2,3) = 0;
+        mclmat.at<double>(3,3) = 1;
+
+        /*
         mclmat.at<double>(0,0) = 0.25;
         mclmat.at<double>(1,0) = 1.0/3.0;
         mclmat.at<double>(2,0) = 0.5;
@@ -784,6 +795,7 @@ void xLBPH::clusterHistograms() {
         mclmat.at<double>(1,3) = 1.0/3.0;
         mclmat.at<double>(2,3) = 0;
         mclmat.at<double>(3,3) = 1.0/3.0;
+        */
 
         /*
         Mat mclmat = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
@@ -849,12 +861,15 @@ void xLBPH::clusterHistograms() {
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
             mcl_expand(mclmat, mcl_expansion_power);
-            printf("Expanded:\n");
+            printf("Expanded - Iteration %d\n", i);
             printMat(mclmat, it->first);
+
             mcl_inflate(mclmat, mcl_inflation_power);
 
             printf("Inflated - Result of Iteration %d\n", i);
             printMat(mclmat, it->first);
+
+            printf("=-=-=\n");
         }
        
         printf("Final Iteration:\n");
