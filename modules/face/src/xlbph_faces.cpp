@@ -855,7 +855,7 @@ void xLBPH::clusterHistograms() {
         printf("Normalized:\n");
         printMat(mclmat, it->first);
 
-        Mat mask = (src >= mcl_prune_min) / 255; 
+        Mat mask = (mclmat >= mcl_prune_min) / 255; 
         mcl_expand(mclmat, mcl_expansion_power);
         mclmat *= mask;
         printf("Expanded:\n");
