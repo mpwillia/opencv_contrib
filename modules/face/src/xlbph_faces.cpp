@@ -811,7 +811,7 @@ void xLBPH::clusterHistograms() {
         for(size_t i = 0; i < hists.size()-1; i++) {
             for(size_t j = i; j < hists.size(); j++) {
                 double dist = compareHist(hists.at((int)i), hists.at((int)j), COMP_ALG);
-                dist = round(dist / 100);
+                dist = round(dist / 10);
                 mclmat.at<double>(i, j) = dist;
                 mclmat.at<double>(j, i) = dist;
             } 
