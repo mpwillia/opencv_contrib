@@ -762,7 +762,29 @@ void xLBPH::clusterHistograms() {
 
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
+        
+        Mat mclmat = Mat::zeros(4,4,CV_64FC1);
+        mclmat.at<double>(0,0) = 0.25;
+        mclmat.at<double>(1,0) = 1.0/3.0;
+        mclmat.at<double>(2,0) = 0.5;
+        mclmat.at<double>(3,0) = 1.0/3.0;
+        
+        mclmat.at<double>(0,1) = 0.25;
+        mclmat.at<double>(1,1) = 1.0/3.0;
+        mclmat.at<double>(2,1) = 0;
+        mclmat.at<double>(3,1) = 1.0/3.0;
+        
+        mclmat.at<double>(0,2) = 0.25;
+        mclmat.at<double>(1,2) = 0;
+        mclmat.at<double>(2,2) = 0.5;
+        mclmat.at<double>(3,2) = 0;
 
+        mclmat.at<double>(0,3) = 0.25;
+        mclmat.at<double>(1,3) = 1.0/3.0;
+        mclmat.at<double>(2,3) = 0;
+        mclmat.at<double>(3,3) = 1.0/3.0;
+
+        /*
         Mat mclmat = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
         // get raw dists
         for(size_t i = 0; i < hists.size()-1; i++) {
@@ -773,7 +795,7 @@ void xLBPH::clusterHistograms() {
                 mclmat.at<double>(j, i) = dist;
             } 
         }
-        
+        */ 
 
         // find smallest
         /*
@@ -795,19 +817,20 @@ void xLBPH::clusterHistograms() {
         mcl_normalize(mclmat);
         printf("Normalized:\n");
         printMat(mclmat, it->first);
-
+        
+        
+        /*
         // invert the probs, we want closer mat to cluster together
         mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
         // clear self references
-        /*
         for(int i = 0; i < hists.size(); i++) {
             mclmat.at<double>(i,i) = 0;             
         }
-        */
 
         printf("Inverted Probs:\n");
         printMat(mclmat, it->first);
-        
+        */
+
         /*
         mclmat *= (int)hists.size();
         printf("Inverted Scaled Probs:\n");
