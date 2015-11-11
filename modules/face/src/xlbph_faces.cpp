@@ -890,12 +890,15 @@ void xLBPH::clusterHistograms() {
 
             Mat mask = (mclmat >= mcl_prune_min) / 255; 
             mask.convertTo(mask, mclmat.type());
-            mcl_expand(mclmat, mcl_expansion_power);
+            int e = mcl_expansion_power - i;
+            if(e < 1)
+                e = 1
+            mcl_expand(mclmat, e);
             mclmat = mclmat.mul(mask);
             printf("Expanded - Iteration %d:\n", i);
             printMat(mclmat, it->first);
 
-            mcl_inflate(mclmat, mcl_inflation_power);
+            mcl_inflate(mclmat, (mcl_inflation_power+i));
             printf("Inflated - Iteration %d\n", i);
             printMat(mclmat, it->first);
 
