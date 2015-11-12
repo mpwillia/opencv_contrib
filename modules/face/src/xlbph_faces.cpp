@@ -925,7 +925,7 @@ void xLBPH::clusterHistograms() {
         }
         
         std::vector<std::set<int> > clusters;
-        for(std::map<int, std::set<int> >::const_iterator it = cluster_map.begin(); it != cluster_map.end(); it++) {
+        for(std::map<int, std::set<int> >::const_iterator it = clusters_map.begin(); it != clusters_map.end(); it++) {
             clusters.push_back(it->second);
         }
 
