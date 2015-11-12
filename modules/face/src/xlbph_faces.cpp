@@ -943,7 +943,7 @@ void xLBPH::clusterHistograms() {
             
             for(int j = 0; j < mclmat.cols; j++) {
                 if((int)round(mclmat.at<double>(i,j)) == 1) {
-                    if((int)clusters_map[i].size() <= 0)
+                    if(clusters_map[i].empty())
                         clusters_map[j].insert(i);
                 }
             }
@@ -951,7 +951,8 @@ void xLBPH::clusterHistograms() {
         
         std::vector<std::set<int> > clusters;
         for(std::map<int, std::set<int> >::const_iterator it = clusters_map.begin(); it != clusters_map.end(); it++) {
-            clusters.push_back(it->second);
+            if(!it->second.empty())
+                clusters.push_back(it->second);
         }
 
 
