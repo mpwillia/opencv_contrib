@@ -761,8 +761,8 @@ void xLBPH::clusterHistograms() {
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
         
+        /*
         Mat mclmat = Mat::zeros(6,6,CV_64FC1);
-        
         mclmat.at<double>(0,0) = 1;
         mclmat.at<double>(1,0) = 1;
         mclmat.at<double>(2,0) = 1;
@@ -788,6 +788,7 @@ void xLBPH::clusterHistograms() {
         mclmat.at<double>(5,5) = 1;
         mclmat.at<double>(3,5) = 3;
         mclmat.at<double>(4,5) = 3;
+        */
 
         /*
         mclmat.at<double>(1,0) = 1;
@@ -812,32 +813,46 @@ void xLBPH::clusterHistograms() {
         */
 
         
-        /*
         Mat mclmat = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
         // get raw dists
         for(size_t i = 0; i < hists.size()-1; i++) {
             for(size_t j = i; j < hists.size(); j++) {
                 double dist = compareHist(hists.at((int)i), hists.at((int)j), COMP_ALG);
-                dist = round(dist/10);
                 mclmat.at<double>(i, j) = dist;
                 mclmat.at<double>(j, i) = dist;
             } 
         }
-        */
 
-        // find smallest
-        /*
+        // calculate tiers
+        double tierStep = 0.05;
+        int numTiers = 5;
         for(size_t i = 0; i < mclmat.rows; i++) {
-            int worstIdx = 0;
+            // find best
+            double best = DBL_MAX;
             for(size_t j = 0; j < mclmat.cols; j++) {
-                if(mclmat.at<double>(j,i) > mclmat.at<double>(worstIdx, i)) {
-                    worstIdx = j; 
+                double check = mclmat.at<double>(i,j);
+                if(check > 0 && < best) 
+                    best = check;
+            }
+            
+            // calculate tiers
+            for(size_t j = 0; j < mclmat.cols; j++) {
+                double check = mclmat.at<double>(i,j);
+                if(check > 0) {
+                    mclmat.at<double>(i,j) = ceil(((check - best) / best) / tierStep);
+                }
+                else {
+                    mclmat.at<double>(i,j) = 1; 
                 }
             }
-            mclmat.at<double>(i,worstIdx) = 0;
+
+            // calculate weights
+            for(size_t j = 0; j < mclmat.cols; j++) {
+                mclmat.at<double>(i,j) = (numTiers + 1) - mclmat.at<double>(i,j);
+            }
         }
-        */
-        
+       
+
         printf("Raw Dists:\n");
         printMat(mclmat, it->first);
         
