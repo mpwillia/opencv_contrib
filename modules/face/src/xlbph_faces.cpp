@@ -812,7 +812,6 @@ void xLBPH::clusterHistograms() {
         mclmat.at<double>(4,5) = 1;
         */
 
-        
         Mat mclmat = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
         // get raw dists
         for(size_t i = 0; i < hists.size()-1; i++) {
@@ -841,7 +840,7 @@ void xLBPH::clusterHistograms() {
             // calculate tiers
             for(size_t j = 0; j < mclmat.cols; j++) {
                 double check = mclmat.at<double>(j,i);
-                if(check > 0) 
+                if(check > 0 && check != best) 
                     mclmat.at<double>(j,i) = ceil(((check - best) / best) / tierStep);
                 else 
                     mclmat.at<double>(j,i) = 1; 
@@ -856,7 +855,6 @@ void xLBPH::clusterHistograms() {
                 mclmat.at<double>(j,i) = (weight <= 0) ? 0 : weight;
             }
         }
-       
 
         printf("Raw Weights:\n");
         printMat(mclmat, it->first);
