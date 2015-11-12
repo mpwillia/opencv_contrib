@@ -831,24 +831,23 @@ void xLBPH::clusterHistograms() {
             double best = DBL_MAX;
             for(size_t j = 0; j < mclmat.cols; j++) {
                 double check = mclmat.at<double>(i,j);
-                if(check > 0 && < best) 
+                if(check > 0 && check < best) 
                     best = check;
             }
             
             // calculate tiers
             for(size_t j = 0; j < mclmat.cols; j++) {
                 double check = mclmat.at<double>(i,j);
-                if(check > 0) {
+                if(check > 0) 
                     mclmat.at<double>(i,j) = ceil(((check - best) / best) / tierStep);
-                }
-                else {
+                else 
                     mclmat.at<double>(i,j) = 1; 
-                }
             }
 
             // calculate weights
             for(size_t j = 0; j < mclmat.cols; j++) {
-                mclmat.at<double>(i,j) = (numTiers + 1) - mclmat.at<double>(i,j);
+                double weight = (numTiers + 1) - mclmat.at<double>(i,j);
+                mclmat.at<double>(i,j) = (weight <= 0) ? 0 : weight;
             }
         }
        
