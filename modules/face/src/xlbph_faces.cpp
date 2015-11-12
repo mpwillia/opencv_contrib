@@ -833,18 +833,18 @@ void xLBPH::clusterHistograms() {
             // find best
             double best = DBL_MAX;
             for(size_t j = 0; j < mclmat.cols; j++) {
-                double check = mclmat.at<double>(i,j);
+                double check = mclmat.at<double>(j,i);
                 if(check > 0 && check < best) 
                     best = check;
             }
             
             // calculate tiers
             for(size_t j = 0; j < mclmat.cols; j++) {
-                double check = mclmat.at<double>(i,j);
+                double check = mclmat.at<double>(j,i);
                 if(check > 0) 
-                    mclmat.at<double>(i,j) = ceil(((check - best) / best) / tierStep);
+                    mclmat.at<double>(j,i) = ceil(((check - best) / best) / tierStep);
                 else 
-                    mclmat.at<double>(i,j) = 1; 
+                    mclmat.at<double>(j,i) = 1; 
             }
 
             printf("Raw Tiers (Lower is Better, Zeros are now Ones):\n");
@@ -852,8 +852,8 @@ void xLBPH::clusterHistograms() {
 
             // calculate weights
             for(size_t j = 0; j < mclmat.cols; j++) {
-                double weight = (numTiers + 1) - mclmat.at<double>(i,j);
-                mclmat.at<double>(i,j) = (weight <= 0) ? 0 : weight;
+                double weight = (numTiers + 1) - mclmat.at<double>(j,i);
+                mclmat.at<double>(j,i) = (weight <= 0) ? 0 : weight;
             }
         }
        
