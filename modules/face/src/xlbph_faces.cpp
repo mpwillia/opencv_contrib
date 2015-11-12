@@ -826,8 +826,8 @@ void xLBPH::clusterHistograms() {
         printMat(mclmat, it->first);
 
         // calculate tiers
-        double tierStep = 0.025;
-        int numTiers = 5;
+        double tierStep = 0.01;
+        int numTiers = 10;
         for(size_t i = 0; i < mclmat.rows; i++) {
             // find best
             double best = DBL_MAX;
