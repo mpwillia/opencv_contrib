@@ -762,24 +762,30 @@ void xLBPH::clusterHistograms() {
         std::vector<Mat> hists = it->second;
         
         Mat mclmat = Mat::zeros(6,6,CV_64FC1);
-
+        
+        mclmat.at<double>(0,0) = 1;
         mclmat.at<double>(1,0) = 1;
         mclmat.at<double>(2,0) = 1;
         mclmat.at<double>(3,0) = 5;
 
+        mclmat.at<double>(1,1) = 1;
         mclmat.at<double>(0,1) = 1;
         mclmat.at<double>(2,1) = 3;
 
+        mclmat.at<double>(2,2) = 1;
         mclmat.at<double>(0,2) = 1;
         mclmat.at<double>(1,2) = 3;
 
+        mclmat.at<double>(3,3) = 1;
         mclmat.at<double>(0,3) = 5;
         mclmat.at<double>(4,3) = 3;
         mclmat.at<double>(5,3) = 3;
 
+        mclmat.at<double>(4,4) = 1;
         mclmat.at<double>(3,4) = 3;
         mclmat.at<double>(5,4) = 3;
 
+        mclmat.at<double>(5,5) = 1;
         mclmat.at<double>(3,5) = 3;
         mclmat.at<double>(4,5) = 3;
 
