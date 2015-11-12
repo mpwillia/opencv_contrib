@@ -146,7 +146,7 @@ private:
     int mcl_iterations = 25;    
     int mcl_expansion_power = 2;
     double mcl_inflation_power = 1.8;
-    double mcl_prune_min = 0.025;
+    double mcl_prune_min = 0.001;
 
     //--------------------------------------------------------------------------
     // Misc 
@@ -761,8 +761,27 @@ void xLBPH::clusterHistograms() {
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
         
+        Mat mclmat = Mat::zeros(6,6,CV_64FC1);
+        mclmat.at<double>(1,0) = 1;
+        mclmat.at<double>(2,0) = 1;
+        mclmat.at<double>(3,0) = 1;
+
+        mclmat.at<double>(0,1) = 1;
+        mclmat.at<double>(2,1) = 1;
+
+        mclmat.at<double>(0,2) = 1;
+        mclmat.at<double>(1,2) = 1;
+
+        mclmat.at<double>(0,3) = 1;
+        mclmat.at<double>(4,3) = 1;
+
+        mclmat.at<double>(3,4) = 1;
+        mclmat.at<double>(5,4) = 1;
+
+        mclmat.at<double>(3,5) = 1;
+        mclmat.at<double>(4,5) = 1;
+
         /*
-        Mat mclmat = Mat::zeros(4,4,CV_64FC1);
         mclmat.at<double>(0,0) = 1;
         mclmat.at<double>(1,0) = 1;
         mclmat.at<double>(2,0) = 1;
@@ -805,7 +824,8 @@ void xLBPH::clusterHistograms() {
         mclmat.at<double>(2,3) = 0;
         mclmat.at<double>(3,3) = 1.0/3.0;
         */
-
+        
+        /*
         Mat mclmat = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
         // get raw dists
         for(size_t i = 0; i < hists.size()-1; i++) {
@@ -816,6 +836,7 @@ void xLBPH::clusterHistograms() {
                 mclmat.at<double>(j, i) = dist;
             } 
         }
+        */
 
         // find smallest
         /*
@@ -832,7 +853,8 @@ void xLBPH::clusterHistograms() {
         
         printf("Raw Dists:\n");
         printMat(mclmat, it->first);
-
+        
+        /*
         for(size_t i = 0; i < mclmat.rows; i++) {
             double largestDist = 0;
             for(size_t j = 0; j < mclmat.cols; j++) {
@@ -849,7 +871,7 @@ void xLBPH::clusterHistograms() {
         }
         printf("Inverted Dists:\n");
         printMat(mclmat, it->first);
-       
+        */ 
 
         // initial normalization
         mcl_normalize(mclmat);
@@ -893,18 +915,13 @@ void xLBPH::clusterHistograms() {
         // perform mcl inflation iterations
         for(int i = 0; i < mcl_iterations; i++) {
             
-            Mat mask = (mclmat >= mcl_prune_min) / 255; 
-            mask.convertTo(mask, mclmat.type());
             mcl_expand(mclmat, mcl_expansion_power);
-            mclmat = mclmat.mul(mask);
             printf("Expanded - Iteration %d:\n", i);
             printMat(mclmat, it->first);
             
-            /*
             mcl_inflate(mclmat, (mcl_inflation_power+i));
             printf("Inflated - Iteration %d\n", i);
             printMat(mclmat, it->first);
-            */
 
             mcl_prune(mclmat, mcl_prune_min);
             printf("Pruned - Result of Iteration %d\n", i);
