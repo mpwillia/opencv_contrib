@@ -943,7 +943,8 @@ void xLBPH::clusterHistograms() {
             
             for(int j = 0; j < mclmat.cols; j++) {
                 if((int)round(mclmat.at<double>(i,j)) == 1) {
-                    clusters_map[j].insert(i);
+                    if((int)clusters_map[i].size() <= 0)
+                        clusters_map[j].insert(i);
                 }
             }
         }
