@@ -762,6 +762,28 @@ void xLBPH::clusterHistograms() {
         std::vector<Mat> hists = it->second;
         
         Mat mclmat = Mat::zeros(6,6,CV_64FC1);
+
+        mclmat.at<double>(1,0) = 1;
+        mclmat.at<double>(2,0) = 1;
+        mclmat.at<double>(3,0) = 5;
+
+        mclmat.at<double>(0,1) = 1;
+        mclmat.at<double>(2,1) = 3;
+
+        mclmat.at<double>(0,2) = 1;
+        mclmat.at<double>(1,2) = 3;
+
+        mclmat.at<double>(0,3) = 5;
+        mclmat.at<double>(4,3) = 3;
+        mclmat.at<double>(5,3) = 3;
+
+        mclmat.at<double>(3,4) = 3;
+        mclmat.at<double>(5,4) = 3;
+
+        mclmat.at<double>(3,5) = 3;
+        mclmat.at<double>(4,5) = 3;
+
+        /*
         mclmat.at<double>(1,0) = 1;
         mclmat.at<double>(2,0) = 1;
         mclmat.at<double>(3,0) = 1;
@@ -774,56 +796,15 @@ void xLBPH::clusterHistograms() {
 
         mclmat.at<double>(0,3) = 1;
         mclmat.at<double>(4,3) = 1;
+        mclmat.at<double>(5,3) = 1;
 
         mclmat.at<double>(3,4) = 1;
         mclmat.at<double>(5,4) = 1;
 
         mclmat.at<double>(3,5) = 1;
         mclmat.at<double>(4,5) = 1;
-
-        /*
-        mclmat.at<double>(0,0) = 1;
-        mclmat.at<double>(1,0) = 1;
-        mclmat.at<double>(2,0) = 1;
-        mclmat.at<double>(3,0) = 1;
-        
-        mclmat.at<double>(0,1) = 1;
-        mclmat.at<double>(1,1) = 1;
-        mclmat.at<double>(2,1) = 0;
-        mclmat.at<double>(3,1) = 1;
-        
-        mclmat.at<double>(0,2) = 1;
-        mclmat.at<double>(1,2) = 0;
-        mclmat.at<double>(2,2) = 1;
-        mclmat.at<double>(3,2) = 0;
-
-        mclmat.at<double>(0,3) = 1;
-        mclmat.at<double>(1,3) = 1;
-        mclmat.at<double>(2,3) = 0;
-        mclmat.at<double>(3,3) = 1;
         */
 
-        /*
-        mclmat.at<double>(0,0) = 0.25;
-        mclmat.at<double>(1,0) = 1.0/3.0;
-        mclmat.at<double>(2,0) = 0.5;
-        mclmat.at<double>(3,0) = 1.0/3.0;
-        
-        mclmat.at<double>(0,1) = 0.25;
-        mclmat.at<double>(1,1) = 1.0/3.0;
-        mclmat.at<double>(2,1) = 0;
-        mclmat.at<double>(3,1) = 1.0/3.0;
-        
-        mclmat.at<double>(0,2) = 0.25;
-        mclmat.at<double>(1,2) = 0;
-        mclmat.at<double>(2,2) = 0.5;
-        mclmat.at<double>(3,2) = 0;
-
-        mclmat.at<double>(0,3) = 0.25;
-        mclmat.at<double>(1,3) = 1.0/3.0;
-        mclmat.at<double>(2,3) = 0;
-        mclmat.at<double>(3,3) = 1.0/3.0;
-        */
         
         /*
         Mat mclmat = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
@@ -949,8 +930,27 @@ void xLBPH::clusterHistograms() {
 
             for(int i = 0; i < mclmat.cols; i++) {
                 if((int)round(mclmat.at<double>(i,j)) == 1) {
-                    // add mat i
-                    cluster.insert(i);
+                    if(!found) {
+                        for(size_t idx = 0; idx < clusters.size(); idx++) {
+                            std::set<int> check = clusters.at(idx);
+                            if(check.find(i) != check.end()) {
+                                cluster = check;
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if(found) {
+                           cluster.insert(j);  
+                        }
+                        else {
+                            cluster.insert(i);
+                        }
+                    }
+                    else {
+                        // add mat i
+                        cluster.insert(i);
+                    }
                 }
             }
             
