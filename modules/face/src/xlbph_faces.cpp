@@ -875,7 +875,6 @@ void xLBPH::clusterHistograms() {
 
         // initial normalization
         mcl_normalize(mclmat);
-        mcl_prune(mclmat, mcl_prune_min);
         printf("Normalized:\n");
         printMat(mclmat, it->first);
         
