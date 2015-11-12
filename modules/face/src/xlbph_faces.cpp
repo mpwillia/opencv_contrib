@@ -823,9 +823,12 @@ void xLBPH::clusterHistograms() {
             } 
         }
 
+        printf("Raw Dists:\n");
+        printMat(mclmat, it->first);
+
         // calculate tiers
         double tierStep = 0.05;
-        int numTiers = 5;
+        int numTiers = 10;
         for(size_t i = 0; i < mclmat.rows; i++) {
             // find best
             double best = DBL_MAX;
@@ -844,6 +847,9 @@ void xLBPH::clusterHistograms() {
                     mclmat.at<double>(i,j) = 1; 
             }
 
+            printf("Raw Tiers (Lower is Better, Zeros are now Ones):\n");
+            printMat(mclmat, it->first);
+
             // calculate weights
             for(size_t j = 0; j < mclmat.cols; j++) {
                 double weight = (numTiers + 1) - mclmat.at<double>(i,j);
@@ -852,7 +858,7 @@ void xLBPH::clusterHistograms() {
         }
        
 
-        printf("Raw Dists:\n");
+        printf("Raw Weights:\n");
         printMat(mclmat, it->first);
         
         /*
