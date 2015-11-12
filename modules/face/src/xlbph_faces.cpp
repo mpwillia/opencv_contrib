@@ -914,6 +914,23 @@ void xLBPH::clusterHistograms() {
         printMat(mclmat, it->first);
 
         // interpret clusters
+        std::map<int, std::set<int> > clusters_map;
+        for(int i = 0; i < mclmat.rows; i++) {
+            
+            for(int j = 0; j < mclmat.cols; j++) {
+                if((int)round(mclmat.at<double>(i,j)) == 1) {
+                    clusters_map[j].insert(i);
+                }
+            }
+        }
+        
+        std::vector<std::set<int> > clusters;
+        for(std::map<int, std::set<int> >::const_iterator it = cluster_map.begin(); it != cluster_map.end(); it++) {
+            clusters.push_back(it->second);
+        }
+
+
+        /*
         std::vector<std::set<int> > clusters;
         for(int j = 0; j < mclmat.rows; j++) {
             // check if mat j is already in a cluster 
@@ -959,7 +976,9 @@ void xLBPH::clusterHistograms() {
                 clusters.push_back(cluster);
             }
         }
-        
+        */
+
+
         printf("%d Clusters for %d:\n", (int)clusters.size(), it->first);
         for(size_t idx = 0; idx < clusters.size(); idx++) {
             std::set<int> cluster = clusters.at(idx);
