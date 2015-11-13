@@ -949,7 +949,7 @@ void xLBPH::clusterHistograms() {
                     else {
                         bool found = false;
                         for(int k = 0; k < i; k++) {
-                            if(clusters_map[k].find(i) == clusters_map[k].end()) {
+                            if(clusters_map[k].find(i) != clusters_map[k].end()) {
                                 found = true; 
                             } 
                         } 
