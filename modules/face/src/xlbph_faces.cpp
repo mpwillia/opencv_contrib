@@ -950,9 +950,18 @@ void xLBPH::clusterHistograms() {
                 }
             }
         }
-        
+       
+    
+
         std::vector<std::set<int> > clusters;
         for(std::map<int, std::set<int> >::const_iterator it = clusters_map.begin(); it != clusters_map.end(); it++) {
+            std::cout << it->first << " -> "
+            std::set<int> cluster = it->second;
+            for(std::set<int>::const_iterator it2 = cluster.begin(); it2 != cluster.end(); it2++) {
+                printf("%d, ", *it);
+            }
+            std::cout << "\n";
+
             if(!it->second.empty())
                 clusters.push_back(it->second);
         }
