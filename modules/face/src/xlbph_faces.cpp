@@ -941,23 +941,23 @@ void xLBPH::clusterHistograms() {
         std::map<int, std::set<int> > clusters_map;
 
         for(int vert = 0; vert < mclmat.rows; vert++) {
-            std::cout << "checking vert " << vert << "\n";
+            //std::cout << "checking vert " << vert << "\n";
             for(int check = 0; check < mclmat.cols; check ++) {
                 double dist = mclmat.at<double>(check, vert);
-                std::cout << "\tchecking check " << check << " | dist: " << dist << "\n";
+                //std::cout << "\tchecking check " << check << " | dist: " << dist << "\n";
                 if(dist > 0) {
                     // we want to add it
                     // check if it already has
                     bool found = false;
                     for(int i = 0; i < vert; i++) {
                         if(!clusters_map[i].empty() && clusters_map[i].find(vert) != clusters_map[i].end()) {
-                            std::cout << "\t\tfound check at " << i << " - not adding\n";
+                            //std::cout << "\t\tfound check at " << i << " - not adding\n";
                             found = true; 
                         } 
                     }
                         
                     if(!found) {
-                        std::cout << "\t\tdidn't find check adding\n";
+                        //std::cout << "\t\tdidn't find check adding\n";
                         clusters_map[vert].insert(check);
                     }
                 }
