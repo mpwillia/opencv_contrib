@@ -939,40 +939,45 @@ void xLBPH::clusterHistograms() {
 
         // interpret clusters
         std::map<int, std::set<int> > clusters_map;
+
+        for(int vert = 0; vert < mclmat.cols; vert++) {
+            for(int check = 0; check < mclmat.rows; check ++) {
+                if((int)round(mclmat.at<double>(vert, check)) == 1) {
+                    // we want to add it
+                    // check if it already has
+                    bool found = false;
+                    for(int i = 0; i < check; i++) {
+                        if(clusters_map[check].find(vert) != clusters_map[check].end()) {
+                            found = true; 
+                        } 
+                    }
+                        
+                    if(!found)
+                        clusters_map[vert].insert(check);
+
+                }
+            } 
+        }
+
+
+        /*
         for(int i = 0; i < mclmat.cols; i++) {
             
             for(int j = 0; j < mclmat.rows; j++) {
                 if((int)round(mclmat.at<double>(j,i)) == 1) {
                     bool found = false;
                     for(int k = 0; k < i; k++) {
-                        if(clusters_map[k].find(j) != clusters_map[k].end()) {
+                        if(!clusters_map[k].empty() && clusters_map[k].find(j) != clusters_map[k].end()) {
                             found = true; 
                         } 
                     }
 
                     if(!found)
                         clusters_map[i].insert(j);
-
-                    /*
-                    if(clusters_map[j].empty()) {
-                        clusters_map[i].insert(j);
-                    }
-                    else {
-                        bool found = false;
-                        for(int k = 0; k < i; k++) {
-                            if(clusters_map[k].find(i) != clusters_map[k].end()) {
-                                found = true; 
-                            } 
-                        } 
-
-                        if(!found)
-                            clusters_map[j].insert(i);
-                    }
-                    */
                 }
             }
         }
-       
+        */ 
     
 
         std::vector<std::set<int> > clusters;
