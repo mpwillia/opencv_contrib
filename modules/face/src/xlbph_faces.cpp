@@ -1065,8 +1065,8 @@ void xLBPH::clusterHistograms() {
         }
         */
 
-        
-        printf("%d Clusters for %d:\n", (int)clusters.size(), it->first);
+        double ratio = (int)clusters.size() / (double)hists.size(); 
+        printf("%d Clusters from %d hists for %d - Cluster Ratio: %7.3f\n", (int)clusters.size(), (int)hists.size(), it->first, ratio);
         for(size_t idx = 0; idx < clusters.size(); idx++) {
             std::set<int> cluster = clusters.at(idx);
             for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
