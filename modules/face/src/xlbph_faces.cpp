@@ -940,9 +940,9 @@ void xLBPH::clusterHistograms() {
         // interpret clusters
         std::map<int, std::set<int> > clusters_map;
 
-        for(int vert = 0; vert < mclmat.cols; vert++) {
-            for(int check = 0; check < mclmat.rows; check ++) {
-                if((int)round(mclmat.at<double>(vert, check)) == 1) {
+        for(int vert = 0; vert < mclmat.rows; vert++) {
+            for(int check = 0; check < mclmat.cols; check ++) {
+                if((int)round(mclmat.at<double>(check, vert)) == 1) {
                     // we want to add it
                     // check if it already has
                     bool found = false;
