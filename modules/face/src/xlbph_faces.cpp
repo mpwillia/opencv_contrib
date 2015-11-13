@@ -958,7 +958,7 @@ void xLBPH::clusterHistograms() {
             std::cout << it->first << " -> ";
             std::set<int> cluster = it->second;
             for(std::set<int>::const_iterator it2 = cluster.begin(); it2 != cluster.end(); it2++) {
-                printf("%d, ", *it);
+                printf("%d, ", *it2);
             }
             std::cout << "\n";
 
