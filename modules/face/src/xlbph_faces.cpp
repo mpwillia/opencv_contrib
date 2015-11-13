@@ -946,7 +946,7 @@ void xLBPH::clusterHistograms() {
                     // we want to add it
                     // check if it already has
                     bool found = false;
-                    for(int i = 0; i < check; i++) {
+                    for(int i = 0; i < vert; i++) {
                         if(!clusters_map[i].empty() && clusters_map[i].find(vert) != clusters_map[i].end()) {
                             found = true; 
                         } 
