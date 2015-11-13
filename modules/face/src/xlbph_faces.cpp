@@ -939,10 +939,10 @@ void xLBPH::clusterHistograms() {
 
         // interpret clusters
         std::map<int, std::set<int> > clusters_map;
-        for(int i = 0; i < mclmat.rows; i++) {
+        for(int i = 0; i < mclmat.cols; i++) {
             
-            for(int j = 0; j < mclmat.cols; j++) {
-                if((int)round(mclmat.at<double>(i,j)) == 1) {
+            for(int j = 0; j < mclmat.rows; j++) {
+                if((int)round(mclmat.at<double>(j,i)) == 1) {
                     if(clusters_map[i].empty())
                         clusters_map[j].insert(i);
                     else if(clusters_map[i].find(j) == clusters_map[i].end())
