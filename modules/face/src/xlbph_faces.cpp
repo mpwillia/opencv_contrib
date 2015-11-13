@@ -821,9 +821,11 @@ void xLBPH::clusterHistograms() {
                 mclmat.at<double>(j, i) = dist;
             } 
         }
-
+        
+        /*
         printf("Raw Dists:\n");
         printMat(mclmat, it->first);
+        */
 
         // calculate tiers
         double tierStep = 0.01;
@@ -845,9 +847,11 @@ void xLBPH::clusterHistograms() {
                 else 
                     mclmat.at<double>(j,i) = 1; 
             }
-
+            
+            /*
             printf("Raw Tiers (Lower is Better, Zeros are now Ones):\n");
             printMat(mclmat, it->first);
+            */
 
             // calculate weights
             for(size_t j = 0; j < mclmat.cols; j++) {
@@ -855,10 +859,12 @@ void xLBPH::clusterHistograms() {
                 mclmat.at<double>(j,i) = (weight <= 0) ? 0 : weight;
             }
         }
-
+        
+        /*
         printf("Raw Weights:\n");
         printMat(mclmat, it->first);
-        
+        */
+
         /*
         for(size_t i = 0; i < mclmat.rows; i++) {
             double largestDist = 0;
@@ -877,12 +883,14 @@ void xLBPH::clusterHistograms() {
         printf("Inverted Dists:\n");
         printMat(mclmat, it->first);
         */ 
-
+        
+        /*
         // initial normalization
         mcl_normalize(mclmat);
         printf("Normalized:\n");
         printMat(mclmat, it->first);
-        
+        */
+
 
         /*
         // invert the probs, we want closer mat to cluster together
@@ -920,22 +928,30 @@ void xLBPH::clusterHistograms() {
         for(int i = 0; i < mcl_iterations; i++) {
             
             mcl_expand(mclmat, mcl_expansion_power);
+            /*
             printf("Expanded - Iteration %d:\n", i);
             printMat(mclmat, it->first);
-            
+            */
+
             mcl_inflate(mclmat, (mcl_inflation_power+i));
+            /*
             printf("Inflated - Iteration %d\n", i);
             printMat(mclmat, it->first);
+            */
 
             mcl_prune(mclmat, mcl_prune_min);
+            /*
             printf("Pruned - Result of Iteration %d\n", i);
             printMat(mclmat, it->first);
 
             printf("=-=-=\n");
+            */
         }
-       
+        
+        /*
         printf("Final Iteration:\n");
         printMat(mclmat, it->first);
+        */
 
         // interpret clusters
         std::map<int, std::set<int> > clusters_map;
@@ -984,15 +1000,17 @@ void xLBPH::clusterHistograms() {
         }
         */ 
     
-
+        
         std::vector<std::set<int> > clusters;
         for(std::map<int, std::set<int> >::const_iterator it = clusters_map.begin(); it != clusters_map.end(); it++) {
+            /*
             std::cout << it->first << " -> ";
             std::set<int> cluster = it->second;
             for(std::set<int>::const_iterator it2 = cluster.begin(); it2 != cluster.end(); it2++) {
                 printf("%d, ", *it2);
             }
             std::cout << "\n";
+            */
 
             if(!it->second.empty())
                 clusters.push_back(it->second);
@@ -1047,7 +1065,7 @@ void xLBPH::clusterHistograms() {
         }
         */
 
-
+        
         printf("%d Clusters for %d:\n", (int)clusters.size(), it->first);
         for(size_t idx = 0; idx < clusters.size(); idx++) {
             std::set<int> cluster = clusters.at(idx);
@@ -1056,8 +1074,9 @@ void xLBPH::clusterHistograms() {
             }
             printf("\n");
         }
+        printf("\n");
 
-        break;
+        //break;
     }
 
     /*
