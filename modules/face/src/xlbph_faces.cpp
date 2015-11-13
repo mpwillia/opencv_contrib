@@ -951,7 +951,7 @@ void xLBPH::clusterHistograms() {
                     }
 
                     if(!found)
-                        clusters_map[k].insert(j);
+                        clusters_map[i].insert(j);
 
                     /*
                     if(clusters_map[j].empty()) {
