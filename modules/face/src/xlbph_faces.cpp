@@ -943,8 +943,9 @@ void xLBPH::clusterHistograms() {
         for(int vert = 0; vert < mclmat.rows; vert++) {
             std::cout << "checking vert " << vert << "\n";
             for(int check = 0; check < mclmat.cols; check ++) {
-                std::cout << "\tchecking check " << check << "\n";
-                if((int)round(mclmat.at<double>(check, vert)) == 1) {
+                double dist = mclmat.at<double>(check, vert);
+                std::cout << "\tchecking check " << check << " | dist: " << dist << "\n";
+                if((int)round(dist) == 1) {
                     // we want to add it
                     // check if it already has
                     bool found = false;
