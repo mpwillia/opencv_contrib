@@ -943,6 +943,17 @@ void xLBPH::clusterHistograms() {
             
             for(int j = 0; j < mclmat.rows; j++) {
                 if((int)round(mclmat.at<double>(j,i)) == 1) {
+                    bool found = false;
+                    for(int k = 0; k < i; k++) {
+                        if(clusters_map[k].find(j) != clusters_map[k].end()) {
+                            found = true; 
+                        } 
+                    }
+
+                    if(!found)
+                        clusters_map[k].insert(j);
+
+                    /*
                     if(clusters_map[j].empty()) {
                         clusters_map[i].insert(j);
                     }
@@ -957,6 +968,7 @@ void xLBPH::clusterHistograms() {
                         if(!found)
                             clusters_map[j].insert(i);
                     }
+                    */
                 }
             }
         }
