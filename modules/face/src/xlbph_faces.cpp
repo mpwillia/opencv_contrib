@@ -946,9 +946,16 @@ void xLBPH::clusterHistograms() {
                     if(clusters_map[j].empty()) {
                         clusters_map[i].insert(j);
                     }
-                    else if(clusters_map[j].find(i) == clusters_map[j].end()) {
-                        clusters_map[j].insert(i);
-                        break;
+                    else {
+                        bool found = false;
+                        for(int k = 0; k < i; k++) {
+                            if(clusters_map[k].find(i) == clusters_map[k].end()) {
+                                found = true; 
+                            } 
+                        } 
+
+                        if(!found)
+                            clusters_map[j].insert(i);
                     }
                 }
             }
