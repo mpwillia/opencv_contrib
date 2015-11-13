@@ -1072,8 +1072,9 @@ void xLBPH::clusterHistograms() {
             if((int)cluster.size() > worstCase)
                 worstCase = (int)cluster.size();
         }
-        worstCase /= (int)clusters.size();
-        printf("%d Clusters from %d hists for %d - Cluster Ratio: %7.3f - Worse Case Checks: %d\n", (int)clusters.size(), (int)hists.size(), it->first, ratio, worstCase);
+        worstCase += (int)clusters.size();
+        double checkRatio = worstCase / (double)hists.size();
+        printf("%d Clusters from %d hists for %d - Cluster Ratio: %7.3f - Worst Case Checks: %d - Check Ratio: %7.3f\n", (int)clusters.size(), (int)hists.size(), it->first, ratio, worstCase, checkRatio);
         for(size_t idx = 0; idx < clusters.size(); idx++) {
             std::set<int> cluster = clusters.at(idx);
             for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
