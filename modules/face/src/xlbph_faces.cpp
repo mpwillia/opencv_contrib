@@ -883,6 +883,7 @@ void xLBPH::clusterHistograms() {
                 absdiff(mclmat, prev, diff);
                 mcl_prune(diff, mcl_comp_epsilon);
                 same = (countNonZero(diff) == 0);
+                prev = mclmat;
             }
             printf("Num Iterations: %d\n", iters);
         }
