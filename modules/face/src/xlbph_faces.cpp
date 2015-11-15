@@ -138,15 +138,26 @@ private:
     // Histogram Clustering
     void clusterHistograms();
     void printMat(const Mat &mat, int label) const;
+    
+    // Histogram Clustering - Settings
+    double cluster_tierStep = 0.01; // Sets how large a tier is, default is 0.01 or 1%
+    int cluster_numTiers = 10; // Sets how many tiers to keep, default is 10, or 10% max tier
+    bool cluster_breakWorst = true; // Sets whether or not to always break the worst connection even if it falls within a valid tier, default is true
+
+    // MCL Clustering Algorithm - Functions
     void mcl_normalize(Mat &src);
     void mcl_expand(Mat &src, unsigned int e);
     void mcl_inflate(Mat &src, double power);
     void mcl_prune(Mat &src, double min);
-
-    int mcl_iterations = 25;    
-    int mcl_expansion_power = 2;
-    double mcl_inflation_power = 1.8;
-    double mcl_prune_min = 0.001;
+    // MCL Clustering Algorithm - Settings
+    /* Sets the number of MCL iterations, default is 10
+     * If 0 then iterates until no change is found
+     */
+    int mcl_iterations = 10;
+    int mcl_expansion_power = 2; // Sets the expansion power exponent, default is 2
+    double mcl_inflation_power = 2; // Sets the inflation power exponent, default is 2 
+    double mcl_prune_min = 0.001; // Sets the minimum value to prune, any values below this are set to zero, default is 0.001
+    double mcl_comp_epsilon = 0.00001; // Sets the epsilon value for comparing doubles, default is 0.00001;
 
     //--------------------------------------------------------------------------
     // Misc 
@@ -250,12 +261,20 @@ public:
     // NOTE: Remember to add header to opencv2/face/facerec.hpp
     //--------------------------------------------------------------------------
     
-    void set_mcl_settings(int numIters, int e, double r);
+    void setMCLSettings(int numIters, int e, double r);
+    void setClusterSettings(double tierStep, int numTiers, bool breakWorst);
 
     void test();
 };
 
-void xLBPH::set_mcl_settings(int numIters, int e, double r) {
+void xLBPH::setClusterSettings(double tierStep, int numTiers, bool breakWorst) {
+    cluster_tierStep = tierStep;
+    cluster_numTiers = numTiers;
+    cluster_breakWorst = breakWorst;
+} 
+
+
+void xLBPH::setMCLSettings(int numIters, int e, double r) {
     mcl_iterations = numIters;
     mcl_expansion_power = e;
     mcl_inflation_power = r;
@@ -733,30 +752,6 @@ void xLBPH::clusterHistograms() {
      * Every cluster has an average histogram and a set of histograms
      */
     
-    /*
-    Mat test = Mat::zeros(2,2,CV_64FC1);
-    test.at<double>(0,0) = 0.6;
-    test.at<double>(1,0) = 0.2;
-    test.at<double>(0,1) = 0.4;
-    test.at<double>(1,1) = 0.8;
-    Mat test2 = test.clone();
-
-    printf("Test Pre Expand:\n");
-    printMat(test, -1);
-    mcl_expand(test, 2);
-    printf("Test Post Expand - Power 2:\n");
-    printMat(test, -1);
-    printf("\n");
-    
-    printf("\n");
-    printf("Test2 Pre Expand:\n");
-    printMat(test2, -1);
-    mcl_expand(test2, 3);
-    printf("Test2 Post Expand - Power 3:\n");
-    printMat(test2, -1);
-    printf("\n");
-    printf("\n=========\n");
-    */
     double avgCheckRatio = 0;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
@@ -827,9 +822,9 @@ void xLBPH::clusterHistograms() {
         printMat(mclmat, it->first);
         */
 
-        // calculate tiers
-        double tierStep = 0.01;
-        int numTiers = 10;
+        // calculate tiers and weights
+        //double tierStep = 0.01;
+        //int numTiers = 10;
         for(size_t i = 0; i < mclmat.rows; i++) {
             // find best
             double best = DBL_MAX;
@@ -843,7 +838,7 @@ void xLBPH::clusterHistograms() {
             for(size_t j = 0; j < mclmat.cols; j++) {
                 double check = mclmat.at<double>(j,i);
                 if(check > 0 && check != best) 
-                    mclmat.at<double>(j,i) = ceil(((check - best) / best) / tierStep);
+                    mclmat.at<double>(j,i) = ceil(((check - best) / best) / cluster_tierStep);
                 else 
                     mclmat.at<double>(j,i) = 1; 
             }
@@ -855,7 +850,7 @@ void xLBPH::clusterHistograms() {
 
             // calculate weights
             for(size_t j = 0; j < mclmat.cols; j++) {
-                double weight = (numTiers + 1) - mclmat.at<double>(j,i);
+                double weight = (cluster_numTiers+ 1) - mclmat.at<double>(j,i);
                 mclmat.at<double>(j,i) = (weight <= 0) ? 0 : weight;
             }
         }
@@ -865,88 +860,59 @@ void xLBPH::clusterHistograms() {
         printMat(mclmat, it->first);
         */
 
-        /*
-        for(size_t i = 0; i < mclmat.rows; i++) {
-            double largestDist = 0;
-            for(size_t j = 0; j < mclmat.cols; j++) {
-                double check = mclmat.at<double>(j,i);
-                if(check > largestDist) 
-                    largestDist = check;
-            }
-
-            for(size_t j = 0; j < mclmat.cols; j++) {
-                if(i!=j) {
-                    mclmat.at<double>(j,i) = largestDist - mclmat.at<double>(j,i);
-                }
-            }
-        }
-        printf("Inverted Dists:\n");
-        printMat(mclmat, it->first);
-        */ 
-        
-        /*
         // initial normalization
         mcl_normalize(mclmat);
+        /*
         printf("Normalized:\n");
         printMat(mclmat, it->first);
         */
-
-
-        /*
-        // invert the probs, we want closer mat to cluster together
-        mclmat = Mat::ones((int)hists.size(), (int)hists.size(), CV_64FC1) - mclmat;
-        // clear self references
-        for(int i = 0; i < hists.size(); i++) {
-            mclmat.at<double>(i,i) = 0;             
-        }
-
-        printf("Inverted Probs:\n");
-        printMat(mclmat, it->first);
-        */
-
-        /*
-        mclmat *= (int)hists.size();
-        printf("Inverted Scaled Probs:\n");
-        printMat(mclmat, it->first);
-
-        mcl_normalize(mclmat);
-        printf("Inverted Normalized Probs:\n");
-        printMat(mclmat, it->first);
-
-        mcl_inflate(mclmat, mcl_inflation_power);
-        printf("Inverted Normalized Inflated Probs:\n");
-        printMat(mclmat, it->first);
-        */
         
-        /*
-        mcl_inflate(mclmat, mcl_inflation_power*2);
-        printf("Pre-Inflated:\n");
-        printMat(mclmat, it->first);
-        */
+        if(mcl_iterations <= 0) {
+            // iterate until no change is found
+            Mat prev = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
+            int iters = 0;
+            bool same = false;
+            while(!same) {
+                iters++;
+                // MCL
+                mcl_expand(mclmat, mcl_expansion_power);
+                mcl_inflate(mclmat, (mcl_inflation_power+i));
+                mcl_prune(mclmat, mcl_prune_min);
 
-        // perform mcl inflation iterations
-        for(int i = 0; i < mcl_iterations; i++) {
-            
-            mcl_expand(mclmat, mcl_expansion_power);
-            /*
-            printf("Expanded - Iteration %d:\n", i);
-            printMat(mclmat, it->first);
-            */
-
-            mcl_inflate(mclmat, (mcl_inflation_power+i));
-            /*
-            printf("Inflated - Iteration %d\n", i);
-            printMat(mclmat, it->first);
-            */
-
-            mcl_prune(mclmat, mcl_prune_min);
-            /*
-            printf("Pruned - Result of Iteration %d\n", i);
-            printMat(mclmat, it->first);
-
-            printf("=-=-=\n");
-            */
+                // Check Prev
+                Mat diff;
+                absdiff(mclmat, prev, diff);
+                mcl_prune(diff, mcl_comp_epsilon);
+                same = (countNonZero(diff) == 0);
+            }
+            printf("Num Iterations: %d\n", iters);
         }
+        else {
+            // perform mcl inflation iterations
+            for(int i = 0; i < mcl_iterations; i++) {
+                
+                mcl_expand(mclmat, mcl_expansion_power);
+                /*
+                printf("Expanded - Iteration %d:\n", i);
+                printMat(mclmat, it->first);
+                */
+
+                mcl_inflate(mclmat, (mcl_inflation_power+i));
+                /*
+                printf("Inflated - Iteration %d\n", i);
+                printMat(mclmat, it->first);
+                */
+
+                mcl_prune(mclmat, mcl_prune_min);
+                /*
+                printf("Pruned - Result of Iteration %d\n", i);
+                printMat(mclmat, it->first);
+
+                printf("=-=-=\n");
+                */
+            }
+        }
+
         
         /*
         printf("Final Iteration:\n");
@@ -955,7 +921,6 @@ void xLBPH::clusterHistograms() {
 
         // interpret clusters
         std::map<int, std::set<int> > clusters_map;
-
         for(int vert = 0; vert < mclmat.rows; vert++) {
             //std::cout << "checking vert " << vert << "\n";
             for(int check = 0; check < mclmat.cols; check ++) {
@@ -963,7 +928,7 @@ void xLBPH::clusterHistograms() {
                 //std::cout << "\tchecking check " << check << " | dist: " << dist << "\n";
                 if(dist > 0) {
                     // we want to add it
-                    // check if it already has
+                    // check if it already has been added somewhere
                     bool found = false;
                     for(int i = 0; i < vert; i++) {
                         if(!clusters_map[i].empty() && clusters_map[i].find(vert) != clusters_map[i].end()) {
@@ -979,26 +944,6 @@ void xLBPH::clusterHistograms() {
                 }
             } 
         }
-
-
-        /*
-        for(int i = 0; i < mclmat.cols; i++) {
-            
-            for(int j = 0; j < mclmat.rows; j++) {
-                if((int)round(mclmat.at<double>(j,i)) == 1) {
-                    bool found = false;
-                    for(int k = 0; k < i; k++) {
-                        if(!clusters_map[k].empty() && clusters_map[k].find(j) != clusters_map[k].end()) {
-                            found = true; 
-                        } 
-                    }
-
-                    if(!found)
-                        clusters_map[i].insert(j);
-                }
-            }
-        }
-        */ 
     
         
         std::vector<std::set<int> > clusters;
@@ -1015,55 +960,6 @@ void xLBPH::clusterHistograms() {
             if(!it->second.empty())
                 clusters.push_back(it->second);
         }
-
-
-        /*
-        std::vector<std::set<int> > clusters;
-        for(int j = 0; j < mclmat.rows; j++) {
-            // check if mat j is already in a cluster 
-            bool found = false;
-            std::set<int> cluster;
-            for(size_t idx = 0; idx < clusters.size(); idx++) {
-                std::set<int> check = clusters.at(idx);
-                if(check.find(j) != check.end()) {
-                    cluster = check;
-                    found = true;
-                    break;
-                }
-            }
-
-            for(int i = 0; i < mclmat.cols; i++) {
-                if((int)round(mclmat.at<double>(i,j)) == 1) {
-                    if(!found) {
-                        for(size_t idx = 0; idx < clusters.size(); idx++) {
-                            std::set<int> check = clusters.at(idx);
-                            if(check.find(i) != check.end()) {
-                                cluster = check;
-                                found = true;
-                                break;
-                            }
-                        }
-
-                        if(found) {
-                           cluster.insert(j);  
-                        }
-                        else {
-                            cluster.insert(i);
-                        }
-                    }
-                    else {
-                        // add mat i
-                        cluster.insert(i);
-                    }
-                }
-            }
-            
-            if(!found) {
-                cluster.insert(j);
-                clusters.push_back(cluster);
-            }
-        }
-        */
 
         //double clusterRatio = (int)clusters.size() / (double)hists.size(); 
         int worstCase = 0;
@@ -1095,52 +991,6 @@ void xLBPH::clusterHistograms() {
     avgCheckRatio /= (int)_histograms.size();
     printf("\n### Overall ###\n");
     printf("Average Check Ratio: %7.3f\n", avgCheckRatio);
-
-    /*
-    Mat zero = Mat::zeros(1, getHistogramSize(), CV_32FC1);
-    for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
-        std::vector<Mat> hists = it->second;
-
-        Mat distmat = Mat::zeros((int)hists.size(), (int)hists.size(), CV_32FC1);
-        std::vector<double> ranges;
-        std::cout << "Hist dists from eachother:\n";
-        for(size_t i = 0; i < hists.size() - 1; i++) {
-
-            double zerodist = compareHist(hists.at((int)i), zero, COMP_ALG);
-
-            std::cout << "Dists from " << i << " -> ";
-            std::vector<double> dists;
-            for(size_t j = i + 1; j < hists.size(); j++) {
-                double dist = compareHist(hists.at((int)i), hists.at((int)j), COMP_ALG);
-                dists.push_back(dist);
-                distmat.at<float>(i, j) = (float)dist;
-                distmat.at<float>(j, i) = (float)dist;
-                //std::cout << dist << ", ";
-            } 
-            std::sort(dists.begin(), dists.end());
-            double avg = 0;
-            for(size_t idx = 0; idx < dists.size(); idx++)
-                avg += dists.at((int)idx);
-            avg /= (int)dists.size();
-            
-            double range = dists.at((int)dists.size()-1) - dists.at(0);
-            ranges.push_back(range);
-            printf("Best: %7.3f  |  Worst: %7.3f  |  Avg: %7.3f  |  Range: %7.3f  |  Zeros: %7.3f\n", dists.at(0), dists.at((int)dists.size()-1), avg, range, zerodist);
-            //std::cout << "Best: " << dists.at(0) << "  |  Worst: " << dists.at((int)dists.size()-1) << "  |  Avg: " << avg << "  |  Range: " << range;
-            //std::cout << "\n";
-        }
-        
-        _distmats[it->first] = distmat;
-
-        double avg = 0;
-        for(size_t idx = 0; idx < ranges.size(); idx++)
-            avg += ranges.at((int)idx);
-        avg /= (int)ranges.size();
-        std::cout << "Average Range: " << avg << "\n";
-       
-        break; 
-    }
-    */
 
 }
 
