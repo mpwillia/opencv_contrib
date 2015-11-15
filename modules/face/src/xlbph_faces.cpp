@@ -757,7 +757,7 @@ void xLBPH::clusterHistograms() {
     printf("\n");
     printf("\n=========\n");
     */
-
+    double avgCheckRatio = 0;
     for(std::map<int, std::vector<Mat> >::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::vector<Mat> hists = it->second;
         
@@ -1065,7 +1065,7 @@ void xLBPH::clusterHistograms() {
         }
         */
 
-        double ratio = (int)clusters.size() / (double)hists.size(); 
+        //double clusterRatio = (int)clusters.size() / (double)hists.size(); 
         int worstCase = 0;
         for(size_t idx = 0; idx < clusters.size(); idx++) {
             std::set<int> cluster = clusters.at(idx);
@@ -1074,7 +1074,13 @@ void xLBPH::clusterHistograms() {
         }
         worstCase += (int)clusters.size();
         double checkRatio = worstCase / (double)hists.size();
-        printf("%d Clusters from %d hists for %d - Cluster Ratio: %7.3f - Worst Case Checks: %d - Check Ratio: %7.3f\n", (int)clusters.size(), (int)hists.size(), it->first, ratio, worstCase, checkRatio);
+        avgCheckRatio += checkRatio;
+        printf("=== Cluster Stats [%d] ===\n", it->first);
+        printf("Total Hists: - - > %7d\n", (int)hists.size());
+        printf("Total Clusters:  > %7d\n", (int)clusters.size());
+        printf("Worst Case Checks: %7d\n", worstCase);
+        printf("Check Ratio: - - > %7.3f (lower = better)\n", checkRatio);
+        //printf("%d Clusters from %d hists for %d - Cluster Ratio: %7.3f - Worst Case Checks: %d - Check Ratio: %7.3f\n", (int)clusters.size(), (int)hists.size(), it->first, ratio, worstCase, checkRatio);
         for(size_t idx = 0; idx < clusters.size(); idx++) {
             std::set<int> cluster = clusters.at(idx);
             for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
@@ -1086,6 +1092,9 @@ void xLBPH::clusterHistograms() {
 
         //break;
     }
+    avgCheckRatio /= (int)hists.size();
+    printf("\n### Overall ###\n");
+    printf("Average Check Ratio: %7.3f\n", avgCheckRatio);
 
     /*
     Mat zero = Mat::zeros(1, getHistogramSize(), CV_32FC1);
