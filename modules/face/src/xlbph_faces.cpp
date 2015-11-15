@@ -142,7 +142,7 @@ private:
     // Histogram Clustering - Settings
     double cluster_tierStep = 0.01; // Sets how large a tier is, default is 0.01 or 1%
     int cluster_numTiers = 10; // Sets how many tiers to keep, default is 10, or 10% max tier
-    bool cluster_breakWorst = true; // Sets whether or not to always break the worst connection even if it falls within a valid tier, default is true
+    int cluster_forceBreak = 1; // Sets how many connections to always break, always breaks the worst first
 
     // MCL Clustering Algorithm - Functions
     void mcl_normalize(Mat &src);
@@ -262,15 +262,15 @@ public:
     //--------------------------------------------------------------------------
     
     void setMCLSettings(int numIters, int e, double r);
-    void setClusterSettings(double tierStep, int numTiers, bool breakWorst);
+    void setClusterSettings(double tierStep, int numTiers, int forceBreak);
 
     void test();
 };
 
-void xLBPH::setClusterSettings(double tierStep, int numTiers, bool breakWorst) {
+void xLBPH::setClusterSettings(double tierStep, int numTiers, int forceBreak) {
     cluster_tierStep = tierStep;
     cluster_numTiers = numTiers;
-    cluster_breakWorst = breakWorst;
+    cluster_forceBreak = forceBreak;
 } 
 
 
@@ -850,7 +850,7 @@ void xLBPH::clusterHistograms() {
 
             // calculate weights
             for(size_t j = 0; j < mclmat.cols; j++) {
-                double weight = (cluster_numTiers+ 1) - mclmat.at<double>(j,i);
+                double weight = (cluster_numTiers+1) - mclmat.at<double>(j,i);
                 mclmat.at<double>(j,i) = (weight <= 0) ? 0 : weight;
             }
         }
@@ -876,7 +876,7 @@ void xLBPH::clusterHistograms() {
                 iters++;
                 // MCL
                 mcl_expand(mclmat, mcl_expansion_power);
-                mcl_inflate(mclmat, (mcl_inflation_power+i));
+                mcl_inflate(mclmat, mcl_inflation_power);
                 mcl_prune(mclmat, mcl_prune_min);
 
                 // Check Prev
@@ -897,7 +897,7 @@ void xLBPH::clusterHistograms() {
                 printMat(mclmat, it->first);
                 */
 
-                mcl_inflate(mclmat, (mcl_inflation_power+i));
+                mcl_inflate(mclmat, mcl_inflation_power);
                 /*
                 printf("Inflated - Iteration %d\n", i);
                 printMat(mclmat, it->first);
