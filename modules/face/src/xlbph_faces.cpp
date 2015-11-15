@@ -142,7 +142,6 @@ private:
     // Histogram Clustering - Settings
     double cluster_tierStep = 0.01; // Sets how large a tier is, default is 0.01 or 1%
     int cluster_numTiers = 10; // Sets how many tiers to keep, default is 10, or 10% max tier
-    int cluster_forceBreak = 1; // Sets how many connections to always break, always breaks the worst first
 
     // MCL Clustering Algorithm - Functions
     void mcl_normalize(Mat &src);
@@ -262,15 +261,14 @@ public:
     //--------------------------------------------------------------------------
     
     void setMCLSettings(int numIters, int e, double r);
-    void setClusterSettings(double tierStep, int numTiers, int forceBreak);
+    void setClusterSettings(double tierStep, int numTiers);
 
     void test();
 };
 
-void xLBPH::setClusterSettings(double tierStep, int numTiers, int forceBreak) {
+void xLBPH::setClusterSettings(double tierStep, int numTiers) {
     cluster_tierStep = tierStep;
     cluster_numTiers = numTiers;
-    cluster_forceBreak = forceBreak;
 } 
 
 
@@ -842,7 +840,7 @@ void xLBPH::clusterHistograms() {
                 else 
                     mclmat.at<double>(j,i) = 1; 
             }
-            
+
             /*
             printf("Raw Tiers (Lower is Better, Zeros are now Ones):\n");
             printMat(mclmat, it->first);
@@ -853,6 +851,7 @@ void xLBPH::clusterHistograms() {
                 double weight = (cluster_numTiers+1) - mclmat.at<double>(j,i);
                 mclmat.at<double>(j,i) = (weight <= 0) ? 0 : weight;
             }
+
         }
         
         /*
