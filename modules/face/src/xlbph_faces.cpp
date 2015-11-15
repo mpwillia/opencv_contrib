@@ -1092,7 +1092,7 @@ void xLBPH::clusterHistograms() {
 
         //break;
     }
-    avgCheckRatio /= (int)hists.size();
+    avgCheckRatio /= (int)_histograms.size();
     printf("\n### Overall ###\n");
     printf("Average Check Ratio: %7.3f\n", avgCheckRatio);
 
