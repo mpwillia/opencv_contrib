@@ -774,8 +774,6 @@ void xLBPH::mcl_converge(Mat &mclmat, int e, double r, double prune) {
         // Check Prev
         Mat diff;
         absdiff(mclmat, prev, diff);
-        printf("Diff Mat:\n");
-        printMat(diff, iters);
         mcl_prune(diff, mcl_comp_epsilon);
         same = (countNonZero(diff) == 0);
     }
