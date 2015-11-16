@@ -780,11 +780,6 @@ void xLBPH::mcl_converge(Mat &mclmat, int e, double r, double prune) {
         same = (countNonZero(diff) == 0);
     }
     printf("Num Iterations: %d\n", iters);
-    printf("Prev Iteration:\n");
-    printMat(prev, -1);
-    printf("Final Iteration:\n");
-    printMat(mclmat, -1);
-
     prev.release();
 }
 
@@ -895,7 +890,10 @@ void xLBPH::cluster_label(int label, std::vector<std::set<int> > &clusters) {
         } 
     }
     
-    int optimalWorstCase = (int)ceil(sqrt((int)hists.size())*2);
+    int optimalCase = (int)ceil(sqrt((int)hists.size())*2);
+    double checkRatio = optimalCase / (double)hists.size();
+    printf("Optimal Case Checks: %d\n", optimalCase);
+    printf("Optimal Check Ratio: %.3f\n", checkRatio);
 
     Mat mclmat;
     cluster_dists(dists, mclmat, mcl_inflation_power);
