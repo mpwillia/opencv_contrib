@@ -935,7 +935,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int> > &cluste
         clusters.clear();
         cluster_interpret(mclmat, clusters);
         checkClusters = (int)clusters.size();
-        printf("r: %0.3f  |  clusters: %d\n", r, checkClusters);
+        printf("r: %0.3f  |  checkClusters: %d  |  prevClusters: %d  |  optimalClusters: %d\n", r, checkClusters, prevClusters, optimalClusters);
     }
     
 
