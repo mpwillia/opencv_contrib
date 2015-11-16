@@ -668,18 +668,19 @@ void xLBPH::printMat(const Mat &mat, int label) const {
         printf("___%3d___|", x);
     }
     printf("\n");
-
+    
+    int width = 7;
     for(int y = 0; y < mat.rows; y++) {
         printf(" %2d | ", y);
         for(int x = 0; x < mat.cols; x++) {
             switch (mat.type()) {
-                case CV_8SC1:  printf("%7d | ", mat.at<char>(x,y)); break; 
-                case CV_8UC1:  printf("%7d | ", mat.at<unsigned char>(x,y)); break;
-                case CV_16SC1: printf("%7d | ", mat.at<short>(x,y)); break; 
-                case CV_16UC1: printf("%7d | ", mat.at<unsigned short>(x,y)); break;
-                case CV_32SC1: printf("%7d | ", mat.at<int>(x,y)); break;
-                case CV_32FC1: printf("%7.6f | ", mat.at<float>(x,y)); break;
-                case CV_64FC1: printf("%7.6f | ", mat.at<double>(x,y)); break;
+                case CV_8SC1:  printf("%*d | ", width, mat.at<char>(x,y)); break; 
+                case CV_8UC1:  printf("%*d | ", width, mat.at<unsigned char>(x,y)); break;
+                case CV_16SC1: printf("%*d | ", width, mat.at<short>(x,y)); break; 
+                case CV_16UC1: printf("%*d | ", width, mat.at<unsigned short>(x,y)); break;
+                case CV_32SC1: printf("%*d | ", width, mat.at<int>(x,y)); break;
+                case CV_32FC1: printf("%*.*f | ", width, width-2, mat.at<float>(x,y)); break;
+                case CV_64FC1: printf("%*.*f | ", wdith, width-2, mat.at<double>(x,y)); break;
                 default: printf(" type! | "); break;
             }
         }
