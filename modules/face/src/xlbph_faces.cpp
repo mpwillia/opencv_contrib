@@ -886,6 +886,8 @@ void xLBPH::clusterHistograms() {
                 prev = mclmat;
             }
             printf("Num Iterations: %d\n", iters);
+            printf("Prev Iteration:\n");
+            printMat(prev, it->first);
             printf("Final Iteration:\n");
             printMat(mclmat, it->first);
         }
