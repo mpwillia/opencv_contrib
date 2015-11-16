@@ -156,7 +156,7 @@ private:
     int mcl_expansion_power = 2; // Sets the expansion power exponent, default is 2
     double mcl_inflation_power = 2; // Sets the inflation power exponent, default is 2 
     double mcl_prune_min = 0.001; // Sets the minimum value to prune, any values below this are set to zero, default is 0.001
-    double mcl_comp_epsilon = 0.001; // Sets the epsilon value for comparing doubles, default is 0.00001;
+    double mcl_comp_epsilon = 0.00001; // Sets the epsilon value for comparing doubles, default is 0.00001;
 
     //--------------------------------------------------------------------------
     // Misc 
