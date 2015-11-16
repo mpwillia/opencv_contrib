@@ -141,7 +141,7 @@ private:
     void clusterHistograms();
     void cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int numTiers);
     void cluster_dists(Mat &dists, Mat &mclmat, double r);
-    void cluster_interpret(Mat &mclmat, std::vector<std::set<int> > clusters);
+    void cluster_interpret(Mat &mclmat, std::vector<std::set<int> > &clusters);
     void cluster_label(int label, std::vector<std::set<int> > &clusters);
 
     void printMat(const Mat &mat, int label) const;
@@ -838,7 +838,7 @@ void xLBPH::cluster_dists(Mat &dists, Mat &mclmat, double r) {
     mclmat.create(dists.rows, dists.cols, dists.type());
 
     // find weights
-    cluster_calcWeights(dists, mclmat, cluster_tierStep, cluster_numTiers);
+    cluster_calc_weights(dists, mclmat, cluster_tierStep, cluster_numTiers);
 
     // normalize weights
     mcl_normalize(mclmat);
