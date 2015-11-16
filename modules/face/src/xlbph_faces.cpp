@@ -142,6 +142,8 @@ private:
     void cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int numTiers);
     void cluster_dists(Mat &dists, Mat &mclmat, double r);
     void cluster_interpret(Mat &mclmat, std::vector<std::set<int> > &clusters);
+    double cluster_ratio(std::vector<std::set<int> > &clusters);
+    void cluster_find_optimal(Mat &dists, std::vector<std::set<int> > &clusters);
     void cluster_label(int label, std::vector<std::set<int> > &clusters);
 
     void printMat(const Mat &mat, int label) const;
@@ -171,6 +173,8 @@ private:
     int mcl_iterations = 10;
     int mcl_expansion_power = 2; // Sets the expansion power exponent, default is 2
     double mcl_inflation_power = 2; // Sets the inflation power exponent, default is 2 
+    double mcl_inflation_min = 1.1;
+    double mcl_inflation_max = 4;
     double mcl_prune_min = 0.001; // Sets the minimum value to prune, any values below this are set to zero, default is 0.001
     double mcl_comp_epsilon = 0.00001; // Sets the epsilon value for comparing doubles, default is 0.00001;
 
@@ -875,6 +879,65 @@ void xLBPH::cluster_interpret(Mat &mclmat, std::vector<std::set<int> > &clusters
     }
 }
 
+double xLBPH::cluster_ratio(std::vector<std::set<int> > &clusters) {
+    int worstCase = 0;
+    for(size_t idx = 0; idx < clusters.size(); idx++) {
+        std::set<int> cluster = clusters.at(idx);
+        if((int)cluster.size() > worstCase)
+            worstCase = (int)cluster.size();
+    }
+    worstCase += (int)clusters.size();
+    return  worstCase / (double)numHists;
+}
+
+void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int> > &clusters) {
+    
+    int optimalClusters = dists.rows;
+    int optimalCase = (int)ceil(sqrt((int)dists.rows)*2);
+    double optimalRatio = optimalCase / (double)dists.rows;
+    printf("Optimal Case Checks: %d\n", optimalCase);
+    printf("Optimal Check Ratio: %.3f\n", optimalRatio);
+
+    Mat initial;
+    double r = mcl_inflation_power;
+    cluster_dists(dists, initial, r);
+    cluster_interpret(initial, clusters);
+    
+    int checkClusters = (int)clusters.size();
+    int prevClusters = optimalClusters;
+
+    double mcl_inflation_min = 1.1;
+    double mcl_inflation_max = 4;
+    while(checkClusters != prevClusters && checkClusters != optimalClusters) {
+        
+        prevClusters = checkClusters;
+        if(checkClusters < optimalClusters) {
+            // we want more clusters - larger r 
+            if(r <= mcl_inflation_power) // r <= baseline
+                r = (r + mcl_inflation_power) / 2;
+            else // r > baseline
+                r = (r + mcl_inflation_max) / 2;
+        } 
+        else if(checkClusters > optimalClusters) {
+            // we want fewer clusters - smaller r
+            if(r <= mcl_inflation_power) // r <= baseline | (1.5 + 2) / 2
+                r = (r + mcl_inflation_min) / 2;
+            else // r > baseline | (2.5 + 4) / 2
+                r = (r + mcl_inflation_power) / 2;
+        }
+        
+        printf("r: %0.3f\n", r);
+        Mat mclmat;
+        cluster_dists(dists, mclmat, r);
+        clusters.clear();
+        cluster_interpret(mclmat, clusters);
+        checkClusters = (int)clusters.size();
+
+    }
+    
+
+}
+
 void xLBPH::cluster_label(int label, std::vector<std::set<int> > &clusters) {
      
     std::vector<Mat> hists = _histograms[label];
@@ -888,14 +951,12 @@ void xLBPH::cluster_label(int label, std::vector<std::set<int> > &clusters) {
         } 
     }
     
-    int optimalCase = (int)ceil(sqrt((int)hists.size())*2);
-    double checkRatio = optimalCase / (double)hists.size();
-    printf("Optimal Case Checks: %d\n", optimalCase);
-    printf("Optimal Check Ratio: %.3f\n", checkRatio);
-
+    cluster_find_optimal(dists, clusters);
+    /*
     Mat mclmat;
     cluster_dists(dists, mclmat, mcl_inflation_power);
     cluster_interpret(mclmat, clusters);
+    */
 }
 
 void xLBPH::clusterHistograms() {
