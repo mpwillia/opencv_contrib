@@ -663,13 +663,14 @@ void xLBPH::munmapHistograms() {
 //------------------------------------------------------------------------------
 
 void xLBPH::printMat(const Mat &mat, int label) const {
+
+    int width = 7;
     printf("%4d_", label);
     for(int x = 0; x < mat.cols; x++) {
-        printf("___%3d___|", x);
+        printf("___%*d___|", width-4, x);
     }
     printf("\n");
     
-    int width = 7;
     for(int y = 0; y < mat.rows; y++) {
         printf(" %2d | ", y);
         for(int x = 0; x < mat.cols; x++) {
