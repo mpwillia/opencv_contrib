@@ -769,7 +769,7 @@ void xLBPH::mcl_converge(Mat &mclmat, int e, double r, double prune) {
         prev = mclmat.clone();
         iters++;
         // MCL
-        mcl_iteration(e,r,prune);
+        mcl_iteration(mclmat, e, r, prune);
 
         // Check Prev
         Mat diff;
@@ -781,9 +781,9 @@ void xLBPH::mcl_converge(Mat &mclmat, int e, double r, double prune) {
     }
     printf("Num Iterations: %d\n", iters);
     printf("Prev Iteration:\n");
-    printMat(prev, it->first);
+    printMat(prev, -1);
     printf("Final Iteration:\n");
-    printMat(mclmat, it->first);
+    printMat(mclmat, -1);
 
     prev.release();
 }
@@ -791,10 +791,10 @@ void xLBPH::mcl_converge(Mat &mclmat, int e, double r, double prune) {
 
 // Markov Clustering - Runs MCL iterations on src
 void xLBPH::mcl_cluster(Mat &mclmat, int iters, int e, double r, double prune) {
-    if(iterations <= 0)
+    if(iters <= 0)
         mcl_converge(mclmat, e, r, prune);
     else
-        for(int i = 0; i < iterations; i++)
+        for(int i = 0; i < iters; i++)
             mcl_iteration(mclmat, e, r, prune);
 }
 
@@ -804,7 +804,7 @@ void xLBPH::mcl_cluster(Mat &mclmat, int iters, int e, double r, double prune) {
 //------------------------------------------------------------------------------
 // Calculates the weights between each histogram and puts them in weights
 void xLBPH::cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int numTiers) {
-    weights.create(dists.rows, dists.cols, dists.type())
+    weights.create(dists.rows, dists.cols, dists.type());
 
     // calculate tiers and weights
     for(size_t i = 0; i < dists.rows; i++) {
