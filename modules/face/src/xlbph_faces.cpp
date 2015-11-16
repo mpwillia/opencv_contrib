@@ -874,7 +874,7 @@ void xLBPH::clusterHistograms() {
             int iters = 0;
             bool same = false;
             while(!same) {
-                prev = mclmat;
+                prev = mclmat.clone();
                 iters++;
                 // MCL
                 mcl_expand(mclmat, mcl_expansion_power);
