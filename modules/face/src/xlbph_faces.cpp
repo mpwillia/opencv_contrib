@@ -173,8 +173,6 @@ private:
     int mcl_iterations = 10;
     int mcl_expansion_power = 2; // Sets the expansion power exponent, default is 2
     double mcl_inflation_power = 2; // Sets the inflation power exponent, default is 2 
-    double mcl_inflation_min = 1.1;
-    double mcl_inflation_max = 4;
     double mcl_prune_min = 0.001; // Sets the minimum value to prune, any values below this are set to zero, default is 0.001
     double mcl_comp_epsilon = 0.00001; // Sets the epsilon value for comparing doubles, default is 0.00001;
 
@@ -880,9 +878,11 @@ void xLBPH::cluster_interpret(Mat &mclmat, std::vector<std::set<int> > &clusters
 }
 
 double xLBPH::cluster_ratio(std::vector<std::set<int> > &clusters) {
+    int numHists = 0;
     int worstCase = 0;
     for(size_t idx = 0; idx < clusters.size(); idx++) {
         std::set<int> cluster = clusters.at(idx);
+        numHists += (int)cluster.size();
         if((int)cluster.size() > worstCase)
             worstCase = (int)cluster.size();
     }
@@ -906,8 +906,10 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int> > &cluste
     int checkClusters = (int)clusters.size();
     int prevClusters = optimalClusters;
 
-    double mcl_inflation_min = 1.1;
-    double mcl_inflation_max = 4;
+    double mcl_inflation_min = mcl_inflation_power / 2;
+    if(mcl_inflation_min <= 1)
+        mcl_inflation_min = 1.1;
+    double mcl_inflation_max = mcl_inflation_power * 2;
     while(checkClusters != prevClusters && checkClusters != optimalClusters) {
         
         prevClusters = checkClusters;
