@@ -892,11 +892,13 @@ double xLBPH::cluster_ratio(std::vector<std::set<int> > &clusters) {
 
 void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int> > &clusters) {
     
+    printf("=========\n");
     int optimalClusters = dists.rows;
     int optimalCase = (int)ceil(sqrt((int)dists.rows)*2);
     double optimalRatio = optimalCase / (double)dists.rows;
     printf("Optimal Case Checks: %d\n", optimalCase);
     printf("Optimal Check Ratio: %.3f\n", optimalRatio);
+    printf("Optimal Clusters: %d\n", optimalClusters);
 
     Mat initial;
     double r = mcl_inflation_power;
@@ -928,13 +930,12 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int> > &cluste
                 r = (r + mcl_inflation_power) / 2;
         }
         
-        printf("r: %0.3f\n", r);
         Mat mclmat;
         cluster_dists(dists, mclmat, r);
         clusters.clear();
         cluster_interpret(mclmat, clusters);
         checkClusters = (int)clusters.size();
-
+        printf("r: %0.3f  |  clusters: %d\n", r, checkClusters);
     }
     
 
