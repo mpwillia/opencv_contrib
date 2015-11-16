@@ -870,10 +870,11 @@ void xLBPH::clusterHistograms() {
         
         if(mcl_iterations <= 0) {
             // iterate until no change is found
-            Mat prev = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
+            Mat prev; 
             int iters = 0;
             bool same = false;
             while(!same) {
+                prev = mclmat;
                 iters++;
                 // MCL
                 mcl_expand(mclmat, mcl_expansion_power);
@@ -885,7 +886,6 @@ void xLBPH::clusterHistograms() {
                 absdiff(mclmat, prev, diff);
                 mcl_prune(diff, mcl_comp_epsilon);
                 same = (countNonZero(diff) == 0);
-                prev = mclmat;
             }
             printf("Num Iterations: %d\n", iters);
             printf("Prev Iteration:\n");
