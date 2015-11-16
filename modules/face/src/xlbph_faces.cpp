@@ -919,7 +919,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int> > &cluste
         if(checkClusters < optimalClusters) {
             printf("larger r: %.3f -> ", r);
             // we want more clusters - larger r 
-            if(r <= mcl_inflation_power) // r <= baseline
+            if(r < mcl_inflation_power) // r <= baseline
                 r = (r + mcl_inflation_power) / 2;
             else // r > baseline
                 r = (r + mcl_inflation_max) / 2;
