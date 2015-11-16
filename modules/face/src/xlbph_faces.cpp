@@ -893,7 +893,7 @@ double xLBPH::cluster_ratio(std::vector<std::set<int> > &clusters) {
 void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int> > &clusters) {
     
     printf("=========\n");
-    int optimalClusters = dists.rows;
+    int optimalClusters = ceil(sqrt((int)dists.rows));
     int optimalCase = (int)ceil(sqrt((int)dists.rows)*2);
     double optimalRatio = optimalCase / (double)dists.rows;
     printf("Optimal Case Checks: %d\n", optimalCase);
