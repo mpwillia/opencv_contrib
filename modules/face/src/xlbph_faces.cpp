@@ -1677,7 +1677,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
         performMultithreadedComp<Mat, Mat, double>(query, histavgs, clusterAvgsDists, getMaxThreads(), &xLBPH::compareHistograms);
        
         printf(" - Got dists back from threads -> ");
-        for(int i = 0; i < clusterAvgsDists; i++)
+        for(int i = 0; i < (int)clusterAvgsDists.size(); i++)
             printf("%0.3f, ", clusterAvgsDists.at(i));
         printf("\n");
 
