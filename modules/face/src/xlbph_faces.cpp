@@ -1664,25 +1664,36 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
     std::vector<std::pair<int, std::vector<Mat>>> labelhists;
     for(size_t idx = 0; idx < bestlabels.size() && (int)idx < numLabelsToCheck; idx++) {
         int label = bestlabels.at(idx).second;
+        printf("Finding best cluster for PID %d\n", label);
 
         std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters = _clusters.at(label);
         std::vector<Mat> clusterAvgs;
         for(size_t clusterIdx = 0; clusterIdx < labelClusters.size(); clusterIdx++) {
             clusterAvgs.push_back(labelClusters.at(clusterIdx).first);
         }
-
+        
+        printf(" - Has %d clusters, dispatching comparison threads...\n", (int)clusterAvgs.size());
         std::vector<double> clusterAvgsDists;
         performMultithreadedComp<Mat, Mat, double>(query, histavgs, clusterAvgsDists, getMaxThreads(), &xLBPH::compareHistograms);
-        
+       
+        printf(" - Got dists back from threads -> ");
+        for(int i = 0; i < clusterAvgsDists; i++)
+            printf("%0.3f, ", clusterAvgsDists.at(i));
+        printf("\n");
+
+        printf(" - Finding best...");
         int bestClusterIdx = 0;
         for(size_t distsIdx = 1; distsIdx < clusterAvgsDists.size(); distsIdx++) {
             if(clusterAvgsDists.at(distsIdx) > clusterAvgsDists.at(bestClusterIdx)) 
                 bestClusterIdx = distsIdx;
         }
-        
+        printf(" - Found best at index of %d with dist of %.3f\n", bestClusterIdx, clusterAvgsDists.at(bestClusterIdx));
+
+        printf(" - Found best, pushing to labelhists...\n");
         labelhists.push_back(std::pair<int, std::vector<Mat>>(label, labelClusters.at(bestClusterIdx).second));
     }
-
+    
+    printf(" - doing old avg predict stuff that should just work\n");
     std::vector<std::pair<int, std::vector<double>>> labeldists;
 
     performMultithreadedComp<Mat, std::pair<int, std::vector<Mat>>, std::pair<int, std::vector<double>>>(query, labelhists, labeldists, getLabelThreads(), &xLBPH::compareLabelHistograms);
