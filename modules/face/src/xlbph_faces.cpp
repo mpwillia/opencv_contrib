@@ -146,7 +146,8 @@ private:
     double cluster_ratio(std::vector<std::set<int>> &clusters);
     void cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &clusters);
     
-    void cluster_label(int label, std::vector<std::set<int>> &clusters);
+    void cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>>> &matClusters);
+    //void cluster_label(int label, std::vector<std::set<int>> &clusters);
 
     //void cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>>> &clusters);
 
