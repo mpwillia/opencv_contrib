@@ -913,11 +913,13 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int> > &cluste
     if(mcl_inflation_min <= 1)
         mcl_inflation_min = 1.1;
     double mcl_inflation_max = mcl_inflation_power * 2;
+    bool larger = true;
     while(checkClusters != prevClusters && checkClusters != optimalClusters) {
         
         prevClusters = checkClusters;
         if(checkClusters < optimalClusters) {
             printf("larger r: %.3f -> ", r);
+            larger = true;
             // we want more clusters - larger r 
             if(r < mcl_inflation_power) // r <= baseline
                 r = (r + mcl_inflation_power) / 2;
@@ -927,6 +929,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int> > &cluste
         } 
         else if(checkClusters > optimalClusters) {
             printf("smaller r: %.3f -> ", r);
+            larger = false;
             // we want fewer clusters - smaller r
             if(r <= mcl_inflation_power) // r <= baseline | (1.5 + 2) / 2
                 r = (r + mcl_inflation_min) / 2;
@@ -943,6 +946,24 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int> > &cluste
         printf("r: %0.3f  |  checkClusters: %d  |  prevClusters: %d  |  optimalClusters: %d\n", r, checkClusters, prevClusters, optimalClusters);
     }
     
+    if(checkClusters != optimalClusters) {
+        if((larger && r != mcl_inflation_max) || (!larger && r != mcl_inflation_min))
+        {
+            if(larger) 
+                r = mcl_inflation_max;
+            else
+                r = mcl_inflation_min;
+
+            Mat mclmat;
+            cluster_dists(dists, mclmat, r);
+            clusters.clear();
+            cluster_interpret(mclmat, clusters);
+            checkClusters = (int)clusters.size();
+
+            printf("last chance r: %0.3f  |  checkClusters: %d  |  optimalClusters: %d\n", r, checkClusters, optimalClusters);
+        }
+    }
+
 
 }
 
