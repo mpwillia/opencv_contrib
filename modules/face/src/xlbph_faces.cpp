@@ -144,7 +144,10 @@ private:
     void cluster_interpret(Mat &mclmat, std::vector<std::set<int>> &clusters);
     double cluster_ratio(std::vector<std::set<int>> &clusters);
     void cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &clusters);
+    
     void cluster_label(int label, std::vector<std::set<int>> &clusters);
+
+    //void cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>>> &clusters);
 
     void printMat(const Mat &mat, int label) const;
     
@@ -969,7 +972,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
 
 }
 
-//void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>>> &clusters)
+//void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>>> &clusters) {
 void xLBPH::cluster_label(int label, std::vector<std::set<int>> &clusters) {
      
     std::vector<Mat> hists = _histograms[label];
@@ -983,7 +986,26 @@ void xLBPH::cluster_label(int label, std::vector<std::set<int>> &clusters) {
         } 
     }
      
+    std::vector<std::set<int>> clusters;
     cluster_find_optimal(dists, clusters);
+    
+    std::vector<std::pair<Mat, std::vector<Mat>>> matClusters;
+    for(size_t i = 0; i < clusters.size(); i++) {
+        std::set<int> cluster = clusters.at((int)i);
+        
+        std::vector<Mat> clusterHists;
+        Mat clusterAvg;
+
+        for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
+            clusterHists.push_back(hists.at(*it));
+        }
+        
+        averageHistograms(clusterHists, clusterAvg);
+
+        matClusters.push_back(std::pair<Mat, std::vector<Mat>>(clusterAvg, clusterHists));
+    }
+
+    //void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const {
 }
 
 void xLBPH::clusterHistograms() {
