@@ -986,7 +986,6 @@ void xLBPH::cluster_label(int label, std::vector<std::set<int>> &clusters) {
         } 
     }
      
-    std::vector<std::set<int>> clusters;
     cluster_find_optimal(dists, clusters);
     
     std::vector<std::pair<Mat, std::vector<Mat>>> matClusters;
