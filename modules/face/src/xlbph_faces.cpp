@@ -1688,9 +1688,10 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
                 bestClusterIdx = distsIdx;
         }
         printf(" - Found best at index of %d with dist of %.3f\n", bestClusterIdx, clusterAvgsDists.at(bestClusterIdx));
+        std::vector<Mat> bestCluster = labelClusters.at(bestClusterIdx).second;
 
-        printf(" - Found best, pushing to labelhists...\n");
-        labelhists.push_back(std::pair<int, std::vector<Mat>>(label, labelClusters.at(bestClusterIdx).second));
+        printf(" - Pushing best to labelhists...\n");
+        labelhists.push_back(std::pair<int, std::vector<Mat>>(label, bestCluster));
     }
     
     printf(" - doing old avg predict stuff that should just work\n");
