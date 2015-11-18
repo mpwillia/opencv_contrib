@@ -1685,7 +1685,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
         printf(" - Finding best...");
         int bestClusterIdx = 0;
         for(size_t distsIdx = 1; distsIdx < clusterAvgsDists.size(); distsIdx++) {
-            if(clusterAvgsDists.at(distsIdx) > clusterAvgsDists.at(bestClusterIdx)) 
+            if(clusterAvgsDists.at(distsIdx) < clusterAvgsDists.at(bestClusterIdx)) 
                 bestClusterIdx = distsIdx;
         }
         printf(" - Found best at index of %d with dist of %.3f\n", bestClusterIdx, clusterAvgsDists.at(bestClusterIdx));
