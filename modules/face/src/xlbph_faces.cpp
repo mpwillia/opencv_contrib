@@ -1682,24 +1682,36 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
             printf("%0.3f, ", clusterAvgsDists.at(i));
         printf("\n");
 
-        printf(" - Finding best...");
+        printf(" - Finding best cluster...");
         int bestClusterIdx = 0;
         for(size_t distsIdx = 1; distsIdx < clusterAvgsDists.size(); distsIdx++) {
             if(clusterAvgsDists.at(distsIdx) < clusterAvgsDists.at(bestClusterIdx)) 
                 bestClusterIdx = distsIdx;
         }
-        printf(" - Found best at index of %d with dist of %.3f\n", bestClusterIdx, clusterAvgsDists.at(bestClusterIdx));
+        printf(" - Found best cluster at index of %d with dist of %.3f\n", bestClusterIdx, clusterAvgsDists.at(bestClusterIdx));
         std::vector<Mat> bestCluster = labelClusters.at(bestClusterIdx).second;
 
-        printf(" - Pushing best to labelhists...\n");
+        printf(" - Pushing best cluster to labelhists...\n");
         labelhists.push_back(std::pair<int, std::vector<Mat>>(label, bestCluster));
     }
     
-    printf(" - doing old avg predict stuff that should just work\n");
+    printf(" - Calculating distances for best clusters...\n");
     std::vector<std::pair<int, std::vector<double>>> labeldists;
 
     performMultithreadedComp<Mat, std::pair<int, std::vector<Mat>>, std::pair<int, std::vector<double>>>(query, labelhists, labeldists, getLabelThreads(), &xLBPH::compareLabelHistograms);
 
+    printf(" - Dists found:\n");
+    for(size_t idx = 0; idx < labeldists.size(); idx++) {
+        int label = labeldists.at((int)idx).first;
+        std::vector<double> dists = labeldists.at((int)idx).second;
+        printf("    - %d: ", label);
+        for(int i = 0 ; i < (int)dists.size(); i++) {
+            printf("%0.3f, ", dists.at(i));
+        }
+        printf("\n");
+    }
+
+    printf(" - Grabbing best predictions for each PID...\n");
     std::vector<std::pair<double, int>> bestpreds;
     for(size_t idx = 0; idx < labeldists.size(); idx++) {
         std::vector<double> dists = labeldists.at((int)idx).second;
