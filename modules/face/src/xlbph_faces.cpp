@@ -784,7 +784,6 @@ void xLBPH::mcl_converge(Mat &mclmat, int e, double r, double prune) {
         mcl_prune(diff, mcl_comp_epsilon);
         same = (countNonZero(diff) == 0);
     }
-    printf("Num Iterations: %d\n", iters);
     prev.release();
 }
 
@@ -904,7 +903,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
     double optimalRatio = optimalCase / (double)dists.rows;
     printf("Optimal Case Checks: %d\n", optimalCase);
     printf("Optimal Check Ratio: %.3f\n", optimalRatio);
-    printf("Optimal Clusters: %d - %d\n", optimalClustersMin, optimalClustersMax);
+    printf("Optimal Clusters: %d - %d\n\n", optimalClustersMin, optimalClustersMax);
 
     Mat initial;
     double r = mcl_inflation_power;
@@ -991,6 +990,8 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
     std::vector<std::set<int>> clusters;
     cluster_find_optimal(dists, clusters);
     
+    printf(" - %d has %d clusters\n", label, (int)clusters.size());
+
     //std::vector<std::pair<Mat, std::vector<Mat>>> matClusters;
     for(size_t i = 0; i < clusters.size(); i++) {
         std::set<int> cluster = clusters.at((int)i);
@@ -1674,7 +1675,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
         
         printf(" - Has %d clusters, dispatching comparison threads...\n", (int)clusterAvgs.size());
         std::vector<double> clusterAvgsDists;
-        performMultithreadedComp<Mat, Mat, double>(query, histavgs, clusterAvgsDists, getMaxThreads(), &xLBPH::compareHistograms);
+        performMultithreadedComp<Mat, Mat, double>(query, clusterAvgs, clusterAvgsDists, getMaxThreads(), &xLBPH::compareHistograms);
        
         printf(" - Got %d dists back from threads -> ", (int)clusterAvgsDists.size());
         for(int i = 0; i < (int)clusterAvgsDists.size(); i++)
