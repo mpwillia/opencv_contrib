@@ -1661,6 +1661,9 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
     if(numLabelsToCheck < minLabelsToCheck)
         numLabelsToCheck = minLabelsToCheck;
 
+    // figure out how many clusters to check per label
+    int numClustersToCheck = 2;
+
     // find best cluster for each best label
     std::vector<std::pair<int, std::vector<Mat>>> labelhists;
     for(size_t idx = 0; idx < bestlabels.size() && (int)idx < numLabelsToCheck; idx++) {
@@ -1679,20 +1682,48 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
        
         printf(" - Got %d dists back from threads -> ", (int)clusterAvgsDists.size());
         for(int i = 0; i < (int)clusterAvgsDists.size(); i++)
-            printf("%0.3f, ", clusterAvgsDists.at(i));
+            printf("[%d: %0.3f], ", i, clusterAvgsDists.at(i));
         printf("\n");
 
         printf(" - Finding best cluster...");
+        std::vector<std::pair<double, int>> bestClusters; 
+        for(size_t clusterIdx = 0; clusterIdx < clusterAvgsDists.size(); clusterIdx++) {
+            bestClusters.push_back(std::pair<double, int>(clusterAvgsDists.at((int)clusterIdx), (int)clusterIdx));
+        }
+        std::sort(bestClusters.begin(), bestClusters.end());
+        
+        printf(" - best clusters: ");
+        for(int i = 0; i < (int)bestClusters.size(); i++) {
+            std::pair<double, int> cluster = bestClusters.at(i);
+            printf("[%d: %0.3f], ", cluster.second, cluster.first);
+        }
+        printf("\n");
+
+        /*
         int bestClusterIdx = 0;
         for(size_t distsIdx = 1; distsIdx < clusterAvgsDists.size(); distsIdx++) {
             if(clusterAvgsDists.at(distsIdx) < clusterAvgsDists.at(bestClusterIdx)) 
                 bestClusterIdx = distsIdx;
         }
+        */
+        
+        printf(" - Using top %d best clusters...\n", numClustersToCheck);
+        std::vector<Mat> combinedClusters;
+        for(size_t bestIdx = 0; bestIdx < bestClusters.size() && (int)bestIdx < numClustersToCheck; bestIdx++) {
+            std::vector<Mat> cluster = labelClusters.at(bestClusters.at((int)bestIdx).second).second; 
+            for(size_t clusterIdx = 0; clusterIdx < cluster.size(); clusterIdx++) {
+               combinedClusters.push_back(cluster.at((int)clusterIdx));
+            }
+        }
+
+        
+        /*
         printf(" - Found best cluster at index of %d with dist of %.3f\n", bestClusterIdx, clusterAvgsDists.at(bestClusterIdx));
         std::vector<Mat> bestCluster = labelClusters.at(bestClusterIdx).second;
+        */
 
-        printf(" - Pushing best cluster to labelhists...\n");
-        labelhists.push_back(std::pair<int, std::vector<Mat>>(label, bestCluster));
+        printf(" - Pushing combined clusters to labelhists...\n");
+        labelhists.push_back(std::pair<int, std::vector<Mat>>(label, combinedClusters));
     }
     
     printf(" - Calculating distances for best clusters...\n");
