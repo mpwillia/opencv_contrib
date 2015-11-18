@@ -896,14 +896,16 @@ double xLBPH::cluster_ratio(std::vector<std::set<int>> &clusters) {
 
 void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &clusters) {
     
-    printf("=========\n");
+    //printf("=========\n");
     int optimalClustersMax = ceil(sqrt(dists.rows));
     int optimalClustersMin = floor(sqrt(dists.rows));
     int optimalCase = (int)ceil(sqrt((int)dists.rows)*2);
     double optimalRatio = optimalCase / (double)dists.rows;
+    /*
     printf("Optimal Case Checks: %d\n", optimalCase);
     printf("Optimal Check Ratio: %.3f\n", optimalRatio);
     printf("Optimal Clusters: %d - %d\n\n", optimalClustersMin, optimalClustersMax);
+    */
 
     Mat initial;
     double r = mcl_inflation_power;
@@ -975,8 +977,12 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
 
 void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>>> &matClusters) {
 //void xLBPH::cluster_label(int label, std::vector<std::set<int>> &clusters) {
-     
+    
     std::vector<Mat> hists = _histograms[label];
+
+    printf(" - calculating clusters for %d with %d histograms...\r", label, (int)hists.size());
+    std::cout << std::flush;
+
     Mat dists = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
     // get raw dists
     for(size_t i = 0; i < hists.size()-1; i++) {
@@ -989,8 +995,8 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
     
     std::vector<std::set<int>> clusters;
     cluster_find_optimal(dists, clusters);
-    
-    printf(" - %d has %d clusters\n", label, (int)clusters.size());
+     
+    printf(" - %d has %d clusters for %d histograms\n", label, (int)clusters.size(), (int)hists.size());
 
     //std::vector<std::pair<Mat, std::vector<Mat>>> matClusters;
     for(size_t i = 0; i < clusters.size(); i++) {
