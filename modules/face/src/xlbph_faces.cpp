@@ -717,6 +717,7 @@ void xLBPH::printMat(const Mat &mat, int label) const {
 //------------------------------------------------------------------------------
 // Column Normalization
 void xLBPH::mcl_normalize(Mat &mclmat) {
+    printf("\t\t\t\t - normalizing...\n");
     for(int i = 0; i < mclmat.cols; i++) {
         double sum = 0; 
         for(int j = 0; j < mclmat.rows; j++) {
@@ -733,6 +734,7 @@ void xLBPH::mcl_normalize(Mat &mclmat) {
 
 // Expansion
 void xLBPH::mcl_expand(Mat &mclmat, unsigned int e) {
+    printf("\t\t\t\t - expanding...\n");
     switch(e) {
         case 0: mclmat = Mat::eye(mclmat.rows, mclmat.cols, mclmat.type()); break; // return identity matrix
         case 1: break; // do nothing
@@ -748,12 +750,14 @@ void xLBPH::mcl_expand(Mat &mclmat, unsigned int e) {
 
 // Inflation
 void xLBPH::mcl_inflate(Mat &mclmat, double r) {
+    printf("\t\t\t\t - inflating (normalizes)...\n");
     pow(mclmat, r, mclmat);
     mcl_normalize(mclmat);
 }
 
 // Pruning Near Zero Values
 void xLBPH::mcl_prune(Mat &mclmat, double min) {
+    printf("\t\t\t\t - pruning...\n");
     Mat mask = (mclmat >= min) / 255; 
     mask.convertTo(mask, mclmat.type());
     mclmat = mclmat.mul(mask);
@@ -768,6 +772,7 @@ void xLBPH::mcl_iteration(Mat &mclmat, int e, double r, double prune) {
 
 // Performs MCL iterations until convergence is reached
 void xLBPH::mcl_converge(Mat &mclmat, int e, double r, double prune) {
+    printf("\t\t\t - iterating until convergence...\n");
     // iterate until no change is found
     Mat prev; 
     int iters = 0;
@@ -803,6 +808,7 @@ void xLBPH::mcl_cluster(Mat &mclmat, int iters, int e, double r, double prune) {
 //------------------------------------------------------------------------------
 // Calculates the weights between each histogram and puts them in weights
 void xLBPH::cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int numTiers) {
+    printf("\t\t\t - calculating weights...\n");
     weights.create(dists.rows, dists.cols, dists.type());
 
     // calculate tiers and weights
@@ -834,6 +840,7 @@ void xLBPH::cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int 
 
 // Finds clusters for the given label's dists and puts the MCL mat in mclmat
 void xLBPH::cluster_dists(Mat &dists, Mat &mclmat, double r) {
+    printf("\t\t\t - clustering dists...\n");
     mclmat.create(dists.rows, dists.cols, dists.type());
 
     // find weights
@@ -849,6 +856,7 @@ void xLBPH::cluster_dists(Mat &dists, Mat &mclmat, double r) {
 
 // Interprets a given MCL matrix as clusters
 void xLBPH::cluster_interpret(Mat &mclmat, std::vector<std::set<int>> &clusters) {
+    printf("\t\t\t - interpreting clusters...\n");
     // interpret clusters
     std::map<int, std::set<int>> clusters_map;
     for(int vert = 0; vert < mclmat.rows; vert++) {
@@ -896,6 +904,7 @@ double xLBPH::cluster_ratio(std::vector<std::set<int>> &clusters) {
 
 void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &clusters) {
     
+    printf("\t - finding optimal cluster...\n");
     //printf("=========\n");
     int optimalClustersMax = ceil(sqrt(dists.rows));
     int optimalClustersMin = floor(sqrt(dists.rows));
@@ -909,6 +918,9 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
 
     Mat initial;
     double r = mcl_inflation_power;
+
+    printf("\t\t - initial r of %0.3f\n", r);
+
     cluster_dists(dists, initial, r);
     cluster_interpret(initial, clusters);
     
@@ -922,7 +934,6 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
     double mcl_inflation_max = mcl_inflation_power * 2;
     bool larger = true;
     while(checkClusters != prevClusters && checkClusters != optimalClustersMin && checkClusters != optimalClustersMax) {
-        
         prevClusters = checkClusters;
         if(checkClusters < optimalClustersMin) {
             //printf("larger r: %.3f -> ", r);
@@ -945,6 +956,8 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
             //printf("%.3f\n", r);
         }
         
+        printf("\t\t - trying r of %0.3f\n", r);
+
         Mat mclmat;
         cluster_dists(dists, mclmat, r);
         clusters.clear();
@@ -963,6 +976,8 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
                 r = mcl_inflation_min;
 
             Mat mclmat;
+             
+            printf("\t\t - last chance r of %0.3f\n", r);
             cluster_dists(dists, mclmat, r);
             clusters.clear();
             cluster_interpret(mclmat, clusters);
@@ -980,9 +995,15 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
     
     std::vector<Mat> hists = _histograms[label];
 
-    //printf(" - calculating clusters for %d with %d histograms...\r", label, (int)hists.size());
-    std::cout << " - calculating clusters for " << label << " with " << (int)hists.size() << " histograms...\r" << std::flush;
-
+    printf(" - calculating clusters for %d with %d histograms...\r", label, (int)hists.size());
+    //std::cout << " - calculating clusters for " << label << " with " << (int)hists.size() << " histograms...\r" << std::flush;
+    
+    //performMultithreadedComp<Mat, Mat, double>(query, histavgs, avgdists, getMaxThreads(), &xLBPH::compareHistograms);
+    Mat dists = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
+    for(size_t i = 0; i < hists.size()-1; i++) {
+        
+    }
+    /*
     Mat dists = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
     // get raw dists
     for(size_t i = 0; i < hists.size()-1; i++) {
@@ -992,12 +1013,13 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
             dists.at<double>(j, i) = dist;
         } 
     }
-    
+    */
+
     std::vector<std::set<int>> clusters;
     cluster_find_optimal(dists, clusters);
      
-    //printf(" - %d has %d clusters for %d histograms -> averaging clusters...\r", label, (int)clusters.size(), (int)hists.size());
-    std::cout << " - " << label << " has " << (int)clusters.size() << " clusters for " << (int)hists.size() << " histograms -> averaging clusters...\r" << std::flush;
+    printf("\t - %d has %d clusters for %d histograms -> averaging clusters...\r", label, (int)clusters.size(), (int)hists.size());
+    //std::cout << " - " << label << " has " << (int)clusters.size() << " clusters for " << (int)hists.size() << " histograms -> averaging clusters...\r" << std::flush;
 
     //std::vector<std::pair<Mat, std::vector<Mat>>> matClusters;
     for(size_t i = 0; i < clusters.size(); i++) {
@@ -1015,7 +1037,7 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
         matClusters.push_back(std::pair<Mat, std::vector<Mat>>(clusterAvg, clusterHists));
     }
     
-    printf(" - finished with %d who has %d clusters for %d histograms                                                                   \n", label, (int)clusters.size(), (int)hists.size());
+    printf("\t - finished with %d who has %d clusters for %d histograms                                                                   \n", label, (int)clusters.size(), (int)hists.size());
 
     //void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const {
 }
