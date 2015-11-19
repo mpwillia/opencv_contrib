@@ -980,8 +980,8 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
     
     std::vector<Mat> hists = _histograms[label];
 
-    printf(" - calculating clusters for %d with %d histograms...\r", label, (int)hists.size());
-    std::cout << std::flush;
+    //printf(" - calculating clusters for %d with %d histograms...\r", label, (int)hists.size());
+    std::cout << " - calculating clusters for " << label << " with " << (int)hists.size() << " histograms...\r" << std::flush;
 
     Mat dists = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
     // get raw dists
@@ -996,7 +996,8 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
     std::vector<std::set<int>> clusters;
     cluster_find_optimal(dists, clusters);
      
-    printf(" - %d has %d clusters for %d histograms\n", label, (int)clusters.size(), (int)hists.size());
+    //printf(" - %d has %d clusters for %d histograms -> averaging clusters...\r", label, (int)clusters.size(), (int)hists.size());
+    std::cout << " - " << label << " has " << (int)clusters.size() << " clusters for " << (int)hists.size() << " histograms -> averaging clusters...\r" << std::flush;
 
     //std::vector<std::pair<Mat, std::vector<Mat>>> matClusters;
     for(size_t i = 0; i < clusters.size(); i++) {
@@ -1013,6 +1014,8 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
 
         matClusters.push_back(std::pair<Mat, std::vector<Mat>>(clusterAvg, clusterHists));
     }
+    
+    printf(" - finished with %d who has %d clusters for %d histograms\n", label, (int)clusters.size(), (int)hists.size());
 
     //void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const {
 }
