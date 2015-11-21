@@ -18,6 +18,7 @@
 #include "precomp.hpp"
 #include "opencv2/face.hpp"
 #include "face_basic.hpp"
+#include "mcl.hpp"
 
 #include <cmath>
 #include <cstdio>
@@ -164,11 +165,13 @@ private:
     // http://micans.org/mcl/
     //--------------------------------------------------------------------------
     // Markov Clustering Algorithm (MCL)- Functions
+    /*
     void mcl_normalize(Mat &src);
     void mcl_expand(Mat &src, unsigned int e);
     void mcl_inflate(Mat &src, double power);
     void mcl_prune(Mat &src, double min);
     void mcl_iteration(Mat &src, int e, double r, double prune); // Performs one MCL iteration of expand -> inflate -> prune
+    */
     void mcl_converge(Mat &src, int e, double r, double prune); // Performs MCL iterations until convergence
     void mcl_cluster(Mat &src, int iters, int e, double r, double prune); // Perfoms either <iters> MCL iterations or iterates until convergence
 
@@ -716,6 +719,7 @@ void xLBPH::printMat(const Mat &mat, int label) const {
 //------------------------------------------------------------------------------
 // Markov Clustering Algorithm 
 //------------------------------------------------------------------------------
+/*
 // Column Normalization
 void xLBPH::mcl_normalize(Mat &mclmat) {
     printf("\t\t\t\t - normalizing...\n");
@@ -770,6 +774,7 @@ void xLBPH::mcl_iteration(Mat &mclmat, int e, double r, double prune) {
     mcl_inflate(mclmat, r);
     mcl_prune(mclmat, prune);
 }
+*/
 
 // Performs MCL iterations until convergence is reached
 void xLBPH::mcl_converge(Mat &mclmat, int e, double r, double prune) {
@@ -782,12 +787,12 @@ void xLBPH::mcl_converge(Mat &mclmat, int e, double r, double prune) {
         prev = mclmat.clone();
         iters++;
         // MCL
-        mcl_iteration(mclmat, e, r, prune);
+        mcl::mcl_iteration(mclmat, e, r, prune);
 
         // Check Prev
         Mat diff;
         absdiff(mclmat, prev, diff);
-        mcl_prune(diff, mcl_comp_epsilon);
+        mcl::mcl_prune(diff, mcl_comp_epsilon);
         same = (countNonZero(diff) == 0);
     }
     prev.release();
@@ -800,7 +805,7 @@ void xLBPH::mcl_cluster(Mat &mclmat, int iters, int e, double r, double prune) {
         mcl_converge(mclmat, e, r, prune);
     else
         for(int i = 0; i < iters; i++)
-            mcl_iteration(mclmat, e, r, prune);
+            mcl::mcl_iteration(mclmat, e, r, prune);
 }
 
 
@@ -1754,7 +1759,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
         
         //printf(" - Has %d clusters, dispatching comparison threads...\n", (int)clusterAvgs.size());
         std::vector<double> clusterAvgsDists;
-        performMultithreadedComp<Mat, Mat, double>(query, clusterAvgs, clusterAvgsDists, 1, &xLBPH::compareHistograms);
+        performMultithreadedComp<Mat, Mat, double>(query, clusterAvgs, clusterAvgsDists, getHistThreads(), &xLBPH::compareHistograms);
       
         /*
         printf(" - Got %d dists back from threads -> ", (int)clusterAvgsDists.size());
