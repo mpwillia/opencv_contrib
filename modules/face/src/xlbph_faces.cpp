@@ -736,7 +736,7 @@ void xLBPH::cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int 
 
 // Finds clusters for the given label's dists and puts the MCL mat in mclmat
 void xLBPH::cluster_dists(Mat &dists, Mat &mclmat, double r) {
-    printf("\t\t\t - clustering dists...\n");
+    //printf("\t\t\t - clustering dists...\n");
     mclmat.create(dists.rows, dists.cols, dists.type());
 
     // find weights
@@ -749,7 +749,7 @@ void xLBPH::cluster_dists(Mat &dists, Mat &mclmat, double r) {
 
 // Interprets a given MCL matrix as clusters
 void xLBPH::cluster_interpret(Mat &mclmat, std::vector<std::set<int>> &clusters) {
-    printf("\t\t\t - interpreting clusters...\n");
+    //printf("\t\t\t - interpreting clusters...\n");
     // interpret clusters
     std::map<int, std::set<int>> clusters_map;
     for(int vert = 0; vert < mclmat.rows; vert++) {
@@ -797,7 +797,7 @@ double xLBPH::cluster_ratio(std::vector<std::set<int>> &clusters) {
 
 void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &clusters) {
     
-    printf("\t - finding optimal cluster...\n");
+    //printf("\t - finding optimal cluster...\n");
     //printf("=========\n");
     int optimalClustersMax = ceil(sqrt(dists.rows));
     int optimalClustersMin = floor(sqrt(dists.rows));
@@ -812,7 +812,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
     Mat initial;
     double r = mcl_inflation_power;
 
-    printf("\t\t - initial r of %0.3f\n", r);
+    //printf("\t\t - initial r of %0.3f\n", r);
 
     cluster_dists(dists, initial, r);
     cluster_interpret(initial, clusters);
@@ -849,7 +849,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
             //printf("%.3f\n", r);
         }
         
-        printf("\t\t - trying r of %0.3f\n", r);
+        //printf("\t\t - trying r of %0.3f\n", r);
 
         Mat mclmat;
         cluster_dists(dists, mclmat, r);
@@ -870,7 +870,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
 
             Mat mclmat;
              
-            printf("\t\t - last chance r of %0.3f\n", r);
+            //printf("\t\t - last chance r of %0.3f\n", r);
             cluster_dists(dists, mclmat, r);
             clusters.clear();
             cluster_interpret(mclmat, clusters);
