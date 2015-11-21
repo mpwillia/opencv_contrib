@@ -738,6 +738,9 @@ void xLBPH::cluster_dists(Mat &dists, Mat &mclmat, double r) {
     //printf("\t\t\t - clustering dists...\n");
     mclmat.create(dists.rows, dists.cols, dists.type());
 
+    printf("Initial Dists:\n");
+    printMat(dists, -1);
+
     // find weights
     cluster_calc_weights(dists, mclmat, cluster_tierStep, cluster_numTiers);
     
