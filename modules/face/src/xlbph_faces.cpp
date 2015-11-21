@@ -812,7 +812,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
     Mat initial;
     double r = mcl_inflation_power;
 
-    //printf("\t\t - initial r of %0.3f\n", r);
+    printf("\t\t - initial r of %0.3f\n", r);
 
     cluster_dists(dists, initial, r);
     cluster_interpret(initial, clusters);
@@ -849,7 +849,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
             //printf("%.3f\n", r);
         }
         
-        //printf("\t\t - trying r of %0.3f\n", r);
+        printf("\t\t - trying r of %0.3f\n", r);
 
         Mat mclmat;
         cluster_dists(dists, mclmat, r);
@@ -870,7 +870,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
 
             Mat mclmat;
              
-            //printf("\t\t - last chance r of %0.3f\n", r);
+            printf("\t\t - last chance r of %0.3f\n", r);
             cluster_dists(dists, mclmat, r);
             clusters.clear();
             cluster_interpret(mclmat, clusters);

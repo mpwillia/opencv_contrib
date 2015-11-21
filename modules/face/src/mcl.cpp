@@ -9,6 +9,7 @@ namespace cv { namespace mcl {
 
     // Column Normalization
     void normalize(Mat &mclmat) {
+        printf("\t\t\tnormalize\n");
         for(int i = 0; i < mclmat.cols; i++) {
             double sum = 0; 
             for(int j = 0; j < mclmat.rows; j++) {
@@ -25,6 +26,8 @@ namespace cv { namespace mcl {
 
     // Expansion
     void expand(Mat &mclmat, unsigned int e) {
+
+        printf("\t\t\texpand\n");
         switch(e) {
             case 0: mclmat = Mat::eye(mclmat.rows, mclmat.cols, mclmat.type()); break; // return identity matrix
             case 1: break; // do nothing
@@ -40,12 +43,14 @@ namespace cv { namespace mcl {
 
     // Inflation
     void inflate(Mat &mclmat, double r) {
+        printf("\t\t\tinflate (then normalize)\n");
         pow(mclmat, r, mclmat);
         normalize(mclmat);
     }
 
     // Pruning Near Zero Values
     void prune(Mat &mclmat, double min) {
+        printf("\t\t\tprune\n");
         Mat mask = (mclmat >= min) / 255; 
         mask.convertTo(mask, mclmat.type());
         mclmat = mclmat.mul(mask);
@@ -53,6 +58,7 @@ namespace cv { namespace mcl {
 
     // Performs one MCL iterations
     void iteration(Mat &mclmat, int e, double r, double prune_min) {
+        printf("\t\t\t## iteration ##\n");
         expand(mclmat, e);
         inflate(mclmat, r);
         prune(mclmat, prune_min);
@@ -67,6 +73,7 @@ namespace cv { namespace mcl {
         int iters = 0;
         bool same = false;
         while(!same) {
+            printf("\t\t\tconverge iter %d\n", iters);
             prev = mclmat.clone();
             iters++;
             // MCL
