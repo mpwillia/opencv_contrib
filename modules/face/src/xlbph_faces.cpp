@@ -740,6 +740,9 @@ void xLBPH::cluster_dists(Mat &dists, Mat &mclmat, double r) {
 
     // find weights
     cluster_calc_weights(dists, mclmat, cluster_tierStep, cluster_numTiers);
+    
+    printf("Initial Weights:\n");
+    printMat(mclmat, -1);
 
     // iterate
     mcl::cluster(mclmat, mcl_iterations, mcl_expansion_power, r, mcl_prune_min);
@@ -796,6 +799,7 @@ double xLBPH::cluster_ratio(std::vector<std::set<int>> &clusters) {
 
 void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &clusters) {
     
+
     //printf("\t - finding optimal cluster...\n");
     //printf("=========\n");
     int optimalClustersMax = ceil(sqrt(dists.rows));
