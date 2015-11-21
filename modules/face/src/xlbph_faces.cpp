@@ -853,7 +853,7 @@ void xLBPH::cluster_dists(Mat &dists, Mat &mclmat, double r) {
     cluster_calc_weights(dists, mclmat, cluster_tierStep, cluster_numTiers);
 
     // normalize weights
-    mcl_normalize(mclmat);
+    mcl::mcl_normalize(mclmat);
 
     // iterate
     mcl_cluster(mclmat, mcl_iterations, mcl_expansion_power, r, mcl_prune_min);
