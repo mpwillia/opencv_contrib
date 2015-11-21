@@ -738,14 +738,8 @@ void xLBPH::cluster_dists(Mat &dists, Mat &mclmat, double r) {
     //printf("\t\t\t - clustering dists...\n");
     mclmat.create(dists.rows, dists.cols, dists.type());
 
-    printf("Initial Dists:\n");
-    printMat(dists, -1);
-
     // find weights
     cluster_calc_weights(dists, mclmat, cluster_tierStep, cluster_numTiers);
-    
-    printf("Initial Weights:\n");
-    printMat(mclmat, -1);
 
     // iterate
     mcl::cluster(mclmat, mcl_iterations, mcl_expansion_power, r, mcl_prune_min);
@@ -859,7 +853,6 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
 
         Mat mclmat;
         cluster_dists(dists, mclmat, r);
-        printMat(mclmat, -1);
         clusters.clear();
         cluster_interpret(mclmat, clusters);
         checkClusters = (int)clusters.size();
@@ -879,7 +872,6 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
              
             //printf("\t\t - last chance r of %0.3f\n", r);
             cluster_dists(dists, mclmat, r);
-            printMat(mclmat, -1); 
             clusters.clear();
             cluster_interpret(mclmat, clusters);
             checkClusters = (int)clusters.size();
