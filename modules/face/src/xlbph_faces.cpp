@@ -103,6 +103,7 @@ private:
     void predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const;
 
     void compareLabelHistograms(const Mat &query, const std::vector<std::pair<int, std::vector<Mat>>> &labelhists, std::vector<std::pair<int, std::vector<double>>> &labeldists) const;
+    //void compareLabelWithQuery(const Mat &query, const std::vector<int> &labels, std::vector<std::vector<double>> &labeldists) const;
     void compareHistograms(const Mat &query, const std::vector<Mat> &hists, std::vector<double> &dists) const;
     
     const int minLabelsToCheck = 5;
@@ -1388,7 +1389,30 @@ void splitVector(const std::vector<_Tp> &src, std::vector<std::vector<_Tp>> &dst
     }
 }
 
-
+/* performs a multithreaded calculation on the given <src> vector, putting the
+ * results into the given <dst> vector. Attempts to use <numThreads> to split
+ * up the <src> vector. Calls <calcFunc> to do the calculation.
+ * TODO:
+ * If numThreads is:
+ * - (== 1 or == -1) then will simply call <calcFunc> without making a new 
+ *      thread or splitting up the <src> vector 
+ *      -> does not dispatch new threads
+ * - (> 1) then will attempt to use <numThreads> up to _numThreads threads to 
+ *      split up the <src> vector 
+ *      -> will dispatch new threads unless _numThreads is set to <= 1
+ * - (== 0) then will attempt to figure out an "optimal" number of threads to 
+ *      use based on the size of src up to _numThreads 
+ *       -> might dispatch threads, depends on input size and _numThreads, will
+ *          either behave as (== 1 or == -1) or as (> 1)
+ * - (< -1) then will attempt to figure out an "optimal" number of threads to
+ *      use based on the size of src up to either the absolute value of 
+ *      <numThreads> or up to _numThreads. For example if <numThreads> is -4 then
+ *      will only use up to 4 threads.
+ *       -> will dispatch new threads unless _numThreads is set to <= 1
+ * 
+ * If numThreads is greater than the <src> size it will be capped to the size of
+ * <src>, will not try to dispatch more threads than tasks available
+ */
 template <typename S, typename D>
 void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const {
     if(numThreads > (int)src.size())
@@ -1651,8 +1675,13 @@ void xLBPH::compareHistograms(const Mat &query, const std::vector<Mat> &hists, s
     } 
 }
 
+// compares a given set of labels against the given query, each label is represented as a std::pair<int, std::vector<Mat>>
+// where the int is the label and the std::vector<Mat> is that label's histograms
+// TODO: we don't need to provide the histograms for each label, we can just give the label
+// and get the histograms from our _histograms member
+// See new compareLabelWithQuery below this func
 void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair<int, std::vector<Mat>>> &labelhists, std::vector<std::pair<int, std::vector<double>>> &labeldists) const {
-   
+
     for(size_t idx = 0; idx < labelhists.size(); idx++) {
         int label = labelhists.at((int)idx).first;
         std::vector<Mat> hists = labelhists.at((int)idx).second;
@@ -1664,6 +1693,22 @@ void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair
     }
 }
 
+// compares a given set of labels against the given query
+// each label is given as just it's integer value, histograms are gathered from _histograms member
+// each label gets a vector of distances as doubles, in the same order as the histograms are in _histograms
+// these distance vectors are compiled into one vector of vectors
+/*
+void xLBPH::compareLabelWithQuery(const Mat &query, const std::vector<int> &labels, std::vector<std::vector<double>> &labeldists) const {
+    
+    //std::map<int, std::vector<Mat>> _histograms;
+    for(size_t idx = 0; idx < labels.size(); idx++) {
+        std::vector<double> dists;
+        performMultithreadedComp<Mat, Mat, double>(query, _hitograms.at((int)idx), dists, getHistThreads(), &xLBPH::compareHistograms);
+        std::sort(dists.begin(), dists.end());
+        labeldists.push_back(dists);
+    }
+}
+*/
 
 void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const {
     Mat query = _query.getMat();
@@ -1676,7 +1721,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
         histavgs.push_back(it->second);
     }
 
-    // perform calc
+    // perform histogram comparison to find dists from query.
     std::vector<double> avgdists;
     performMultithreadedComp<Mat, Mat, double>(query, histavgs, avgdists, getMaxThreads(), &xLBPH::compareHistograms);
     
@@ -1685,6 +1730,8 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
     for(size_t idx = 0; idx < avgdists.size(); idx++) {
         bestlabels.push_back(std::pair<double, int>(avgdists.at((int)idx), labels.at((int)idx)));
     }
+
+    // sort the data by smallest distance first
     std::sort(bestlabels.begin(), bestlabels.end());
     
     // figure out how many labels to check
@@ -1698,7 +1745,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
     for(size_t idx = 0; idx < bestlabels.size() && (int)idx < numLabelsToCheck; idx++) {
         int label = bestlabels.at(idx).second;
         //printf("Finding best cluster for PID %d\n", label);
-
+        
         std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters = _clusters.at(label);
         std::vector<Mat> clusterAvgs;
         for(size_t clusterIdx = 0; clusterIdx < labelClusters.size(); clusterIdx++) {
@@ -1707,7 +1754,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
         
         //printf(" - Has %d clusters, dispatching comparison threads...\n", (int)clusterAvgs.size());
         std::vector<double> clusterAvgsDists;
-        performMultithreadedComp<Mat, Mat, double>(query, clusterAvgs, clusterAvgsDists, getMaxThreads(), &xLBPH::compareHistograms);
+        performMultithreadedComp<Mat, Mat, double>(query, clusterAvgs, clusterAvgsDists, getHistThreads(), &xLBPH::compareHistograms);
       
         /*
         printf(" - Got %d dists back from threads -> ", (int)clusterAvgsDists.size());
@@ -1799,7 +1846,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
         histavgs.push_back(it->second);
     }
 
-    // perform calc
+    // perform histogram comparison to find dists from query.
     std::vector<double> avgdists;
     performMultithreadedComp<Mat, Mat, double>(query, histavgs, avgdists, getMaxThreads(), &xLBPH::compareHistograms);
     
@@ -1808,6 +1855,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     for(size_t idx = 0; idx < avgdists.size(); idx++) {
         bestlabels.push_back(std::pair<double, int>(avgdists.at((int)idx), labels.at((int)idx)));
     }
+    // sort the data by smallest distance first
     std::sort(bestlabels.begin(), bestlabels.end());
     
     // figure out how many labels to check
@@ -1823,10 +1871,10 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     }
     std::vector<std::pair<int, std::vector<double>>> labeldists;
 
-//void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair<int, std::vector<Mat>>> &labelhists, std::vector<std::pair<int, std::vector<double>>> &labeldists) const {
-
+    // perform histogram comparison on all the histograms of the top <numLabelsToCheck> best averages
     performMultithreadedComp<Mat, std::pair<int, std::vector<Mat>>, std::pair<int, std::vector<double>>>(query, labelhists, labeldists, getLabelThreads(), &xLBPH::compareLabelHistograms);
-
+    
+    // find best prediction for each label checked
     std::vector<std::pair<double, int>> bestpreds;
     for(size_t idx = 0; idx < labeldists.size(); idx++) {
         std::vector<double> dists = labeldists.at((int)idx).second;
