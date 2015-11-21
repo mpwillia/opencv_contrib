@@ -818,13 +818,13 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
     cluster_interpret(initial, clusters);
     
     int checkClusters = (int)clusters.size();
-    int iterations;
+    int iterations = 5;
     int base = 5;
     bool makeLarger = (checkClusters < optimalClustersMin);
     for(int i = 0; i < iterations; i++) {
-        if(checkClusters < optimalClustersMin && larger)
+        if(checkClusters < optimalClustersMin && makeLarger)
             r *= (base + 1.0 + i) / base; // need more clusters - larger r
-        else if(checkClusters > optimalClustersMax && !larger) 
+        else if(checkClusters > optimalClustersMax && !makeLarger) 
             r *= (base - 1.0 - i) / base; // need fewer clusters - smaller r
         else
             break;
