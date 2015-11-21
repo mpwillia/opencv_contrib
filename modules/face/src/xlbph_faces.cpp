@@ -819,7 +819,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
     
     int checkClusters = (int)clusters.size();
     int iterations = 5;
-    int base = 5;
+    int base = 7;
     bool makeLarger = (checkClusters < optimalClustersMin);
     for(int i = 0; i < iterations; i++) {
         if(checkClusters < optimalClustersMin && makeLarger)
@@ -830,7 +830,8 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
             break;
 
         if(r <= 1)
-            r = 1.1;
+            break;
+    
 
         Mat mclmat;
         cluster_dists(dists, mclmat, r);
