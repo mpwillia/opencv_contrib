@@ -60,6 +60,8 @@ namespace cv { namespace mcl {
 
     // Performs MCL iterations until convergence is reached
     void converge(Mat &mclmat, int e, double r, double prune_min) {
+        normalize(mclmat);
+
         // iterate until no change is found
         Mat prev; 
         int iters = 0;
@@ -83,9 +85,11 @@ namespace cv { namespace mcl {
     void cluster(Mat &mclmat, int iters, int e, double r, double prune_min) {
         if(iters <= 0)
             converge(mclmat, e, r, prune_min);
-        else
+        else {
+            normalize(mclmat);
             for(int i = 0; i < iters; i++)
                 iteration(mclmat, e, r, prune_min);
+        }
     }
 
 }}

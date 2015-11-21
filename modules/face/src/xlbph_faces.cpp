@@ -159,22 +159,6 @@ private:
     double cluster_tierStep = 0.01; // Sets how large a tier is, default is 0.01 or 1%
     int cluster_numTiers = 10; // Sets how many tiers to keep, default is 10, or 10% max tier
 
-    //--------------------------------------------------------------------------
-    // Markov Clustering Algorithm
-    // Described Here:
-    // http://micans.org/mcl/
-    //--------------------------------------------------------------------------
-    // Markov Clustering Algorithm (MCL)- Functions
-    /*
-    void mcl_normalize(Mat &src);
-    void mcl_expand(Mat &src, unsigned int e);
-    void mcl_inflate(Mat &src, double power);
-    void mcl_prune(Mat &src, double min);
-    void mcl_iteration(Mat &src, int e, double r, double prune); // Performs one MCL iteration of expand -> inflate -> prune
-    void mcl_converge(Mat &src, int e, double r, double prune); // Performs MCL iterations until convergence
-    void mcl_cluster(Mat &src, int iters, int e, double r, double prune); // Perfoms either <iters> MCL iterations or iterates until convergence
-    */
-
     // Markov Clustering Algorithm (MCL)- Settings
     /* Sets the number of MCL iterations, default is 10
      * If 0 then iterates until no change is found
@@ -183,7 +167,6 @@ private:
     int mcl_expansion_power = 2; // Sets the expansion power exponent, default is 2
     double mcl_inflation_power = 2; // Sets the inflation power exponent, default is 2 
     double mcl_prune_min = 0.001; // Sets the minimum value to prune, any values below this are set to zero, default is 0.001
-    //double mcl_comp_epsilon = 0.00001; // Sets the epsilon value for comparing doubles, default is 0.00001;
 
     //--------------------------------------------------------------------------
     // Misc 
@@ -717,98 +700,6 @@ void xLBPH::printMat(const Mat &mat, int label) const {
 }
 
 //------------------------------------------------------------------------------
-// Markov Clustering Algorithm 
-//------------------------------------------------------------------------------
-/*
-// Column Normalization
-void xLBPH::mcl_normalize(Mat &mclmat) {
-    printf("\t\t\t\t - normalizing...\n");
-    for(int i = 0; i < mclmat.cols; i++) {
-        double sum = 0; 
-        for(int j = 0; j < mclmat.rows; j++) {
-            sum += mclmat.at<double>(i,j);
-        }
-        if(sum > 0)
-        {
-            for(int j = 0; j < mclmat.rows; j++) {
-                mclmat.at<double>(i,j) /= sum;
-            }
-        }
-    } 
-}
-
-// Expansion
-void xLBPH::mcl_expand(Mat &mclmat, unsigned int e) {
-    printf("\t\t\t\t - expanding...\n");
-    switch(e) {
-        case 0: mclmat = Mat::eye(mclmat.rows, mclmat.cols, mclmat.type()); break; // return identity matrix
-        case 1: break; // do nothing
-        case 2: mclmat = mclmat * mclmat; break;
-        default:
-            Mat a = mclmat.clone();
-            while(--e > 0)
-                mclmat = mclmat * a;
-            a.release();
-            break;
-    }
-}
-
-// Inflation
-void xLBPH::mcl_inflate(Mat &mclmat, double r) {
-    printf("\t\t\t\t - inflating (normalizes)...\n");
-    pow(mclmat, r, mclmat);
-    mcl_normalize(mclmat);
-}
-
-// Pruning Near Zero Values
-void xLBPH::mcl_prune(Mat &mclmat, double min) {
-    printf("\t\t\t\t - pruning...\n");
-    Mat mask = (mclmat >= min) / 255; 
-    mask.convertTo(mask, mclmat.type());
-    mclmat = mclmat.mul(mask);
-}
-
-// Performs one MCL iterations
-void xLBPH::mcl_iteration(Mat &mclmat, int e, double r, double prune) {
-    mcl_expand(mclmat, e);
-    mcl_inflate(mclmat, r);
-    mcl_prune(mclmat, prune);
-}
-
-// Performs MCL iterations until convergence is reached
-void xLBPH::mcl_converge(Mat &mclmat, int e, double r, double prune) {
-    printf("\t\t\t - iterating until convergence...\n");
-    // iterate until no change is found
-    Mat prev; 
-    int iters = 0;
-    bool same = false;
-    while(!same) {
-        prev = mclmat.clone();
-        iters++;
-        // MCL
-        mcl::mcl_iteration(mclmat, e, r, prune);
-
-        // Check Prev
-        Mat diff;
-        absdiff(mclmat, prev, diff);
-        mcl::mcl_prune(diff, mcl_comp_epsilon);
-        same = (countNonZero(diff) == 0);
-    }
-    prev.release();
-}
-
-
-// Markov Clustering - Runs MCL iterations on src
-void xLBPH::mcl_cluster(Mat &mclmat, int iters, int e, double r, double prune) {
-    if(iters <= 0)
-        mcl_converge(mclmat, e, r, prune);
-    else
-        for(int i = 0; i < iters; i++)
-            mcl::mcl_iteration(mclmat, e, r, prune);
-}
-*/
-
-//------------------------------------------------------------------------------
 // Histogram Clustering (Using Markov Clustering) 
 //------------------------------------------------------------------------------
 // Calculates the weights between each histogram and puts them in weights
@@ -850,9 +741,6 @@ void xLBPH::cluster_dists(Mat &dists, Mat &mclmat, double r) {
 
     // find weights
     cluster_calc_weights(dists, mclmat, cluster_tierStep, cluster_numTiers);
-
-    // normalize weights
-    mcl::normalize(mclmat);
 
     // iterate
     mcl::cluster(mclmat, mcl_iterations, mcl_expansion_power, r, mcl_prune_min);
