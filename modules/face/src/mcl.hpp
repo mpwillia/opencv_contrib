@@ -15,8 +15,8 @@ namespace cv { namespace mcl {
     
     void mcl_normalize(Mat &src);
 
-    void converge(Mat &src, int e, double r, double prune); // Performs MCL iterations until convergence
-    void cluster(Mat &src, int iters, int e, double r, double prune); // Perfoms either <iters> MCL iterations or iterates until convergence
+    void converge(Mat &src, int e, double r, double prune_min); // Performs MCL iterations until convergence
+    void cluster(Mat &src, int iters, int e, double r, double prune_min); // Perfoms either <iters> MCL iterations or iterates until convergence
 
 }}
 

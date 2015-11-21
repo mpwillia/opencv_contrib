@@ -3,6 +3,8 @@
 #include "mcl.hpp"
 #include <cmath>
 
+#define COMP_EPSILON 0.00001
+
 namespace cv { namespace mcl {
 
     // Column Normalization
@@ -50,14 +52,14 @@ namespace cv { namespace mcl {
     }
 
     // Performs one MCL iterations
-    void iteration(Mat &mclmat, int e, double r, double prune) {
+    void iteration(Mat &mclmat, int e, double r, double prune_min) {
         expand(mclmat, e);
         inflate(mclmat, r);
-        prune(mclmat, prune);
+        prune(mclmat, prune_min);
     }
 
     // Performs MCL iterations until convergence is reached
-    void converge(Mat &mclmat, int e, double r, double prune) {
+    void converge(Mat &mclmat, int e, double r, double prune_min) {
         // iterate until no change is found
         Mat prev; 
         int iters = 0;
@@ -66,24 +68,24 @@ namespace cv { namespace mcl {
             prev = mclmat.clone();
             iters++;
             // MCL
-            iteration(mclmat, e, r, prune);
+            iteration(mclmat, e, r, prune_min);
 
             // Check Prev
             Mat diff;
             absdiff(mclmat, prev, diff);
-            prune(diff, comp_epsilon);
+            prune(diff, COMP_EPSILON);
             same = (countNonZero(diff) == 0);
         }
         prev.release();
     }
 
     // Markov Clustering - Runs MCL iterations on src
-    void cluster(Mat &mclmat, int iters, int e, double r, double prune) {
+    void cluster(Mat &mclmat, int iters, int e, double r, double prune_min) {
         if(iters <= 0)
-            converge(mclmat, e, r, prune);
+            converge(mclmat, e, r, prune_min);
         else
             for(int i = 0; i < iters; i++)
-                iteration(mclmat, e, r, prune);
+                iteration(mclmat, e, r, prune_min);
     }
 
 }}
