@@ -704,7 +704,6 @@ void xLBPH::printMat(const Mat &mat, int label) const {
 //------------------------------------------------------------------------------
 // Calculates the weights between each histogram and puts them in weights
 void xLBPH::cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int numTiers) {
-    printf("\t\t\t - calculating weights...\n");
     weights.create(dists.rows, dists.cols, dists.type());
 
     // calculate tiers and weights
@@ -930,7 +929,7 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
         matClusters.push_back(std::pair<Mat, std::vector<Mat>>(clusterAvg, clusterHists));
     }
     
-    printf("\t - finished with %d who has %d clusters for %d histograms                                                                   \n", label, (int)clusters.size(), (int)hists.size());
+    printf("\t - finished with %d who has %d clusters for %d histograms \n", label, (int)clusters.size(), (int)hists.size());
 
     //void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const {
 }
