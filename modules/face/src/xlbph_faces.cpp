@@ -900,11 +900,13 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
     //std::cout << " - calculating clusters for " << label << " with " << (int)hists.size() << " histograms...\r" << std::flush;
     
     //performMultithreadedComp<Mat, Mat, double>(query, histavgs, avgdists, getMaxThreads(), &xLBPH::compareHistograms);
+    /*
     Mat dists = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
     for(size_t i = 0; i < hists.size()-1; i++) {
         
     }
-    /*
+    */
+
     Mat dists = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
     // get raw dists
     for(size_t i = 0; i < hists.size()-1; i++) {
@@ -914,7 +916,6 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
             dists.at<double>(j, i) = dist;
         } 
     }
-    */
 
     std::vector<std::set<int>> clusters;
     cluster_find_optimal(dists, clusters);
