@@ -812,8 +812,6 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
     Mat initial;
     double r = mcl_inflation_power;
 
-    printf("\t\t - initial r of %0.3f\n", r);
-
     cluster_dists(dists, initial, r);
     cluster_interpret(initial, clusters);
     
@@ -913,7 +911,7 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
     
     std::vector<Mat> hists = _histograms[label];
 
-    printf(" - calculating clusters for %d with %d histograms...\n", label, (int)hists.size());
+    //printf(" - calculating clusters for %d with %d histograms...\n", label, (int)hists.size());
     //std::cout << " - calculating clusters for " << label << " with " << (int)hists.size() << " histograms...\r" << std::flush;
     
     //performMultithreadedComp<Mat, Mat, double>(query, histavgs, avgdists, getMaxThreads(), &xLBPH::compareHistograms);
@@ -937,7 +935,7 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
     std::vector<std::set<int>> clusters;
     cluster_find_optimal(dists, clusters);
      
-    printf("\t - %d has %d clusters for %d histograms -> averaging clusters...\n", label, (int)clusters.size(), (int)hists.size());
+    //printf("\t - %d has %d clusters for %d histograms -> averaging clusters...\n", label, (int)clusters.size(), (int)hists.size());
     //std::cout << " - " << label << " has " << (int)clusters.size() << " clusters for " << (int)hists.size() << " histograms -> averaging clusters...\r" << std::flush;
 
     //std::vector<std::pair<Mat, std::vector<Mat>>> matClusters;
