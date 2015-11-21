@@ -852,6 +852,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
 
         Mat mclmat;
         cluster_dists(dists, mclmat, r);
+        printMat(mclmat, -1);
         clusters.clear();
         cluster_interpret(mclmat, clusters);
         checkClusters = (int)clusters.size();
@@ -871,6 +872,7 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
              
             //printf("\t\t - last chance r of %0.3f\n", r);
             cluster_dists(dists, mclmat, r);
+            printMat(mclmat, -1); 
             clusters.clear();
             cluster_interpret(mclmat, clusters);
             checkClusters = (int)clusters.size();
@@ -879,7 +881,6 @@ void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &cluster
         }
     }
     
-    printMat(mclmat, -1);
 
 }
 
