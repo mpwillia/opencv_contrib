@@ -774,7 +774,6 @@ void xLBPH::mcl_iteration(Mat &mclmat, int e, double r, double prune) {
     mcl_inflate(mclmat, r);
     mcl_prune(mclmat, prune);
 }
-*/
 
 // Performs MCL iterations until convergence is reached
 void xLBPH::mcl_converge(Mat &mclmat, int e, double r, double prune) {
@@ -807,7 +806,7 @@ void xLBPH::mcl_cluster(Mat &mclmat, int iters, int e, double r, double prune) {
         for(int i = 0; i < iters; i++)
             mcl::mcl_iteration(mclmat, e, r, prune);
 }
-
+*/
 
 //------------------------------------------------------------------------------
 // Histogram Clustering (Using Markov Clustering) 
@@ -853,10 +852,10 @@ void xLBPH::cluster_dists(Mat &dists, Mat &mclmat, double r) {
     cluster_calc_weights(dists, mclmat, cluster_tierStep, cluster_numTiers);
 
     // normalize weights
-    mcl::mcl_normalize(mclmat);
+    mcl::normalize(mclmat);
 
     // iterate
-    mcl_cluster(mclmat, mcl_iterations, mcl_expansion_power, r, mcl_prune_min);
+    mcl::cluster(mclmat, mcl_iterations, mcl_expansion_power, r, mcl_prune_min);
 }
 
 
