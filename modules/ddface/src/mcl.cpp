@@ -1,5 +1,5 @@
 
-#include "opencv2/face/precomp.hpp"
+#include "precomp.hpp"
 #include "mcl.hpp"
 #include <cmath>
 

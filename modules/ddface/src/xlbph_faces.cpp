@@ -15,8 +15,7 @@
  *
  *   See <http://www.opensource.org/licenses/bsd-license>
  */
-//#include "precomp.hpp"
-#include "opencv2/face/precomp.hpp"
+#include "precomp.hpp"
 #include "opencv2/face.hpp"
 #include "opencv2/face/face_basic.hpp"
 //#include "face_basic.hpp"
