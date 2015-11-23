@@ -1,7 +1,7 @@
 #ifndef __MCL_HPP
 #define __OPENCV_MCL_HPP
 
-#include "opencv2/face/precomp.hpp"
+#include "precomp.hpp"
 
 namespace cv { namespace mcl {
 

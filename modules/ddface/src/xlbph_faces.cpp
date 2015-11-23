@@ -17,8 +17,7 @@
  */
 #include "precomp.hpp"
 #include "opencv2/face.hpp"
-#include "opencv2/face/face_basic.hpp"
-//#include "face_basic.hpp"
+#include "face_basic.hpp"
 #include "mcl.hpp"
 
 #include <cmath>
