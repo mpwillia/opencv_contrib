@@ -16,7 +16,8 @@
  *   See <http://www.opensource.org/licenses/bsd-license>
  */
 #include "precomp.hpp"
-#include "opencv2/ddface.hpp"
+#include "opencv2/face.hpp"
+#include "opencv2/ddface/ddfacerec.hpp"
 #include "face_basic.hpp"
 #include "mcl.hpp"
 
@@ -32,7 +33,7 @@
 //#define COMP_ALG HISTCMP_BHATTACHARYYA
 #define SIZEOF_CV_32FC1 4
 
-namespace cv { namespace ddface {
+namespace cv { namespace face {
 
 // Face Recognition based on Local Binary Patterns.
 //

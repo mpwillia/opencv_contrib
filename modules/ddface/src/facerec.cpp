@@ -16,11 +16,11 @@
  *   See <http://www.opensource.org/licenses/bsd-license>
  */
 #include "precomp.hpp"
-#include "opencv2/ddface.hpp"
+#include "opencv2/face.hpp"
 
 namespace cv
 {
-namespace ddface
+namespace face
 {
 
 std::vector<int> FaceRecognizer::getLabelsByString(const String &str) const

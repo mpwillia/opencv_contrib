@@ -8,10 +8,10 @@
 #ifndef __OPENCV_DDFACEREC_HPP__
 #define __OPENCV_DDFACEREC_HPP__
 
-#include "opencv2/ddface.hpp"
+#include "opencv2/face.hpp"
 #include "opencv2/core.hpp"
 
-namespace cv { namespace ddface {
+namespace cv { namespace face {
 
 class CV_EXPORTS_W xLBPHFaceRecognizer : public FaceRecognizer 
 {
@@ -56,7 +56,6 @@ public:
     CV_WRAP virtual void load() = 0;
 };
 CV_EXPORTS_W Ptr<xLBPHFaceRecognizer> createxLBPHFaceRecognizer(int radius=1, int neighbors=8, int grid_x=8, int grid_y=8, double threshold = DBL_MAX, String modelpath="");
-
 
 }} 
 
