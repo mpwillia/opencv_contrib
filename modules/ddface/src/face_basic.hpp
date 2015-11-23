@@ -1,7 +1,7 @@
 #ifndef __OPENCV_FACE_BASIC_HPP
 #define __OPENCV_FACE_BASIC_HPP
 
-#include "opencv2/face.hpp"
+#include "opencv2/ddface/ddfacerec.hpp"
 #include "precomp.hpp"
 
 #include <set>

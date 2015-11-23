@@ -16,7 +16,7 @@
  *   See <http://www.opensource.org/licenses/bsd-license>
  */
 #include "precomp.hpp"
-#include "opencv2/face.hpp"
+#include "opencv2/face/facerec.hpp"
 
 namespace cv
 {

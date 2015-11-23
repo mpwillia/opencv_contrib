@@ -355,6 +355,4 @@ protected:
 
 }}
 
-#include "opencv2/face/facerec.hpp"
-
 #endif
