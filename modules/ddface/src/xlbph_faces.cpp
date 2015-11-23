@@ -961,10 +961,11 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
     //void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const {
 }
 
+/*
 void xLBPH::clusterLabels(const std::vector<int> &labels, std::vector<std::pair<int, std::vector<std::pair<Mat, std::vector<Mat>>>>> &allClusters) const {
-     
+ 
 }
-
+*/
 
 void xLBPH::clusterHistograms() {
     /* What is Histogram Clustering?
