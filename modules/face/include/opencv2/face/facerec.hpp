@@ -169,50 +169,6 @@ CV_EXPORTS_W Ptr<LBPHFaceRecognizer> createLBPHFaceRecognizer(int radius=1, int 
 
 //! @}
 
-class CV_EXPORTS_W xLBPHFaceRecognizer : public FaceRecognizer 
-{
-public:
-    /** @see setGridX */
-    CV_WRAP virtual int getGridX() const = 0;
-    /** @copybrief getGridX @see getGridX */
-    CV_WRAP virtual void setGridX(int val) = 0;
-    /** @see setGridY */
-    CV_WRAP virtual int getGridY() const = 0;
-    /** @copybrief getGridY @see getGridY */
-    CV_WRAP virtual void setGridY(int val) = 0;
-    /** @see setRadius */
-    CV_WRAP virtual int getRadius() const = 0;
-    /** @copybrief getRadius @see getRadius */
-    CV_WRAP virtual void setRadius(int val) = 0;
-    /** @see setNeighbors */
-    CV_WRAP virtual int getNeighbors() const = 0;
-    /** @copybrief getNeighbors @see getNeighbors */
-    CV_WRAP virtual void setNeighbors(int val) = 0;
-    /** @see setThreshold */
-    CV_WRAP virtual double getThreshold() const = 0;
-    /** @copybrief getThreshold @see getThreshold */
-    CV_WRAP virtual void setThreshold(double val) = 0;
-
-    CV_WRAP virtual void test() = 0; 
-
-    CV_WRAP virtual void setModelPath(String modelpath) = 0;
-    CV_WRAP virtual String getModelPath() const = 0; 
-    CV_WRAP virtual String getModelName() const = 0;
-    CV_WRAP virtual String getInfoFile() const = 0; 
-    CV_WRAP virtual String getHistogramsDir() const = 0;
-    CV_WRAP virtual String getHistogramFile(int label) const = 0;
-    CV_WRAP virtual String getHistogramAveragesFile() const = 0;
-    
-    CV_WRAP virtual void setAlgToUse(int alg) = 0;
-    CV_WRAP virtual void setNumThreads(int numThreads) = 0;
-
-    CV_WRAP virtual void setMCLSettings(int numIters, int e, double r) = 0;
-    CV_WRAP virtual void setClusterSettings(double tierStep, int numTiers) = 0;
-
-    CV_WRAP virtual void load() = 0;
-};
-CV_EXPORTS_W Ptr<xLBPHFaceRecognizer> createxLBPHFaceRecognizer(int radius=1, int neighbors=8, int grid_x=8, int grid_y=8, double threshold = DBL_MAX, String modelpath="");
-
 
 }} //namespace cv::face
 
