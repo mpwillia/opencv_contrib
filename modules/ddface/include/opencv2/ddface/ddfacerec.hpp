@@ -5,10 +5,10 @@
 // Copyright (c) 2011,2012. Philipp Wagner <bytefish[at]gmx[dot]de>.
 // Third party copyrights are property of their respective owners.
 
-#ifndef __OPENCV_FACEREC_HPP__
-#define __OPENCV_FACEREC_HPP__
+#ifndef __OPENCV_DDFACEREC_HPP__
+#define __OPENCV_DDFACEREC_HPP__
 
-#include "opencv2/face.hpp"
+#include "opencv2/ddface.hpp"
 #include "opencv2/core.hpp"
 
 namespace cv { namespace ddface {
@@ -58,6 +58,6 @@ public:
 CV_EXPORTS_W Ptr<xLBPHFaceRecognizer> createxLBPHFaceRecognizer(int radius=1, int neighbors=8, int grid_x=8, int grid_y=8, double threshold = DBL_MAX, String modelpath="");
 
 
-}}
+}} 
 
-#endif //__OPENCV_FACEREC_HPP__
+#endif //__OPENCV_DDFACEREC_HPP__

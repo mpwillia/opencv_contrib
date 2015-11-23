@@ -16,7 +16,7 @@
  *   See <http://www.opensource.org/licenses/bsd-license>
  */
 #include "precomp.hpp"
-#include "opencv2/face.hpp"
+#include "opencv2/ddface.hpp"
 #include "face_basic.hpp"
 #include "mcl.hpp"
 
@@ -32,7 +32,7 @@
 //#define COMP_ALG HISTCMP_BHATTACHARYYA
 #define SIZEOF_CV_32FC1 4
 
-namespace cv { namespace ddface {
+namespace cv { namespace face {
 
 // Face Recognition based on Local Binary Patterns.
 //
@@ -961,9 +961,10 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
 
 /*
 void xLBPH::clusterLabels(const std::vector<int> &labels, std::vector<std::pair<int, std::vector<std::pair<Mat, std::vector<Mat>>>>> &allClusters) const {
- 
+     
 }
 */
+
 
 void xLBPH::clusterHistograms() {
     /* What is Histogram Clustering?

@@ -36,8 +36,8 @@ or tort (including negligence or otherwise) arising in any way out of
 the use of this software, even if advised of the possibility of such damage.
 */
 
-#ifndef __OPENCV_FACE_HPP__
-#define __OPENCV_FACE_HPP__
+#ifndef __OPENCV_DDFACE_HPP__
+#define __OPENCV_DDFACE_HPP__
 
 /**
 @defgroup face Face Recognition
@@ -50,7 +50,7 @@ the use of this software, even if advised of the possibility of such damage.
 #include "opencv2/core.hpp"
 #include <map>
 
-namespace cv { namespace face {
+namespace cv { namespace ddface {
 
 //! @addtogroup face
 //! @{
@@ -355,6 +355,6 @@ protected:
 
 }}
 
-#include "opencv2/face/facerec.hpp"
+#include "opencv2/ddface/ddfacerec.hpp"
 
 #endif
