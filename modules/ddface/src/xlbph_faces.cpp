@@ -32,7 +32,7 @@
 //#define COMP_ALG HISTCMP_BHATTACHARYYA
 #define SIZEOF_CV_32FC1 4
 
-namespace cv { namespace face {
+namespace cv { namespace ddface {
 
 // Face Recognition based on Local Binary Patterns.
 //
