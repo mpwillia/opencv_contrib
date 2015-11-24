@@ -1883,11 +1883,11 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
 
     tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     tbb::parallel_for(0, numLabelsToCheck, 1, 
-        [&bestlabels, &bestpreds](int i) {
+        [&bestlabels, &bestpreds, &_histograms](int i) {
             tbb::concurrent_vector<double> dists;
             std::vector<Mat> hists = _histograms.at(bestlabels.at(i).second);
             tbb::parallel_for_each(hists.begin(), hists.end(),
-                [&dists](Mat hist) {
+                [&dists, &query](Mat hist) {
                     dists.push_back(compareHist(hist, query, COMP_ALG));
                 }
             );
