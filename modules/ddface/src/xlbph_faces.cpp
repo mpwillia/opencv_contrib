@@ -957,7 +957,7 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
         matClusters.push_back(std::pair<Mat, std::vector<Mat>>(clusterAvg, clusterHists));
     }
     
-    printf("\t - finished with %d who has %d clusters for %d histograms \n", label, (int)clusters.size(), (int)hists.size());
+    //printf("\t - finished with %d who has %d clusters for %d histograms \n", label, (int)clusters.size(), (int)hists.size());
 
     //void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const {
 }
@@ -987,10 +987,13 @@ void xLBPH::clusterHistograms() {
 
     //double avgCheckRatio = 0;
     //tbb::parallel_for(tbb::blocked_range<std::map<int, std::vector<Mat>>::const_iterator>(_histograms.begin(), _histograms.end()), [=](std::map<int, std::vector<Mat>>::const_iterator it) {
+    int count = 0;
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(), 
         [&](std::pair<int, std::vector<Mat>> it) {
     //for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         
+        printf("Clustering histograms %d / %d    \r", count++, (int)_histograms.size());
+
         int numHists = (int)it.second.size();
         std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters;
         cluster_label(it.first, labelClusters);
@@ -1030,6 +1033,9 @@ void xLBPH::clusterHistograms() {
         //break;
         */
     });
+
+    printf("Finished Clustering histograms for %d labels        \n", (int)_histograms.size());
+
     /*
     avgCheckRatio /= (int)_histograms.size();
     printf("\n### Overall ###\n");
