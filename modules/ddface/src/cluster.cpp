@@ -38,15 +38,15 @@ namespace cv { namespace clstr {
     }
 
     // Finds clusters for the given label's dists and puts the MCL mat in mclmat
-    void cluster_dists(Mat &dists, Mat &mclmat, double r, cluster_vars &vars) {
+    void cluster_dists(Mat &dists, Mat &mclmat, double r, const cluster_vars &vars) {
         //printf("\t\t\t - clustering dists...\n");
         mclmat.create(dists.rows, dists.cols, dists.type());
 
         // find weights
-        calc_weights(dists, mclmat, vars->cluster_tierStep, vars->cluster_numTiers);
+        calc_weights(dists, mclmat, vars.cluster_tierStep, vars.cluster_numTiers);
 
         // iterate
-        mcl::cluster(mclmat, vars->mcl_iterations, vars->mcl_expansion_power, r, vars->mcl_prune_min);
+        mcl::cluster(mclmat, vars.mcl_iterations, vars.mcl_expansion_power, r, vars.mcl_prune_min);
     }
 
     // Interprets a given MCL matrix as clusters
@@ -84,7 +84,7 @@ namespace cv { namespace clstr {
         }
     }
 
-    void find_optimal_clustering(Mat &dists, std::vector<idx_cluster_t> &idxClusters, cluster_vars &vars) {
+    void find_optimal_clustering(Mat &dists, std::vector<idx_cluster_t> &idxClusters, const cluster_vars &vars) {
 
         int optimalClustersMax = ceil(sqrt(dists.rows));
         int optimalClustersMin = floor(sqrt(dists.rows));
@@ -97,7 +97,7 @@ namespace cv { namespace clstr {
         */
 
         Mat initial;
-        double r = vars->mcl_inflation_power;
+        double r = vars.mcl_inflation_power;
 
         cluster_dists(dists, initial, r, vars);
         interpret_clusters(initial, clusters);
@@ -126,7 +126,7 @@ namespace cv { namespace clstr {
         }
     }
 
-    void clusterHistograms(const std::vector<Mat> &hists, std::vector<cluster_t>> &clusters, cluster_vars &vars) {
+    void clusterHistograms(const std::vector<Mat> &hists, std::vector<cluster_t>> &clusters, const cluster_vars &vars) {
 
         // calculate hist distances
         Mat dists = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
