@@ -20,6 +20,8 @@
 #include "face_basic.hpp"
 #include "mcl.hpp"
 
+#include "tbb/tbb.h"
+
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -983,7 +985,8 @@ void xLBPH::clusterHistograms() {
 
 
     //double avgCheckRatio = 0;
-    for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
+    parallel_for(_histograms.begin(), _histograms.end(), 1, [=](std::map<int, std::vector<Mat>>::const_iterator it) {
+    //for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         
         int numHists = (int)it->second.size();
         std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters;
@@ -1023,7 +1026,7 @@ void xLBPH::clusterHistograms() {
     
         //break;
         */
-    }
+    })
     /*
     avgCheckRatio /= (int)_histograms.size();
     printf("\n### Overall ###\n");
