@@ -1562,11 +1562,21 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         tbb::parallel_for_each(_histograms.begin(), _histograms.end(), 
             [&](std::pair<int, std::vector<Mat>> it) {
         */
+        
+        int idx = 0;
 
+        //for(size_t idx = 0; idx < labelImages.size(); idx++) {
+        /*
         tbb::parallel_for_each(labelImagesVec.begin(), labelImagesVec.end(), 
             [&](std::pair<int, std::vector<Mat>> labelit) {
-                std::vector<Mat> imgs = labelit.second;
-                concurrent_labelInfoVec.push_back(std::pair<int, int>(labelit.first, (int)imgs.size()));
+        */
+        tbb::parallel_for(0, labelImagesVec.size(), 1,
+            [=](size_t idx) {
+                std::cout << "Calculating histograms " << idx << " / " << (int)labelImagesVec.size() << "          \r" << std::flush;
+                
+                int label = labelImagesVec.at((int)idx).first;
+                std::vector<Mat> imgs = labelImagesVec.at((int)idx).second;
+                concurrent_labelInfoVec.push_back(std::pair<int, int>(label, (int)imgs.size()));
                 
                 tbb::concurrent_vector<Mat> concurrent_hists;
                 tbb::parallel_for_each(imgs.begin(), imgs.end(),
@@ -1587,7 +1597,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                 );
                 
                 std::vector<Mat> hists(concurrent_hists.begin(), concurrent_hists.end());
-                writeHistograms(getHistogramFile(labelit.first), hists, false);
+                writeHistograms(getHistogramFile(label), hists, false);
             }
         );
 
