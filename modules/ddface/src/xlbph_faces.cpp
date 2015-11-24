@@ -1563,7 +1563,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
             [&](std::pair<int, std::vector<Mat>> it) {
         */
         
-        int idx = 0;
+        //int idx = 0;
 
         //for(size_t idx = 0; idx < labelImages.size(); idx++) {
         /*
@@ -1576,7 +1576,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                 
                 int label = labelImagesVec.at((int)idx).first;
                 std::vector<Mat> imgs = labelImagesVec.at((int)idx).second;
-                concurrent_labelInfoVec.push_back(const std::pair<int, int>(label, (int)imgs.size()));
+                concurrent_labelInfoVec.push_back(std::pair<int, int>(label, (int)imgs.size()));
                 
                 tbb::concurrent_vector<Mat> concurrent_hists;
                 tbb::parallel_for_each(imgs.begin(), imgs.end(),
