@@ -21,7 +21,7 @@ namespace cv { namespace mcl {
             {
                 for(int j = 0; j < mclmat.rows; j++) {
                     mclmat.at<double>(i,j) /= sum;
-                });
+                }
             }
         });
     }
