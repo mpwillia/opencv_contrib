@@ -1907,15 +1907,25 @@ void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const
     //std::map<int, double> bestpreds;
     std::vector<std::pair<double, int>> bestpreds;
     //void performMultithreadedComp(const S &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const S &query, const std::vector<S> &src, std::vector<D> &dst) const) const
-    for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
+    tbb::parallel_for(_histograms.begin(), _histograms.end(),
+        [&bestpreds, &query](std::pair<int, std::vector<Mat>> it)
+    //for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
         
         //bestpreds[it->first] = DBL_MAX;
-        std::vector<Mat> hists = it->second;
-        std::vector<double> dists;
-        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, getMaxThreads(), &xLBPH::compareHistograms);
+        std::vector<Mat> hists = it.second;
+        //std::vector<double> dists;
+        tbb::concurrent_vector<double> dists;
+        tbb::parallel_for_each(hists.begin(), hists.end(), 
+            [&dists, &query](Mat hist) {
+                dists.push_back(compareHist(hist, query, COMP_ALG));
+            } 
+        );
+
+        //dists.push_back(compareHist(hists.at((int)idx), query, COMP_ALG));
+        //performMultithreadedComp<Mat, Mat, double>(query, hists, dists, getMaxThreads(), &xLBPH::compareHistograms);
         std::sort(dists.begin(), dists.end());
         
-        bestpreds.push_back(std::pair<double, int>(dists.at(0), it->first));
+        bestpreds.push_back(std::pair<double, int>(dists.at(0), it.first));
 
         /*
         for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
@@ -1930,7 +1940,7 @@ void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const
             }
         }
         */
-    }
+    });
     std::sort(bestpreds.begin(), bestpreds.end());
     minDist = bestpreds.at(0).first;
     minClass = bestpreds.at(0).second;

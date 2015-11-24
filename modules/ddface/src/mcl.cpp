@@ -11,8 +11,8 @@ namespace cv { namespace mcl {
     // Column Normalization
     void normalize(Mat &mclmat) {
         //printf("\t\t\tnormalize\n");
-        //for(int i = 0; i < mclmat.cols; i++) {
-        tbb::parallel_for(0, mclmat.cols, 1, [&mclmat](int i) {
+        for(int i = 0; i < mclmat.cols; i++) {
+        //tbb::parallel_for(0, mclmat.cols, 1, [&mclmat](int i) {
             double sum = 0; 
             for(int j = 0; j < mclmat.rows; j++) {
                 sum += mclmat.at<double>(i,j);
@@ -23,7 +23,8 @@ namespace cv { namespace mcl {
                     mclmat.at<double>(i,j) /= sum;
                 }
             }
-        });
+        }
+        //});
     }
 
     // Expansion
@@ -46,7 +47,8 @@ namespace cv { namespace mcl {
     // Inflation
     void inflate(Mat &mclmat, double r) {
         //printf("\t\t\tinflate (then normalize)\n");
-        //pow(mclmat, r, mclmat);
+        pow(mclmat, r, mclmat);
+        /*
         tbb::parallel_for(tbb::blocked_range2d<int>(0, mclmat.rows, 0, mclmat.cols),
             [r, &mclmat](const tbb::blocked_range2d<int> &range) {
                 for(int i = range.rows().begin(); i != range.rows().end(); i++) {
@@ -56,6 +58,7 @@ namespace cv { namespace mcl {
                 } 
             }  
         );
+        */
 
         normalize(mclmat);
     }
