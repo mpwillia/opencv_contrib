@@ -1554,7 +1554,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     else {
         std::cout << "Multithreaded label calcs\n";
         std::vector<std::pair<int, std::vector<Mat>>> labelImagesVec(labelImages.begin(), labelImages.end());
-        tbb::concurrent_vector<std::pair<int, int>> concurrent_labelInfoVec;
+        std::vector<std::pair<int, int>> labelInfoVec;
+        //tbb::concurrent_vector<std::pair<int, int>> concurrent_labelInfoVec;
         //void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat>>> &labelImages, std::vector<std::pair<int, int>> &labelinfo) const {
         //performMultithreadedCalc<std::pair<int, std::vector<Mat>>, std::pair<int, int>>(labelImagesVec, labelInfoVec, getLabelThreads(), &xLBPH::calculateLabels);
         
@@ -1576,9 +1577,10 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                 
                 int label = labelImagesVec.at((int)idx).first;
                 std::vector<Mat> imgs = labelImagesVec.at((int)idx).second;
-                std::pair<int, int> info(label, (int)imgs.size());
-                concurrent_labelInfoVec.push_back(info);
-                
+                //std::pair<int, int> info(label, (int)imgs.size());
+                //concurrent_labelInfoVec.push_back(info);
+                labelInfoVec.push_back(std::pair<int, int>(label, (int)imgs.size()));
+
                 tbb::concurrent_vector<Mat> concurrent_hists;
                 tbb::parallel_for_each(imgs.begin(), imgs.end(),
                     [&](Mat img) {
@@ -1602,7 +1604,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
             }
         );
 
-        std::vector<std::pair<int, int>> labelInfoVec(concurrent_labelInfoVec.begin(), concurrent_labelInfoVec.end());
+        //std::vector<std::pair<int, int>> labelInfoVec(concurrent_labelInfoVec.begin(), concurrent_labelInfoVec.end());
         for(size_t idx = 0; idx < labelInfoVec.size(); idx++) {
             uniqueLabels.push_back(labelInfoVec.at((int)idx).first);
             numhists.push_back(labelInfoVec.at((int)idx).second);
