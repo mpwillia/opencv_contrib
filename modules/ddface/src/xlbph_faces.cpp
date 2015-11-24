@@ -990,13 +990,13 @@ void xLBPH::clusterHistograms() {
         [&](std::pair<int, std::vector<Mat>> it) {
     //for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         
-        int numHists = (int)it->second.size();
+        int numHists = (int)it.second.size();
         std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters;
-        cluster_label(it->first, labelClusters);
+        cluster_label(it.first, labelClusters);
 
         //push all of the label clusters to the main clusters
         for(size_t i = 0; i < labelClusters.size(); i++) {
-            _clusters[it->first].push_back(labelClusters.at((int)i));
+            _clusters[it.first].push_back(labelClusters.at((int)i));
         }
 
         //std::map<int, std::vector<std::pair<Mat, std::vector<Mat>>>> _clusters;
