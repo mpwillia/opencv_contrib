@@ -992,7 +992,8 @@ void xLBPH::clusterHistograms() {
         [&](std::pair<int, std::vector<Mat>> it) {
     //for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         
-        printf("Clustering histograms %d / %d    \r", count++, (int)_histograms.size());
+        //printf("Clustering histograms %d / %d    \r", count++, (int)_histograms.size());
+        std::cout << "Clustering histograms " << count++ << " / " << (int)_histograms.size() << "   \r" << std::flush;
 
         int numHists = (int)it.second.size();
         std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters;
@@ -1034,7 +1035,7 @@ void xLBPH::clusterHistograms() {
         */
     });
 
-    printf("Finished Clustering histograms for %d labels        \n", (int)_histograms.size());
+    printf("Finished clustering histograms for %d labels        \n", (int)_histograms.size());
 
     /*
     avgCheckRatio /= (int)_histograms.size();
@@ -1668,7 +1669,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     calcHistogramAverages();
     mmapHistogramAverages();    
 
-    std::cout << "Clustering Histograms...\n";
     clusterHistograms();
 
     //load();
