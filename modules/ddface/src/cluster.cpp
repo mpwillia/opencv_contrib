@@ -100,7 +100,7 @@ namespace cv { namespace clstr {
         double r = vars.mcl_inflation_power;
 
         cluster_dists(dists, initial, r, vars);
-        interpret_clusters(initial, clusters);
+        interpret_clusters(initial, idxClusters);
         
         int checkClusters = (int)clusters.size();
         int iterations = 5;
@@ -121,7 +121,7 @@ namespace cv { namespace clstr {
             Mat mclmat;
             cluster_dists(dists, mclmat, r, vars);
             clusters.clear();
-            interpret_clusters(mclmat, clusters);
+            interpret_clusters(mclmat, idxClusters);
             checkClusters = (int)clusters.size();
         }
     }
@@ -133,7 +133,7 @@ namespace cv { namespace clstr {
         tbb::parallel_for(0, (int)hists.size()-1, 1, 
             [&hists, &dists](int i) {
                 tbb::parallel_for(i, (int)hists.size(), 1, 
-                    [&hists, &dists](int j) {
+                    [&hists, &dists, &i](int j) {
                         double dist = compareHist(hists.at(i), hists.at(j), COMP_ALG);
                         dists.at<double>(i, j) = dist;
                         dists.at<double>(j, i) = dist;
@@ -144,7 +144,7 @@ namespace cv { namespace clstr {
         
         // find optimal clusters
         std::vector<idx_cluster_t> idxClusters;
-        find_optimal_clustering(dists, idxClusters);
+        find_optimal_clustering(dists, idxClusters, vars);
 
         // convert from idx_cluster_t to cluster_t
         for(size_t i = 0; i < idxClusters.size(); i++) {
