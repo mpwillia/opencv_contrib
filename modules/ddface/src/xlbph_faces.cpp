@@ -709,7 +709,8 @@ void xLBPH::cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int 
     weights.create(dists.rows, dists.cols, dists.type());
 
     // calculate tiers and weights
-    for(size_t i = 0; i < dists.rows; i++) {
+    //for(size_t i = 0; i < dists.rows; i++) {
+    tbb::parallel_for(0, dists.rows, 1, [=](int i) {
         // find best
         double best = DBL_MAX;
         for(size_t j = 0; j < dists.cols; j++) {
@@ -732,7 +733,7 @@ void xLBPH::cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int 
             double weight = (numTiers+1) - weights.at<double>(j,i);
             weights.at<double>(j,i) = (weight <= 0) ? 0 : weight;
         }
-    }
+    });
 }
 
 // Finds clusters for the given label's dists and puts the MCL mat in mclmat
@@ -1531,7 +1532,40 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     // start training
     if(preserveData)
     {
-        int labelcount = 0;
+        int count = 0;
+        tbb::parallel_for_each(labelImages.begin(), labelImages.end(), 
+            [&](std::pair<int, std::vector<Mat>> it) {
+                std::cout << "Calculating histograms for label " << count++ << " / " << labelImages.size() << " [" << it->first << "]\r" << std::flush;
+            
+                std::vector<Mat> imgs = it.second;
+                std::vector<Mat> hists;
+              
+                tbb::concurrent_vector<Mat> concurrent_hists;
+                tbb::parallel_for_each(imgs.begin(), imgs.end(),
+                    [&](Mat img) {
+                           
+                        Mat lbp_image = elbp(img, _radius, _neighbors);
+
+                        // get spatial histogram from this lbp image
+                        Mat p = spatial_histogram(
+                                lbp_image, // lbp_image
+                                static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), // number of possible patterns
+                                _grid_x, // grid size x
+                                _grid_y, // grid size y
+                                true);
+                        
+                        concurrent_hists.push_back(p);
+                    } 
+                );
+
+                uniqueLabels.push_back(it.first);
+                numhists.push_back((int)imgs.size());
+                std::vector<Mat> hists(concurrent_hists.begin(), concurrent_hists.end());
+                writeHistograms(getHistogramFile(label), hists, true);
+                hists.clear();
+            }
+        );
+        /*
         for(std::map<int, std::vector<Mat>>::const_iterator it = labelImages.begin(); it != labelImages.end(); ++it) {
             std::cout << "Calculating histograms for label " << labelcount << " / " << labelImages.size() << " [" << it->first << "]\r" << std::flush;
 
@@ -1550,23 +1584,13 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
             labelcount++;
         }
+        */
     }
     else {
         std::cout << "Multithreaded label calcs\n";
         std::vector<std::pair<int, std::vector<Mat>>> labelImagesVec(labelImages.begin(), labelImages.end());
-        std::vector<std::pair<int, int>> labelInfoVec;
-        //tbb::concurrent_vector<std::pair<int, int>> concurrent_labelInfoVec;
-        //void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat>>> &labelImages, std::vector<std::pair<int, int>> &labelinfo) const {
-        //performMultithreadedCalc<std::pair<int, std::vector<Mat>>, std::pair<int, int>>(labelImagesVec, labelInfoVec, getLabelThreads(), &xLBPH::calculateLabels);
+        tbb::concurrent_vector<std::pair<int, int>> concurrent_labelInfoVec;
         
-        /*
-        tbb::parallel_for_each(_histograms.begin(), _histograms.end(), 
-            [&](std::pair<int, std::vector<Mat>> it) {
-        */
-        
-        //int idx = 0;
-
-        //for(size_t idx = 0; idx < labelImages.size(); idx++) {
         int count = 0;
         tbb::parallel_for_each(labelImagesVec.begin(), labelImagesVec.end(), 
             [&](std::pair<int, std::vector<Mat>> it) {
@@ -1576,7 +1600,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                 std::vector<Mat> imgs = it.second;
                 //std::pair<int, int> info(label, (int)imgs.size());
                 //concurrent_labelInfoVec.push_back(info);
-                labelInfoVec.push_back(std::pair<int, int>(label, (int)imgs.size()));
+                concurrent_labelInfoVec.push_back(std::pair<int, int>(label, (int)imgs.size()));
 
                 tbb::concurrent_vector<Mat> concurrent_hists;
                 tbb::parallel_for_each(imgs.begin(), imgs.end(),
@@ -1601,7 +1625,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
             }
         );
 
-        //std::vector<std::pair<int, int>> labelInfoVec(concurrent_labelInfoVec.begin(), concurrent_labelInfoVec.end());
+        std::vector<std::pair<int, int>> labelInfoVec(concurrent_labelInfoVec.begin(), concurrent_labelInfoVec.end());
         for(size_t idx = 0; idx < labelInfoVec.size(); idx++) {
             uniqueLabels.push_back(labelInfoVec.at((int)idx).first);
             numhists.push_back(labelInfoVec.at((int)idx).second);
