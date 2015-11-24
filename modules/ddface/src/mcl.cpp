@@ -1,5 +1,5 @@
 
-#include "opencv2/tbb/task_scheduler_init.h"
+#include "tbb/task_scheduler_init.h"
 #include "precomp.hpp"
 #include "mcl.hpp"
 #include <cmath>
