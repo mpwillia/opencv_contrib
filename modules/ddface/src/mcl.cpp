@@ -1,6 +1,7 @@
 
 #include "precomp.hpp"
 #include "mcl.hpp"
+#include "tbb/tbb.h"
 #include <cmath>
 
 #define COMP_EPSILON 0.00001
@@ -10,18 +11,20 @@ namespace cv { namespace mcl {
     // Column Normalization
     void normalize(Mat &mclmat) {
         //printf("\t\t\tnormalize\n");
-        for(int i = 0; i < mclmat.cols; i++) {
+        //for(int i = 0; i < mclmat.cols; i++) {
+        tbb::parallel_for(0, mclmat.cols, 1, [&](int i) {
             double sum = 0; 
             for(int j = 0; j < mclmat.rows; j++) {
                 sum += mclmat.at<double>(i,j);
             }
             if(sum > 0)
             {
-                for(int j = 0; j < mclmat.rows; j++) {
+                tbb::parallel_for(0, mclmat.rows, 1, [&](int j) {
+                //for(int j = 0; j < mclmat.rows; j++) {
                     mclmat.at<double>(i,j) /= sum;
-                }
+                });
             }
-        } 
+        });
     }
 
     // Expansion
@@ -44,7 +47,17 @@ namespace cv { namespace mcl {
     // Inflation
     void inflate(Mat &mclmat, double r) {
         //printf("\t\t\tinflate (then normalize)\n");
-        pow(mclmat, r, mclmat);
+        //pow(mclmat, r, mclmat);
+        tbb::parallel_for(tbb::blocked_range2d<int>(0, mclmat.rows, 0, mclmat.cols),
+            [](const tbb:blocked_range2d<int> &r) {
+                for(int i = r.rows().begin(); i != r.rows().end(); i++) {
+                    for(int j = r.cols().begin(); j != r.cols().end(); j++) {
+                        mclmat.at(i,j) = pow(mclmat.at(i,j), r);
+                    } 
+                } 
+            }  
+        );
+
         normalize(mclmat);
     }
 
