@@ -49,7 +49,7 @@ namespace cv { namespace mcl {
         //printf("\t\t\tinflate (then normalize)\n");
         //pow(mclmat, r, mclmat);
         tbb::parallel_for(tbb::blocked_range2d<int>(0, mclmat.rows, 0, mclmat.cols),
-            [](const tbb::blocked_range2d<int> &r) {
+            [&](const tbb::blocked_range2d<int> &r) {
                 for(int i = r.rows().begin(); i != r.rows().end(); i++) {
                     for(int j = r.cols().begin(); j != r.cols().end(); j++) {
                         mclmat.at(i,j) = pow(mclmat.at(i,j), r);
