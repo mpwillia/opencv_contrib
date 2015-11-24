@@ -12,14 +12,14 @@ namespace cv { namespace mcl {
     void normalize(Mat &mclmat) {
         //printf("\t\t\tnormalize\n");
         //for(int i = 0; i < mclmat.cols; i++) {
-        tbb::parallel_for(0, mclmat.cols, 1, [&](int i) {
+        tbb::parallel_for(0, mclmat.cols, 1, [&mclmat](int i) {
             double sum = 0; 
             for(int j = 0; j < mclmat.rows; j++) {
                 sum += mclmat.at<double>(i,j);
             }
             if(sum > 0)
             {
-                tbb::parallel_for(0, mclmat.rows, 1, [&](int j) {
+                tbb::parallel_for(0, mclmat.rows, 1, [&mclmat, i](int j) {
                 //for(int j = 0; j < mclmat.rows; j++) {
                     mclmat.at<double>(i,j) /= sum;
                 });
