@@ -6,7 +6,7 @@
 
 namespace cv { namespace face {
    
-   typedef cluster_t std::pair<Mat, std::vector<Mat>>;
+   typedef std::pair<Mat, std::vector<Mat>> cluster_t;
    
    //void clusterHistograms(const std::vector<Mat> &hists, std::vector<cluster_t>>);
 
