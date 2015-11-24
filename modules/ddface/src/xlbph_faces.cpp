@@ -985,7 +985,7 @@ void xLBPH::clusterHistograms() {
 
 
     //double avgCheckRatio = 0;
-    tbb::parallel_for(tbb::blocked_range(_histograms.begin(), _histograms.end()), [=](std::map<int, std::vector<Mat>>::const_iterator it) {
+    tbb::parallel_for(tbb::blocked_range<std::map<int, vector<Mat>>::const_iterator>(_histograms.begin(), _histograms.end()), [=](std::map<int, std::vector<Mat>>::const_iterator it) {
     //for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         
         int numHists = (int)it->second.size();
