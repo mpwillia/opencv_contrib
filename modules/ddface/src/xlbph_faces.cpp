@@ -1026,7 +1026,7 @@ void xLBPH::clusterHistograms() {
     
         //break;
         */
-    })
+    });
     /*
     avgCheckRatio /= (int)_histograms.size();
     printf("\n### Overall ###\n");
