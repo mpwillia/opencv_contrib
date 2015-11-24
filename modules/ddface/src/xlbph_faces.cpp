@@ -1571,9 +1571,10 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         tbb::parallel_for_each(labelImagesVec.begin(), labelImagesVec.end(), 
             [&](std::pair<int, std::vector<Mat>> labelit) {
         */
+        int count = 0;
         tbb::parallel_for(0, (int)labelImagesVec.size(), 1,
             [&](int idx) {
-                std::cout << "Calculating histograms " << idx << " / " << (int)labelImagesVec.size() << "          \r" << std::flush;
+                std::cout << "Calculating histograms " << count++ << " / " << (int)labelImagesVec.size() << "          \r" << std::flush;
                 
                 int label = labelImagesVec.at(idx).first;
                 std::vector<Mat> imgs = labelImagesVec.at(idx).second;
