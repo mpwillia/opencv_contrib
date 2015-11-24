@@ -102,7 +102,7 @@ namespace cv { namespace clstr {
         cluster_dists(dists, initial, r, vars);
         interpret_clusters(initial, idxClusters);
         
-        int checkClusters = (int)clusters.size();
+        int checkClusters = (int)idxClusters.size();
         int iterations = 5;
         int base = 7;
         bool makeLarger = (checkClusters < optimalClustersMin);
@@ -122,8 +122,20 @@ namespace cv { namespace clstr {
             cluster_dists(dists, mclmat, r, vars);
             clusters.clear();
             interpret_clusters(mclmat, idxClusters);
-            checkClusters = (int)clusters.size();
+            checkClusters = (int)idxClusters.size();
         }
+    }
+
+    void averageHistograms(const std::vector<Mat> &hists, Mat &histavg) {
+        histavg = Mat::zeros(1, getHistogramSize(), CV_64FC1);
+
+        for(size_t idx = 0; idx < hists.size(); idx++) {
+            Mat dst;
+            hists.at((int)idx).convertTo(dst, CV_64FC1);
+            histavg += dst; 
+        }
+        histavg /= (int)hists.size();
+        histavg.convertTo(histavg, CV_32FC1);
     }
 
     void clusterHistograms(const std::vector<Mat> &hists, std::vector<cluster_t>> &clusters, const cluster_vars &vars) {
