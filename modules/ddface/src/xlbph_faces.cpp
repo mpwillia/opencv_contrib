@@ -19,6 +19,7 @@
 #include "opencv2/ddface/ddfacerec.hpp"
 #include "face_basic.hpp"
 #include "mcl.hpp"
+#include "cluster.hpp"
 
 #include "tbb/tbb.h"
 
@@ -63,7 +64,7 @@ private:
     std::map<int, std::vector<Mat>> _histograms;
     std::map<int, Mat> _histavgs;
     std::map<int, Mat> _distmats;    
-    std::map<int, std::vector<std::pair<Mat, std::vector<Mat>>>> _clusters;
+    std::map<int, std::vector<cluster_t>> _clusters;
 
     // defines what prediction algorithm to use
     int _algToUse;
@@ -962,13 +963,6 @@ void xLBPH::cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>
     //void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const {
 }
 
-/*
-void xLBPH::clusterLabels(const std::vector<int> &labels, std::vector<std::pair<int, std::vector<std::pair<Mat, std::vector<Mat>>>>> &allClusters) const {
-     
-}
-*/
-
-
 void xLBPH::clusterHistograms() {
     /* What is Histogram Clustering?
      * The idea is to group like histograms together
@@ -993,7 +987,7 @@ void xLBPH::clusterHistograms() {
     //for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         
         //printf("Clustering histograms %d / %d    \r", count++, (int)_histograms.size());
-        std::cout << "Clustering histograms " << count++ << " / " << (int)_histograms.size() << "                   \r" << std::flush;
+        std::cout << "Clustering histograms " << count++ << " / " << (int)_histograms.size() << "                                \r" << std::flush;
 
         int numHists = (int)it.second.size();
         std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters;
@@ -1004,44 +998,10 @@ void xLBPH::clusterHistograms() {
             _clusters[it.first].push_back(labelClusters.at((int)i));
         }
 
-        //std::map<int, std::vector<std::pair<Mat, std::vector<Mat>>>> _clusters;
-        /*
-        //double clusterRatio = (int)clusters.size() / (double)hists.size(); 
-        int worstCase = 0;
-        for(size_t idx = 0; idx < clusters.size(); idx++) {
-            std::set<int> cluster = clusters.at(idx);
-            if((int)cluster.size() > worstCase)
-                worstCase = (int)cluster.size();
-        }
-        worstCase += (int)clusters.size();
-        double checkRatio = worstCase / (double)numHists;
-        avgCheckRatio += checkRatio;
-        printf("=== Cluster Stats [%d] ===\n", it->first);
-        printf("Total Hists: - - > %7d\n", numHists);
-        printf("Total Clusters:  > %7d\n", (int)clusters.size());
-        printf("Worst Case Checks: %7d\n", worstCase);
-        printf("Check Ratio: - - > %7.3f (lower = better)\n", checkRatio);
-        //printf("%d Clusters from %d hists for %d - Cluster Ratio: %7.3f - Worst Case Checks: %d - Check Ratio: %7.3f\n", (int)clusters.size(), (int)hists.size(), it->first, ratio, worstCase, checkRatio);
-        for(size_t idx = 0; idx < clusters.size(); idx++) {
-            std::set<int> cluster = clusters.at(idx);
-            for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
-                printf("%d, ", *it);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    
-        //break;
-        */
     });
 
-    printf("Finished clustering histograms for %d labels                         \n", (int)_histograms.size());
+    printf("Finished clustering histograms for %d labels                                        \n", (int)_histograms.size());
 
-    /*
-    avgCheckRatio /= (int)_histograms.size();
-    printf("\n### Overall ###\n");
-    printf("Average Check Ratio: %7.3f\n", avgCheckRatio);
-    */
 }
 
 

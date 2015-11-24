@@ -1,5 +1,5 @@
 #ifndef __MCL_HPP
-#define __OPENCV_MCL_HPP
+#define __MCL_HPP
 
 #include "precomp.hpp"
 
