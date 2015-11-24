@@ -52,7 +52,7 @@ namespace cv { namespace mcl {
             [r, &mclmat](const tbb::blocked_range2d<int> &range) {
                 for(int i = range.rows().begin(); i != range.rows().end(); i++) {
                     for(int j = range.cols().begin(); j != range.cols().end(); j++) {
-                        mclmat.at((int)i,(int)j) = pow(mclmat.at(i,j), r);
+                        mclmat.at<double>(i,j) = pow(mclmat.at<double>(i,j), r);
                     } 
                 } 
             }  
