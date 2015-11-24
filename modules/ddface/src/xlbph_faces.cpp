@@ -1892,6 +1892,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     );
     std::sort(bestlabels.begin(), bestlabels.end());
 
+
     // figure out how many labels to check
     int numLabelsToCheck = (int)((int)_labelinfo.size() * labelsToCheckRatio);
     if(numLabelsToCheck < minLabelsToCheck)
@@ -1913,6 +1914,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
             bestpreds.push_back(std::pair<double, int>(dists.at(0), bestlabels.at(i).second));
         } 
     );
+    std::sort(bestpreds.begin(), bestpreds.end());
 
     // setup data for multithreading
     /*
