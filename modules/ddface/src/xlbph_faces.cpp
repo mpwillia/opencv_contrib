@@ -1601,7 +1601,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
             }
         );
 
-        std::vector<std::pair<int, int>> labelInfoVec;
+        std::vector<std::pair<int, int>> labelInfoVec(concurrent_labelInfoVec.begin(), concurrent_labelInfoVec.end());
         for(size_t idx = 0; idx < labelInfoVec.size(); idx++) {
             uniqueLabels.push_back(labelInfoVec.at((int)idx).first);
             numhists.push_back(labelInfoVec.at((int)idx).second);
