@@ -1,4 +1,5 @@
 
+#include "tbb/task_scheduler_init.h"
 #include "precomp.hpp"
 #include "mcl.hpp"
 #include <cmath>
@@ -90,6 +91,8 @@ namespace cv { namespace mcl {
 
     // Markov Clustering - Runs MCL iterations on src
     void cluster(Mat &mclmat, int iters, int e, double r, double prune_min) {
+        tbb::task_scheduler_init init;
+
         if(iters <= 0)
             converge(mclmat, e, r, prune_min);
         else {
