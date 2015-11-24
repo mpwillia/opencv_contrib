@@ -1,5 +1,5 @@
 
-#include "tbb/task_scheduler_init.h"
+#include "opencv2/tbb/task_scheduler_init.h"
 #include "precomp.hpp"
 #include "mcl.hpp"
 #include <cmath>
@@ -10,7 +10,7 @@ namespace cv { namespace mcl {
 
     // Column Normalization
     void normalize(Mat &mclmat) {
-        //printf("\t\t\tnormalize\n");
+        /aprintf("\t\t\tnormalize\n");
         for(int i = 0; i < mclmat.cols; i++) {
             double sum = 0; 
             for(int j = 0; j < mclmat.rows; j++) {
