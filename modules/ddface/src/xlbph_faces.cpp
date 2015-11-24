@@ -1842,8 +1842,10 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     Mat query = _query.getMat();
 
     //std::map<int, Mat> histavgs = _histavgs;
-
+    
+    
     // we need to break histavgs into it's comps 
+    /*
     std::vector<Mat> histavgs;
     std::vector<int> labels;
     for(std::map<int, Mat>::const_iterator it = _histavgs.begin(); it != _histavgs.end(); it++) {
@@ -1862,13 +1864,40 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     }
     // sort the data by smallest distance first
     std::sort(bestlabels.begin(), bestlabels.end());
+    */
     
+    tbb::concurrent_vector<std::pair<double, int>> bestlabels;
+    tbb::parallel_for_each(_histavgs.begin(), _histavgs.end(), 
+        [&bestlabels, &query](std::pair<int, Mat> it) {
+            bestlabels.push_back(std::pair<double, int>(compareHist(it.second, query, COMP_ALG), it.first));
+        }
+    );
+    std::sort(bestlabels.begin(), bestlabels.end());
+
     // figure out how many labels to check
     int numLabelsToCheck = (int)((int)_labelinfo.size() * labelsToCheckRatio);
     if(numLabelsToCheck < minLabelsToCheck)
         numLabelsToCheck = minLabelsToCheck;
-    
+    if(numLabelsToCheck > (int)bestlabels.size())
+        numLabelsToCheck = (int)bestlabels.size();
+
+    tbb::concurrent_vector<std::pair<double, int>> bestpreds;
+    tbb::parallel_for(0, numLabelsToCheck, 1, 
+        [&bestlabels, &bestpreds](int i) {
+            tbb::concurrent_vector<double> dists;
+            std::vector<Mat> hists = _histograms.at(bestlabels.at(i).second);
+            tbb::parallel_for_each(hists.begin(), hists.end(),
+                [&dists](Mat hist) {
+                    dists.push_back(compareHist(hist, query, COMP_ALG));
+                }
+            );
+            std::sort(dists.begin(), dists.end());
+            bestpreds.push_back(std::pair<double, int>(dists.at(0), bestlabels.at(i).second));
+        } 
+    );
+
     // setup data for multithreading
+    /*
     std::vector<std::pair<int, std::vector<Mat>>> labelhists;
     for(size_t idx = 0; idx < bestlabels.size() && (int)idx < numLabelsToCheck; idx++) {
         int label = bestlabels.at(idx).second;
@@ -1886,6 +1915,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
         bestpreds.push_back(std::pair<double, int>(dists.at(0), labeldists.at((int)idx).first));
     }
     std::sort(bestpreds.begin(), bestpreds.end());
+    */
 
     minDist = bestpreds.at(0).first;
     minClass = bestpreds.at(0).second;
