@@ -710,7 +710,7 @@ void xLBPH::cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int 
 
     // calculate tiers and weights
     //for(size_t i = 0; i < dists.rows; i++) {
-    tbb::parallel_for(0, dists.rows, 1, [=](int i) {
+    tbb::parallel_for(0, dists.rows, 1, [&](int i) {
         // find best
         double best = DBL_MAX;
         for(size_t j = 0; j < dists.cols; j++) {
@@ -1535,10 +1535,9 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         int count = 0;
         tbb::parallel_for_each(labelImages.begin(), labelImages.end(), 
             [&](std::pair<int, std::vector<Mat>> it) {
-                std::cout << "Calculating histograms for label " << count++ << " / " << labelImages.size() << " [" << it->first << "]\r" << std::flush;
+                std::cout << "Calculating histograms for label " << count++ << " / " << labelImages.size() << " [" << it.first << "]\r" << std::flush;
             
                 std::vector<Mat> imgs = it.second;
-                std::vector<Mat> hists;
               
                 tbb::concurrent_vector<Mat> concurrent_hists;
                 tbb::parallel_for_each(imgs.begin(), imgs.end(),
@@ -1561,7 +1560,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                 uniqueLabels.push_back(it.first);
                 numhists.push_back((int)imgs.size());
                 std::vector<Mat> hists(concurrent_hists.begin(), concurrent_hists.end());
-                writeHistograms(getHistogramFile(label), hists, true);
+                writeHistograms(getHistogramFile(it.first), hists, true);
                 hists.clear();
             }
         );
