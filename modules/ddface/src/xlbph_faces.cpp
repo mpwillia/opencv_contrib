@@ -1814,7 +1814,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
             std::vector<Mat> hists = it.second;
             tbb::concurrent_vector<double> dists;
             tbb::parallel_for_each(hists.begin(), hists.end(), 
-                [&labeldists, &query](Mat hist) {
+                [&labeldists, &dists, &query](Mat hist) {
                     dists.push_back(compareHist(hist, query, COMP_ALG));
                 } 
             );
