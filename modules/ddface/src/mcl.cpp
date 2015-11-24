@@ -19,8 +19,7 @@ namespace cv { namespace mcl {
             }
             if(sum > 0)
             {
-                tbb::parallel_for(0, mclmat.rows, 1, [&mclmat, i, sum](int j) {
-                //for(int j = 0; j < mclmat.rows; j++) {
+                for(int j = 0; j < mclmat.rows; j++) {
                     mclmat.at<double>(i,j) /= sum;
                 });
             }
