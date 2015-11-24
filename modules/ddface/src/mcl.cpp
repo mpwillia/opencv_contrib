@@ -10,7 +10,7 @@ namespace cv { namespace mcl {
 
     // Column Normalization
     void normalize(Mat &mclmat) {
-        /aprintf("\t\t\tnormalize\n");
+        //printf("\t\t\tnormalize\n");
         for(int i = 0; i < mclmat.cols; i++) {
             double sum = 0; 
             for(int j = 0; j < mclmat.rows; j++) {
