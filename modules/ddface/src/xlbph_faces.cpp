@@ -1905,7 +1905,7 @@ void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const
     //minDist = DBL_MAX;
     //minClass = -1;
     //std::map<int, double> bestpreds;
-    std::vector<std::pair<double, int>> bestpreds;
+    tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     //void performMultithreadedComp(const S &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const S &query, const std::vector<S> &src, std::vector<D> &dst) const) const
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(),
         [&bestpreds, &query](std::pair<int, std::vector<Mat>> it) {
