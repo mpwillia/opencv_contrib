@@ -3,6 +3,8 @@
 #include "mcl.hpp"
 #include "tbb/tbb.h"
 
+#define COMP_ALG HISTCMP_CHISQR_ALT
+
 namespace cv { namespace clstr {
 
     // Calculates the weights between each histogram and puts them in weights
@@ -120,14 +122,14 @@ namespace cv { namespace clstr {
 
             Mat mclmat;
             cluster_dists(dists, mclmat, r, vars);
-            clusters.clear();
+            idxClusters.clear();
             interpret_clusters(mclmat, idxClusters);
             checkClusters = (int)idxClusters.size();
         }
     }
 
     void averageHistograms(const std::vector<Mat> &hists, Mat &histavg) {
-        histavg = Mat::zeros(1, getHistogramSize(), CV_64FC1);
+        histavg = Mat::zeros(1, hists.at(0).cols, CV_64FC1);
 
         for(size_t idx = 0; idx < hists.size(); idx++) {
             Mat dst;
@@ -138,7 +140,7 @@ namespace cv { namespace clstr {
         histavg.convertTo(histavg, CV_32FC1);
     }
 
-    void clusterHistograms(const std::vector<Mat> &hists, std::vector<cluster_t>> &clusters, const cluster_vars &vars) {
+    void clusterHistograms(const std::vector<Mat> &hists, std::vector<cluster_t> &clusters, const cluster_vars &vars) {
 
         // calculate hist distances
         Mat dists = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
