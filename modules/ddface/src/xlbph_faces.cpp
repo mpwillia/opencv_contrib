@@ -902,7 +902,7 @@ void xLBPH::clusterHistograms() {
         //printf("Clustering histograms %d / %d    \r", count++, (int)_histograms.size());
         std::cout << "Clustering histograms " << count++ << " / " << (int)_histograms.size() << "                                \r" << std::flush;
 
-    std::vector<Mat> hists = _histograms[label];
+        //std::vector<Mat> hists = _histograms[label];
         /*
         int numHists = (int)it.second.size();
         std::vector<cluster_t> labelClusters;
