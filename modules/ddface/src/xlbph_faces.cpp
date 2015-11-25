@@ -64,7 +64,7 @@ private:
     std::map<int, std::vector<Mat>> _histograms;
     std::map<int, Mat> _histavgs;
     std::map<int, Mat> _distmats;    
-    std::map<int, std::vector<cluster_t>> _clusters;
+    std::map<int, std::vector<clstr::cluster_t>> _clusters;
 
     // defines what prediction algorithm to use
     int _algToUse;
