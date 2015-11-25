@@ -889,7 +889,7 @@ void xLBPH::clusterHistograms() {
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
         labels.push_back(it->first);
 
-    std::vector<std::pair<int, std::vector<cluster_t>>> allClusters;
+    std::vector<std::pair<int, std::vector<clstr::cluster_t>>> allClusters;
 
 
     //double avgCheckRatio = 0;
@@ -915,7 +915,7 @@ void xLBPH::clusterHistograms() {
                                     mcl_expansion_power, 
                                     mcl_inflation_power, 
                                     mcl_prune_min};
-        std::vector<cluster_t> labelClusters;
+        std::vector<clstr::cluster_t> labelClusters;
         clstr::clusterHistograms(_histograms[it.first], labelClusters, vars);
 
         //push all of the label clusters to the main clusters
