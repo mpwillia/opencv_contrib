@@ -110,7 +110,7 @@ private:
     //void compareLabelWithQuery(const Mat &query, const std::vector<int> &labels, std::vector<std::vector<double>> &labeldists) const;
     void compareHistograms(const Mat &query, const std::vector<Mat> &hists, std::vector<double> &dists) const;
     
-    static const int minLabelsToCheck = 5;
+    static int minLabelsToCheck = 5;
     static const double labelsToCheckRatio = 0.05;
 
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
@@ -159,8 +159,8 @@ private:
     void printMat(const Mat &mat, int label) const;
     
     // Histogram Clustering - Settings
-    static const double cluster_tierStep = 0.01; // Sets how large a tier is, default is 0.01 or 1%
-    static const int cluster_numTiers = 10; // Sets how many tiers to keep, default is 10, or 10% max tier
+    static double cluster_tierStep = 0.01; // Sets how large a tier is, default is 0.01 or 1%
+    static int cluster_numTiers = 10; // Sets how many tiers to keep, default is 10, or 10% max tier
 
     // Markov Clustering Algorithm (MCL)- Settings
     /* Sets the number of MCL iterations, default is 10
