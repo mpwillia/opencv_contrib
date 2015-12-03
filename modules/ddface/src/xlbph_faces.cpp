@@ -110,8 +110,8 @@ private:
     //void compareLabelWithQuery(const Mat &query, const std::vector<int> &labels, std::vector<std::vector<double>> &labeldists) const;
     void compareHistograms(const Mat &query, const std::vector<Mat> &hists, std::vector<double> &dists) const;
     
-    static int minLabelsToCheck = 5;
-    static const double labelsToCheckRatio = 0.05;
+    int minLabelsToCheck = 5;
+    double labelsToCheckRatio = 0.05;
 
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
 
@@ -159,17 +159,17 @@ private:
     void printMat(const Mat &mat, int label) const;
     
     // Histogram Clustering - Settings
-    static double cluster_tierStep = 0.01; // Sets how large a tier is, default is 0.01 or 1%
-    static int cluster_numTiers = 10; // Sets how many tiers to keep, default is 10, or 10% max tier
+    double cluster_tierStep = 0.01; // Sets how large a tier is, default is 0.01 or 1%
+    int cluster_numTiers = 10; // Sets how many tiers to keep, default is 10, or 10% max tier
 
     // Markov Clustering Algorithm (MCL)- Settings
     /* Sets the number of MCL iterations, default is 10
      * If 0 then iterates until no change is found
      */
-    static const int mcl_iterations = 10;
-    static const int mcl_expansion_power = 2; // Sets the expansion power exponent, default is 2
-    static const double mcl_inflation_power = 2; // Sets the inflation power exponent, default is 2 
-    static const double mcl_prune_min = 0.001; // Sets the minimum value to prune, any values below this are set to zero, default is 0.001
+    int mcl_iterations = 10;
+    int mcl_expansion_power = 2; // Sets the expansion power exponent, default is 2
+    double mcl_inflation_power = 2; // Sets the inflation power exponent, default is 2 
+    double mcl_prune_min = 0.001; // Sets the minimum value to prune, any values below this are set to zero, default is 0.001
 
     //--------------------------------------------------------------------------
     // Misc 
