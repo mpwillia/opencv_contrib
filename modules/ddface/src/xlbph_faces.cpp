@@ -1749,7 +1749,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
     minClass = bestpreds.at(0).second;
     
     std::cout << "\nBest Prediction by PID:\n";
-    for(tbb::concurrent_vector<std::pair<double, int>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
+    for(std::vector<std::pair<double, int>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
         printf("[%d, %f]\n", it->first, it->second);
     }
 } 
