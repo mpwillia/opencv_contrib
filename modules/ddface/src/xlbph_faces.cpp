@@ -110,10 +110,10 @@ private:
     //void compareLabelWithQuery(const Mat &query, const std::vector<int> &labels, std::vector<std::vector<double>> &labeldists) const;
     void compareHistograms(const Mat &query, const std::vector<Mat> &hists, std::vector<double> &dists) const;
     
-    int minLabelsToCheck = 5;
-    double labelsToCheckRatio = 0.1;
+    int minLabelsToCheck = 10;
+    double labelsToCheckRatio = 0.05;
 
-    int minClustersToCheck = 2;
+    int minClustersToCheck = 3;
     double clustersToCheckRatio = 0.25;
 
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
