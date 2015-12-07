@@ -625,9 +625,9 @@ bool xLBPH::calcHistogramAverages() const {
         int label = it->first; 
 
         //find it in concurrent_averages
-        for(tbb::concurrent_vector<std::pair<int, Mat>>::const_iterator avg = concurrent_averages.begin(); avg != concurrent_averages.end(); avgs++) {
-            if(avg.first == label) {
-                averages.push_back(avg.second);
+        for(tbb::concurrent_vector<std::pair<int, Mat>>::const_iterator avg = concurrent_averages.begin(); avg != concurrent_averages.end(); avg++) {
+            if(avg->first == label) {
+                averages.push_back(avg->second);
                 break;
             }
         }
