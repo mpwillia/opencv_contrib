@@ -111,7 +111,10 @@ private:
     void compareHistograms(const Mat &query, const std::vector<Mat> &hists, std::vector<double> &dists) const;
     
     int minLabelsToCheck = 5;
-    double labelsToCheckRatio = 0.05;
+    double labelsToCheckRatio = 0.075;
+
+    int minClustersToCheck = 2;
+    double clusterToCheckRatio = 0.25;
 
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
 
@@ -1681,8 +1684,14 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
                 } 
             );
             std::sort(clusterDists.begin(), clusterDists.end());
+            
 
-            int numClustersToCheck = 2;
+            // figure out how many labels to check
+            int numClustersToCheck = (int)((int)clusterDists.size() * clustersToCheckRatio);
+            if(numClustersToCheck < minClustersToCheck)
+                numClustersToCheck = minClustersToCheck;
+            if(numClustersToCheck > (int)clusterDists.size())
+                numClustersToCheck = (int)clusterDists.size();
 
             std::vector<Mat> combinedClusters;
             for(size_t bestIdx = 0; bestIdx < clusterDists.size() && (int)bestIdx < numClustersToCheck; bestIdx++) {
