@@ -614,7 +614,7 @@ bool xLBPH::calcHistogramAverages() const {
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(),
         [&concurrent_averages, this](std::pair<int, std::vector<Mat>> it) {
            Mat histavg;
-           this.averageHistograms(it.second, histavg);
+           this->averageHistograms(it.second, histavg);
 
            concurrent_averages.push_back(std::pair<int, Mat>(it.first, histavg));
         } 
@@ -625,7 +625,7 @@ bool xLBPH::calcHistogramAverages() const {
         int label = it->first; 
 
         //find it in concurrent_averages
-        for(tbb::concurrent_vector<std::pair<int, Mat>>::const_iterator avg = _concurrent_averages.begin(); avg != _concurrent_averages.end(); avgs++) {
+        for(tbb::concurrent_vector<std::pair<int, Mat>>::const_iterator avg = concurrent_averages.begin(); avg != concurrent_averages.end(); avgs++) {
             if(avg.first == label) {
                 averages.push_back(avg.second);
                 break;
