@@ -111,7 +111,7 @@ private:
     void compareHistograms(const Mat &query, const std::vector<Mat> &hists, std::vector<double> &dists) const;
     
     int minLabelsToCheck = 5;
-    double labelsToCheckRatio = 0.075;
+    double labelsToCheckRatio = 0.1;
 
     int minClustersToCheck = 2;
     double clustersToCheckRatio = 0.25;
