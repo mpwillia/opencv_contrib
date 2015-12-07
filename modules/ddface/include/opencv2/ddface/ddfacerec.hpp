@@ -53,6 +53,8 @@ public:
     CV_WRAP virtual void setMCLSettings(int numIters, int e, double r) = 0;
     CV_WRAP virtual void setClusterSettings(double tierStep, int numTiers) = 0;
 
+    CV_WRAP virtual void setUseClusters(bool flag) = 0;
+
     CV_WRAP virtual void load() = 0;
 };
 CV_EXPORTS_W Ptr<xLBPHFaceRecognizer> createxLBPHFaceRecognizer(int radius=1, int neighbors=8, int grid_x=8, int grid_y=8, double threshold = DBL_MAX, String modelpath="");

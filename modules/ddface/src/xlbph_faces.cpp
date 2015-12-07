@@ -69,7 +69,7 @@ private:
     // defines what prediction algorithm to use
     int _algToUse;
     
-
+    bool _useClusters;
 
     //--------------------------------------------------------------------------
     // Multithreading
@@ -203,7 +203,8 @@ public:
                 _threshold(threshold) {
 
         _numThreads = 16;
-        _algToUse = 0;
+        _algToUse = 0
+        _useClusters = true;
         setModelPath(modelpath);
     }
 
@@ -225,6 +226,7 @@ public:
                 _threshold(threshold) {
         _numThreads = 16;
         _algToUse = 0;
+        _useClusters = true;
         setModelPath(modelpath);
         train(src, labels);
     }
@@ -279,8 +281,14 @@ public:
     void setMCLSettings(int numIters, int e, double r);
     void setClusterSettings(double tierStep, int numTiers);
 
+    void setUseClusters(bool flag);
     void test();
 };
+
+void xLBPH::setUseClusters(bool flag) {
+    _useClusters = flag;
+}
+
 
 void xLBPH::setClusterSettings(double tierStep, int numTiers) {
     cluster_tierStep = tierStep;
@@ -589,13 +597,41 @@ void xLBPH::calcHistogramAverages_thread(const std::vector<int> &labels, std::ve
 }
 
 bool xLBPH::calcHistogramAverages() const {
-    
+        
+    /*
     std::vector<Mat> averages;
     std::vector<int> labels; 
     for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
         labels.push_back(it->first);
     
     performMultithreadedCalc<int, Mat>(labels, averages, getMaxThreads(), &xLBPH::calcHistogramAverages_thread);
+
+    return writeHistograms(getHistogramAveragesFile(), averages, false);
+    */
+
+    tbb::concurrent_vector<std::pair<int, Mat>> concurrent_averages;
+
+    tbb::parallel_for_each(_histograms.begin(), _histograms.end(),
+        [&concurrent_averages](std::pair<int, std::vector<Mat>> it) {
+           Mat histavg;
+           averageHistograms(it.second, histavg);
+
+           concurrent_averages.push_back(std::pair<int, Mat>(it.first, histavg));
+        } 
+    );
+
+    std::vector<Mat> averages;
+    for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++) {
+        int label = it->first; 
+
+        //find it in concurrent_averages
+        for(tbb:concurrent_vector<std::pair<int, Mat>>::const_iterator avg = _concurrent_averages.begin(); avg != _concurrent_averages.end(); avgs++) {
+            if(avg.first == label) {
+                averages.push_back(avg.second);
+                break;
+            }
+        }
+    }
 
     return writeHistograms(getHistogramAveragesFile(), averages, false);
 }
@@ -1557,7 +1593,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     calcHistogramAverages();
     mmapHistogramAverages();    
 
-    clusterHistograms();
+    if(_useClusters)
+        clusterHistograms();
 
     //load();
 
@@ -1610,6 +1647,12 @@ void xLBPH::compareLabelWithQuery(const Mat &query, const std::vector<int> &labe
 */
 
 void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const {
+
+    if(!_useClusters) {
+        CV_Error(Error::StsError, "Cannot make prediction using clusters, clustering disabled!"); 
+        return;
+    }
+
     Mat query = _query.getMat();
     
     tbb::concurrent_vector<std::pair<double, int>> bestlabels;
