@@ -102,9 +102,14 @@ private:
     //--------------------------------------------------------------------------
     // Prediction Functions
     //--------------------------------------------------------------------------
-    void predict_std(InputArray _src, int &label, double &dist) const;
+    void predict_std(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds) const;
+    void predict_avg(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds) const;
+    void predict_avg_clustering(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds) const;
+    
+    /*
     void predict_avg(InputArray _src, int &label, double &dist) const;
     void predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const;
+    */
 
     void compareLabelHistograms(const Mat &query, const std::vector<std::pair<int, std::vector<Mat>>> &labelhists, std::vector<std::pair<int, std::vector<double>>> &labeldists) const;
     //void compareLabelWithQuery(const Mat &query, const std::vector<int> &labels, std::vector<std::vector<double>> &labeldists) const;
@@ -1646,7 +1651,8 @@ void xLBPH::compareLabelWithQuery(const Mat &query, const std::vector<int> &labe
 }
 */
 
-void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const {
+void xLBPH::predict_avg(InputArray _query, tbb:concurrent_vector<std::pair<double, int>> &bestpreds) const {
+//void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const {
 
     if(!_useClusters) {
         CV_Error(Error::StsError, "Cannot make prediction using clusters, clustering disabled!"); 
@@ -1781,16 +1787,20 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
     */
 
     //printf(" - Grabbing best predictions for each PID...\n");
-    std::vector<std::pair<double, int>> bestpreds;
+    //std::vector<std::pair<double, int>> bestpreds;
+
+    //tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     for(size_t idx = 0; idx < labeldists.size(); idx++) {
         std::vector<double> dists = labeldists.at((int)idx).second;
         bestpreds.push_back(std::pair<double, int>(dists.at(0), labeldists.at((int)idx).first));
     }
     std::sort(bestpreds.begin(), bestpreds.end());
-
+    
+    /*
     minDist = bestpreds.at(0).first;
     minClass = bestpreds.at(0).second;
-        
+    */
+
     /*
     std::cout << "\nBest Prediction by PID:\n";
     for(std::vector<std::pair<double, int>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
@@ -1799,7 +1809,8 @@ void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &min
     */
 } 
 
-void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const {
+void xLBPH::predict_avg(InputArray _query, tbb:concurrent_vector<std::pair<double, int>> &bestpreds) const {
+//void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const {
     Mat query = _query.getMat();
 
     //std::map<int, Mat> histavgs = _histavgs;
@@ -1843,7 +1854,7 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     if(numLabelsToCheck > (int)bestlabels.size())
         numLabelsToCheck = (int)bestlabels.size();
 
-    tbb::concurrent_vector<std::pair<double, int>> bestpreds;
+    //tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     tbb::parallel_for(0, numLabelsToCheck, 1, 
         [&](int i) {
             tbb::concurrent_vector<double> dists;
@@ -1879,10 +1890,12 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
     }
     std::sort(bestpreds.begin(), bestpreds.end());
     */
-
+    
+    /*
     minDist = bestpreds.at(0).first;
     minClass = bestpreds.at(0).second;
-        
+    */
+
     /*
     std::cout << "\nBest Prediction by PID:\n";
     for(tbb::concurrent_vector<std::pair<double, int>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
@@ -1892,13 +1905,14 @@ void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const
 } 
 
 
-void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const {
+void xLBPH::predict_std(InputArray _query, tbb:concurrent_vector<std::pair<double, int>> &bestpreds) const {
+//void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const {
     Mat query = _query.getMat();
 
     //minDist = DBL_MAX;
     //minClass = -1;
     //std::map<int, double> bestpreds;
-    tbb::concurrent_vector<std::pair<double, int>> bestpreds;
+    //tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     //void performMultithreadedComp(const S &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const S &query, const std::vector<S> &src, std::vector<D> &dst) const) const
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(),
         [&bestpreds, &query](std::pair<int, std::vector<Mat>> it) {
@@ -1935,9 +1949,12 @@ void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const
         */
     });
     std::sort(bestpreds.begin(), bestpreds.end());
+    
+    /*
     minDist = bestpreds.at(0).first;
     minClass = bestpreds.at(0).second;
-    
+    */
+
     /*
     std::cout << "\nBest Prediction by PID:\n";
     for(tbb::concurrent_vector<std::pair<double, int>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
@@ -1969,12 +1986,29 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
             _grid_y, /* grid size y */
             true /* normed histograms */);
     
+    tbb::concurrent_vector<std::pair<double, int>> bestpreds;
+    switch(_algToUse) {
+        case 1: predict_avg(query, bestpreds); break;
+        case 2: predict_avg_clustering(query, bestpreds); break;
+        default: predict_std(query, bestpreds); break;
+    }
+
+    std::cout << "\nBest Prediction by PID:\n";
+    for(tbb::concurrent_vector<std::pair<double, int>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
+        printf("[%d, %f]\n", it->first, it->second);
+    }
+
+    minClass = bestpreds.at(0).second;
+    minDist = bestpreds.at(0).first;
+
+    /*
     switch(_algToUse) {
         case 1: predict_avg(query, minClass, minDist); break;
         case 2: predict_avg_clustering(query, minClass, minDist); break;
         default: predict_std(query, minClass, minDist); break;
     }
-    
+    */
+
     //printf("!!! Final Prediction: [%d, %f]\n", minClass, minDist);
 }
 
