@@ -1651,7 +1651,7 @@ void xLBPH::compareLabelWithQuery(const Mat &query, const std::vector<int> &labe
 }
 */
 
-void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds) const {
+void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds) const {
 //void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const {
 
     if(!_useClusters) {
