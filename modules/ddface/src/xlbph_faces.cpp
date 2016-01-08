@@ -251,7 +251,7 @@ public:
 
     // Predicts the label and confidence for a given sample.
     void predict(InputArray _src, int &label, double &dist) const;
-
+       //  predictMulti
     void predictMulti(InputArray _src, OutputArray _preds, int numPreds) const;
 
     // See FaceRecognizer::load.
@@ -1967,6 +1967,7 @@ void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<doub
 
 
 //void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
+//
 void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) const {
     CV_Assert((int)_labelinfo.size() > 0);
     CV_Assert((int)_histograms.size() > 0);
