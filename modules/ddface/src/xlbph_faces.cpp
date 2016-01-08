@@ -252,6 +252,8 @@ public:
     // Predicts the label and confidence for a given sample.
     void predict(InputArray _src, int &label, double &dist) const;
 
+    void predictMulti(InputArray _src, OutputArray _labels, OutputArrays _dists, int numPreds) const;
+
     // See FaceRecognizer::load.
     void load(const FileStorage& fs);
     void load(const String &filename);
@@ -1964,9 +1966,8 @@ void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<doub
 }
 
 
-
-void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
-    
+//void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
+ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) const {
     CV_Assert((int)_labelinfo.size() > 0);
     CV_Assert((int)_histograms.size() > 0);
 
@@ -1993,13 +1994,28 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
         default: predict_std(query, bestpreds); break;
     }
 
-    std::cout << "\nBest Prediction by PID:\n";
+    _preds.create(numPreds, 2, CV_32FC1);
+    Mat preds = _preds.getMat();
+
+
+    //std::cout << "\nBest Prediction by PID:\n";
+    int i = 0;
     for(tbb::concurrent_vector<std::pair<double, int>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
-        printf("[%d, %f]\n", it->first, it->second);
+        //printf("[%d, %f]\n", it->first, it->second);
+
+        if(i < numPreds) {
+            preds.at<float>(0, i) = it->second;
+            preds.at<float>(1, i) = it->first;
+            i++;
+        }
     }
 
+    
+     
+    /* 
     minClass = bestpreds.at(0).second;
     minDist = bestpreds.at(0).first;
+    */
 
     /*
     switch(_algToUse) {
@@ -2010,6 +2026,13 @@ void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     */
 
     //printf("!!! Final Prediction: [%d, %f]\n", minClass, minDist);
+}
+
+void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
+    Mat dst;
+    predictMulti(_src, dst, 1);
+    minClass = (int)dst.at<float>(0,0);
+    minDist = dst.at<float>(1,0);
 }
 
 int xLBPH::predict(InputArray _src) const {
