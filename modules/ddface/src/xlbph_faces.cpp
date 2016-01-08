@@ -252,7 +252,7 @@ public:
     // Predicts the label and confidence for a given sample.
     void predict(InputArray _src, int &label, double &dist) const;
 
-    void predictMulti(InputArray _src, OutputArray _labels, OutputArrays _dists, int numPreds) const;
+    void predictMulti(InputArray _src, OutputArray _preds, int numPreds) const;
 
     // See FaceRecognizer::load.
     void load(const FileStorage& fs);
