@@ -16,7 +16,7 @@
  *   See <http://www.opensource.org/licenses/bsd-license>
  */
 #include "precomp.hpp"
-#include "opencv2/face.hpp"
+#include "opencv2/face/facerec.hpp"
 
 namespace cv
 {
@@ -58,7 +58,7 @@ void FaceRecognizer::load(const String &filename)
 {
     FileStorage fs(filename, FileStorage::READ);
     if (!fs.isOpened())
-        CV_Error(Error::StsError, "File can't be opened for writing!");
+        CV_Error(Error::StsError, "File can't be opened for reading!");
     this->load(fs);
     fs.release();
 }
@@ -70,20 +70,6 @@ void FaceRecognizer::save(const String &filename) const
         CV_Error(Error::StsError, "File can't be opened for writing!");
     this->save(fs);
     fs.release();
-}
-
-int FaceRecognizer::predict(InputArray src) const {
-    int _label;
-    double _dist;
-    predict(src, _label, _dist);
-    return _label;
-}
-
-void FaceRecognizer::predict(InputArray src, CV_OUT int &label, CV_OUT double &confidence) const {
-    Ptr<MinDistancePredictCollector> collector = MinDistancePredictCollector::create(getThreshold());
-    predict(src, collector, 0);
-    label = collector->getLabel();
-    confidence = collector->getDist();
 }
 
 }

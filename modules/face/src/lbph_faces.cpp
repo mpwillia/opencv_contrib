@@ -16,8 +16,11 @@
  *   See <http://www.opensource.org/licenses/bsd-license>
  */
 #include "precomp.hpp"
-#include "opencv2/face.hpp"
+#include "opencv2/face/facerec.hpp"
 #include "face_basic.hpp"
+
+#include <cstdio>
+#include <cstring>
 
 namespace cv { namespace face {
 
@@ -43,6 +46,15 @@ private:
     // corresponding labels in labels, possibly preserving
     // old model data.
     void train(InputArrayOfArrays src, InputArray labels, bool preserveData);
+    
+    //--------------------------------------------------------------------------
+    // Additional Private Functions
+    //--------------------------------------------------------------------------
+    bool saveRawHistograms(const String &filename, const std::vector<Mat> &histograms) const;
+    bool loadRawHistograms(const String &filename, std::vector<Mat> &histograms);
+    
+    int getHistogramSize() const;
+    bool matsEqual(const Mat &a, const Mat &b) const;
 
 
 public:
@@ -91,15 +103,18 @@ public:
     // corresponding labels in labels.
     void update(InputArrayOfArrays src, InputArray labels);
 
-    // Send all predict results to caller side for custom result handling
-    void predict(InputArray src, Ptr<PredictCollector> collector, const int state = 0) const;
+    // Predicts the label of a query image in src.
+    int predict(InputArray src) const;
+
+    // Predicts the label and confidence for a given sample.
+    void predict(InputArray _src, int &label, double &dist) const;
 
     // See FaceRecognizer::load.
     void load(const FileStorage& fs);
 
     // See FaceRecognizer::save.
     void save(FileStorage& fs) const;
-
+    
     CV_IMPL_PROPERTY(int, GridX, _grid_x)
     CV_IMPL_PROPERTY(int, GridY, _grid_y)
     CV_IMPL_PROPERTY(int, Radius, _radius)
@@ -107,9 +122,393 @@ public:
     CV_IMPL_PROPERTY(double, Threshold, _threshold)
     CV_IMPL_PROPERTY_RO(std::vector<cv::Mat>, Histograms, _histograms)
     CV_IMPL_PROPERTY_RO(cv::Mat, Labels, _labels)
+
+
+    //--------------------------------------------------------------------------
+    // Additional Public Functions 
+    // NOTE: Remember to add header to opencv2/face/facerec.hpp
+    //--------------------------------------------------------------------------
+    void load_segmented(const String &parent_dir, const String &modelname);
+    void save_segmented(const String &parent_dir, const String &modelname, bool binary_hist) const;
+    bool verifyBinaryFiles(const String &parent_dir, const String &modelname);
+    //void train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists);
 };
 
 
+//------------------------------------------------------------------------------
+// Additional Functions and File IO
+//------------------------------------------------------------------------------
+
+bool LBPH::verifyBinaryFiles(const String &parent_dir, const String &modelname) {
+    
+    String modelname_bin(modelname + "-bin");
+    String model_dir_bin(parent_dir + "/" + modelname_bin);
+    String modelname_yaml(modelname + "-yaml");
+    String model_dir_yaml(parent_dir + "/" + modelname_yaml);
+
+    // save our model with both yaml and binary
+    save_segmented(parent_dir, modelname_bin, true);
+    save_segmented(parent_dir, modelname_yaml, false);
+
+    // load info file
+    String infofilepath(model_dir_bin + "/" + modelname_bin + ".yml");
+    FileStorage infofile(infofilepath, FileStorage::READ);
+    if (!infofile.isOpened())
+        CV_Error(Error::StsError, "File '" + infofilepath + "' can't be opened for writing!");
+    
+    infofile["radius"] >> _radius;
+    infofile["neighbors"] >> _neighbors;
+    infofile["grid_x"] >> _grid_x;
+    infofile["grid_y"] >> _grid_y;
+
+    std::vector<int> labels;
+    std::vector<int> numhists;
+    FileNode label_info = infofile["label_info"];
+    label_info["labels"] >> labels;
+    label_info["numhists"] >> numhists;
+    infofile.release();
+   
+    for(size_t i = 0; i < labels.size(); i++) {
+
+        char label[16];
+        sprintf(label, "%d", labels.at((int)i));
+
+        String histfilename_bin(model_dir_bin + "/" + modelname_bin + "-histograms" + "/" + modelname_bin + "-" + label + ".bin");
+        String histfilename_yaml(model_dir_yaml + "/" + modelname_yaml + "-histograms" + "/" + modelname_yaml + "-" + label + ".yml");
+        
+        std::vector<Mat> hists_bin;
+        std::vector<Mat> hists_yaml;
+        FileStorage yaml(histfilename_yaml, FileStorage::READ);
+        if (yaml.isOpened()) {
+            // attempt to load yaml 
+            yaml["histograms"] >> hists_yaml;
+        } 
+        else {
+            std::cout << "Cannot load YAML histograms for label " << label << " | " << histfilename_yaml << "\n";
+            return false;
+        }
+
+        yaml.release();
+
+        // attempt to load binary
+        if (!loadRawHistograms(histfilename_bin, hists_bin)) {
+            // loading binary failed
+            std::cout << "Cannot load Binary histograms for label " << label << " | " << histfilename_bin << "\n";
+            return false;
+        } 
+      
+        if(hists_yaml.size() != hists_bin.size()) {
+            std::cout << "Different number of histograms between YAML(" << (int)hists_yaml.size() << ") and Binary(" << (int)hists_bin.size() << ")!\n";
+            return false;
+        }
+
+        for(size_t j = 0; j < hists_yaml.size() && j < hists_bin.size(); j++) {
+            if(!matsEqual(hists_yaml.at((int)j), hists_bin.at((int)j))) {
+                std::cout << " -> NOT EQUAL!!! <- \n";
+                return false;
+            }
+        }
+
+
+        
+        /*
+        std::vector<Mat> yaml_hists;
+        std::vector<Mat> bin_hists;
+        
+        std::cout << "loading yaml...\n";
+        FileStorage yaml(histfilename_yaml, FileStorage::READ);
+        //readFileNodeList(yaml["histograms"], yaml_hists);
+        yaml["histograms"] >> yaml_hists;
+        yaml.release();
+
+        std::cout << "loading bin...\n";
+        loadRawHistograms(histfilename_bin, bin_hists);
+       
+        std::cout << "yaml hists size: " << yaml_hists.size() << "\n";
+        std::cout << "bin hists size: " << bin_hists.size() << "\n";
+        
+        bool equal = true;
+        for(size_t j = 0; j < yaml_hists.size() && j < bin_hists.size(); j++) {
+            if(!matsEqual(yaml_hists.at((int)j), bin_hists.at((int)j))) {
+                equal = false;
+                break;
+            }
+        }
+
+        if(equal)
+            std::cout << "EQUAL!!!!!\n";
+        else
+            std::cout << "NOT EQUAL!!!!\n";
+        */
+    }
+
+    std::cout << "Binary files are OK\n";
+
+    return true;
+} 
+
+
+
+
+
+bool LBPH::matsEqual(const Mat &a, const Mat &b) const {
+    return countNonZero(a!=b) == 0; 
+}
+
+int LBPH::getHistogramSize() const {
+    return (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
+}
+
+
+bool LBPH::loadRawHistograms(const String &filename, std::vector<Mat> &histograms) {
+    FILE *fp = fopen(filename.c_str(), "r");
+    if(fp == NULL) {
+        //std::cout << "cannot open file at '" << filename << "'\n";
+        return false;
+    }
+    
+    float buffer[getHistogramSize()];
+    while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
+        Mat hist = Mat::zeros(1, getHistogramSize(), CV_32FC1);
+        memcpy(hist.ptr<float>(), buffer, getHistogramSize() * sizeof(float));
+        histograms.push_back(hist);
+    }
+    fclose(fp);
+    return true;
+}
+
+bool LBPH::saveRawHistograms(const String &filename, const std::vector<Mat> &histograms) const {
+    FILE *fp = fopen(filename.c_str(), "w");
+    if(fp == NULL) {
+        //std::cout << "cannot open file at '" << filename << "'\n";
+        return false;
+    }
+    
+    float* buffer = new float[getHistogramSize() * (int)histograms.size()];
+    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
+        memcpy((buffer + sampleIdx * getHistogramSize()), histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
+    }
+    fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
+    delete buffer;
+
+    //TODO: Either increase write buffer or group all hists into one write call
+    /*
+    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
+        Mat hist = histograms.at((int)sampleIdx);
+        fwrite(hist.ptr<float>(), sizeof(float), getHistogramSize(), fp);
+    }
+    */
+    fclose(fp);
+    return true;
+}
+
+
+
+void LBPH::load_segmented(const String &parent_dir, const String &modelname) {
+    
+    String model_dir(parent_dir + "/" + modelname);
+    String infofilepath(model_dir + "/" + modelname + ".yml");
+   
+    FileStorage infofile(infofilepath, FileStorage::READ);
+    if (!infofile.isOpened())
+        CV_Error(Error::StsError, "File '" + infofilepath + "' can't be opened for writing!");
+    
+    infofile["radius"] >> _radius;
+    infofile["neighbors"] >> _neighbors;
+    infofile["grid_x"] >> _grid_x;
+    infofile["grid_y"] >> _grid_y;
+
+    std::vector<int> labels;
+    std::vector<int> numhists;
+    FileNode label_info = infofile["label_info"];
+    label_info["labels"] >> labels;
+    label_info["numhists"] >> numhists;
+    
+    infofile.release();
+
+    std::cout << "labels: [ ";
+    for(size_t i = 0; i < labels.size(); i++) {
+        if(i != 0)
+            std::cout << ", ";
+        std::cout << labels.at((int)i);
+    }
+    std::cout << " ]\n";
+    std::cout << "numhists: [ ";
+    for(size_t i = 0; i < numhists.size(); i++) {
+        if(i != 0)
+            std::cout << ", ";
+        std::cout << numhists.at((int)i);
+    }
+    std::cout << " ]\n";
+
+    String histograms_dir(model_dir + "/" + modelname + "-histograms");
+    for(size_t i = 0; i < labels.size(); i++) {
+        std::cout << "Loading " << (int)i << " / " << (int)labels.size() << "\r" << std::flush;
+        //std::cout << "loading label '" << labels.at((int)i) << "'\r";
+
+        char label[16];
+        sprintf(label, "%d", labels.at((int)i));
+        String histfilename_base(histograms_dir + "/" + modelname + "-" + label);
+        String histfilename_yaml(histfilename_base + ".yml");
+        String histfilename_bin(histfilename_base + ".bin");
+        
+        std::vector<Mat> hists;
+        FileStorage yaml(histfilename_yaml, FileStorage::READ);
+        if (yaml.isOpened()) {
+            // attempt to load yaml 
+            yaml["histograms"] >> hists;
+        } 
+        // attempt to load binary
+        else if (!loadRawHistograms(histfilename_bin, hists)) {
+            // loading binary failed
+            std::cout << "cannot load histograms for label " << label << "\n";
+        } 
+        yaml.release();
+        
+        /*
+        std::vector<Mat> yaml_hists;
+        std::vector<Mat> bin_hists;
+        
+        std::cout << "loading yaml...\n";
+        FileStorage yaml(histfilename_yaml, FileStorage::READ);
+        //readFileNodeList(yaml["histograms"], yaml_hists);
+        yaml["histograms"] >> yaml_hists;
+        yaml.release();
+
+        std::cout << "loading bin...\n";
+        loadRawHistograms(histfilename_bin, bin_hists);
+       
+        std::cout << "yaml hists size: " << yaml_hists.size() << "\n";
+        std::cout << "bin hists size: " << bin_hists.size() << "\n";
+        
+        bool equal = true;
+        for(size_t j = 0; j < yaml_hists.size() && j < bin_hists.size(); j++) {
+            if(!matsEqual(yaml_hists.at((int)j), bin_hists.at((int)j))) {
+                equal = false;
+                break;
+            }
+        }
+
+        if(equal)
+            std::cout << "EQUAL!!!!!\n";
+        else
+            std::cout << "NOT EQUAL!!!!\n";
+        */
+    }
+    std::cout << "Finished loading " << (int)labels.size() << " label's histograms\n";
+
+}
+
+
+
+void LBPH::save_segmented(const String &parent_dir, const String &modelname, bool binary_hists) const {
+   
+    // create our model dir
+    String model_dir(parent_dir + "/" + modelname);
+
+    // can write WAY faster if the dir doesn't exist already
+    system(("rm -rf " + model_dir).c_str());
+    system(("mkdir " + model_dir).c_str());
+
+    // create a map between our labels and our histograms 
+    std::map<int, std::vector<Mat> > histograms_map;
+    for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
+        histograms_map[_labels.at<int>((int)sampleIdx)].push_back(_histograms[sampleIdx]);
+    }
+
+    //int unique_labels[(int)histograms_map.size()];
+    std::vector<int> unique_labels;
+    std::vector<int> label_num_hists;
+    for(std::map<int, std::vector<Mat> >::iterator it = histograms_map.begin(); it != histograms_map.end(); ++it) {
+        unique_labels.push_back(it->first);
+        label_num_hists.push_back((it->second).size());
+    }
+
+    // create our main info file
+    String infofilepath(model_dir + "/" + modelname + ".yml");
+    FileStorage infofile(infofilepath, FileStorage::WRITE);
+    if (!infofile.isOpened())
+        CV_Error(Error::StsError, "File can't be opened for writing!");
+
+    infofile << "radius" << _radius;
+    infofile << "neighbors" << _neighbors;
+    infofile << "grid_x" << _grid_x;
+    infofile << "grid_y" << _grid_y;
+    infofile << "numlabels" << (int)histograms_map.size();
+    //infofile << "labels" << unique_labels;
+    infofile << "label_info" << "{";
+    infofile << "labels" << unique_labels;
+    infofile << "numhists" << label_num_hists;
+    infofile << "}";
+    infofile.release();
+
+    // create our histogram directory
+    String histogram_dir(model_dir + "/" + modelname + "-histograms");
+    system(("mkdir " + histogram_dir).c_str());
+    
+    std::cout << "\n";
+    for(size_t idx = 0; idx < unique_labels.size(); idx++) {
+        std::cout << "Saving label " << (int)idx << " / " << (int)unique_labels.size() << "\r" << std::flush;
+        char label[16];
+        sprintf(label, "%d", unique_labels.at(idx));
+        String histogram_filename(histogram_dir + "/" + modelname + "-" + label + ".yml");
+        
+        if(binary_hists) {
+            String histogram_rawfilename(histogram_dir + "/" + modelname + "-" + label + ".bin");
+            saveRawHistograms(histogram_rawfilename, histograms_map.at(unique_labels.at(idx)));
+        }
+        else {
+            FileStorage histogram_file(histogram_filename, FileStorage::WRITE);
+            if(!histogram_file.isOpened())
+                CV_Error(Error::StsError, "Histogram file can't be opened for writing!");
+
+            histogram_file << "histograms" << histograms_map.at(unique_labels.at(idx));
+            histogram_file.release();
+        }
+    } 
+    std::cout << "Finished saving " << (int)unique_labels.size() << "\n";
+
+} 
+
+//void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData)
+/*
+void LBPH::train_segmented(InputArrayOfArrays _in_src, InputArray _in_labels, const String &parent_dir, const String &modelname, bool binary_hists) {
+     
+    if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
+        String error_message = "The images are expected as InputArray::STD_VECTOR_MAT (a std::vector<Mat>) or _InputArray::STD_VECTOR_VECTOR (a std::vector< std::vector<...> >).";
+        CV_Error(Error::StsBadArg, error_message);
+    }
+    if(_in_src.total() == 0) {
+        String error_message = format("Empty training data was given. You'll need more than one sample to learn a model.");
+        CV_Error(Error::StsUnsupportedFormat, error_message);
+    } else if(_in_labels.getMat().type() != CV_32SC1) {
+        String error_message = format("Labels must be given as integer (CV_32SC1). Expected %d, but was %d.", CV_32SC1, _in_labels.type());
+        CV_Error(Error::StsUnsupportedFormat, error_message);
+    }
+
+    // get the vector of matrices
+    std::vector<Mat> src;
+    _in_src.getMatVector(src);
+    // get the label matrix
+    Mat labels = _in_labels.getMat();
+    // check if data is well- aligned
+    if(labels.total() != src.size()) {
+        String error_message = format("The number of samples (src) must equal the number of labels (labels). Was len(samples)=%d, len(labels)=%d.", src.size(), _labels.total());
+        CV_Error(Error::StsBadArg, error_message);
+    }
+
+    // append labels to _labels matrix
+    for(size_t labelIdx = 0; labelIdx < labels.total(); labelIdx++) {
+        _labels.push_back(labels.at<int>((int)labelIdx));
+    }
+}
+*/
+
+//------------------------------------------------------------------------------
+// Standard Functions and File IO
+//------------------------------------------------------------------------------
+
+// See FaceRecognizer::load.
 void LBPH::load(const FileStorage& fs) {
     fs["radius"] >> _radius;
     fs["neighbors"] >> _neighbors;
@@ -315,9 +714,15 @@ static Mat spatial_histogram(InputArray _src, int numPatterns,
         for(int j = 0; j < grid_x; j++) {
             Mat src_cell = Mat(src, Range(i*height,(i+1)*height), Range(j*width,(j+1)*width));
             Mat cell_hist = histc(src_cell, 0, (numPatterns-1), true);
+
             // copy to the result matrix
             Mat result_row = result.row(resultRowIdx);
             cell_hist.reshape(1,1).convertTo(result_row, CV_32FC1);
+
+            // free memory
+            src_cell.release();
+            cell_hist.release();
+   
             // increase row count in result matrix
             resultRowIdx++;
         }
@@ -337,6 +742,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 }
 
 void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
+
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
         String error_message = "The images are expected as InputArray::STD_VECTOR_MAT (a std::vector<Mat>) or _InputArray::STD_VECTOR_VECTOR (a std::vector< std::vector<...> >).";
         CV_Error(Error::StsBadArg, error_message);
@@ -348,6 +754,7 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
         String error_message = format("Labels must be given as integer (CV_32SC1). Expected %d, but was %d.", CV_32SC1, _in_labels.type());
         CV_Error(Error::StsUnsupportedFormat, error_message);
     }
+
     // get the vector of matrices
     std::vector<Mat> src;
     _in_src.getMatVector(src);
@@ -358,19 +765,29 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
         String error_message = format("The number of samples (src) must equal the number of labels (labels). Was len(samples)=%d, len(labels)=%d.", src.size(), _labels.total());
         CV_Error(Error::StsBadArg, error_message);
     }
+
     // if this model should be trained without preserving old data, delete old model data
     if(!preserveData) {
         _labels.release();
         _histograms.clear();
     }
+
     // append labels to _labels matrix
     for(size_t labelIdx = 0; labelIdx < labels.total(); labelIdx++) {
         _labels.push_back(labels.at<int>((int)labelIdx));
     }
+
     // store the spatial histograms of the original data
     for(size_t sampleIdx = 0; sampleIdx < src.size(); sampleIdx++) {
+        std::cout << "Calculating histograms for image " << sampleIdx << " / " << src.size() << "\r" << std::flush;
+
+
         // calculate lbp image
         Mat lbp_image = elbp(src[sampleIdx], _radius, _neighbors);
+         
+        if(sampleIdx == 0)
+            std::cout << "lbp_image size = " << lbp_image.cols << "x" << lbp_image.rows << " | depth = " << lbp_image.depth() << " | channels = " << lbp_image.channels() << "\n";
+         
         // get spatial histogram from this lbp image
         Mat p = spatial_histogram(
                 lbp_image, /* lbp_image */
@@ -378,12 +795,24 @@ void LBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserv
                 _grid_x, /* grid size x */
                 _grid_y, /* grid size y */
                 true);
+         
+        if(sampleIdx == 0)
+            std::cout << "p size = " << p.cols << "x" << p.rows << " | depth = " << p.depth() << " | channels = " << p.channels() << "\n";
+
         // add to templates
         _histograms.push_back(p);
+
+        // free memory
+        //lbp_image.release();
     }
+    
+    std::cout << "Finished calculating histograms for " << src.size() << " images.            \n";
+    std::cout << "Num Histograms: " << _histograms.size() << "\n";
+    std::cout << "Elems In Histograms : " << _histograms.at(0).rows << "x" << _histograms.at(0).cols << "\n";
+
 }
 
-void LBPH::predict(InputArray _src, Ptr<PredictCollector> collector, const int state) const {
+void LBPH::predict(InputArray _src, int &minClass, double &minDist) const {
     if(_histograms.empty()) {
         // throw error if no data (or simply return -1?)
         String error_message = "This LBPH model is not computed yet. Did you call the train method?";
@@ -399,12 +828,62 @@ void LBPH::predict(InputArray _src, Ptr<PredictCollector> collector, const int s
             _grid_y, /* grid size y */
             true /* normed histograms */);
     // find 1-nearest neighbor
-    collector->init((int)_histograms.size(), state);
-    for (size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
+    minDist = DBL_MAX;
+    double maxDist = 0;
+    minClass = -1;
+    
+    //NOTE: <double, int> instead of <int, double> so we sort by dist not label
+    std::vector<std::pair<double, int> > preds;
+    std::map<int, std::vector<double> > alldists;
+
+    for(size_t sampleIdx = 0; sampleIdx < _histograms.size(); sampleIdx++) {
         double dist = compareHist(_histograms[sampleIdx], query, HISTCMP_CHISQR_ALT);
-        int label = _labels.at<int>((int)sampleIdx);
-        if (!collector->emit(label, dist, state))return;
+        alldists[_labels.at<int>((int) sampleIdx)].push_back(dist);
+        if((dist < minDist) && (dist < _threshold)) {
+            minDist = dist;
+            minClass = _labels.at<int>((int) sampleIdx);
+            
+            preds.push_back(std::pair<double, int>(dist, minClass));
+            //std::cout << "[" << minClass << " | " << minDist << "], ";
+        }
+
+        if(dist > maxDist)
+            maxDist = dist;
     }
+
+    std::sort(preds.begin(), preds.end());
+    
+    /*
+    std::cout << "\nPredictions: ";
+    for(size_t idx = 0; idx < preds.size() ; idx++) {
+        std::pair<double, int> pred = preds.at(idx);
+        printf("[%d, %f], ", pred.second, pred.first);
+        //std::cout << pred->second << ", " << pred->first
+        //std::cout << preds.at(idx)  << ", ";
+    }
+    std::cout << "\n";
+
+
+    std::cout << "\nAll Predictions by PID:\n";
+    for(std::map<int, std::vector<double> >::const_iterator it = alldists.begin(); it != alldists.end(); ++it) {
+        std::vector<double> dists = it->second;
+        std::sort(dists.begin(), dists.end());
+        std::cout << it->first << "[" << dists.size() << " total] -> ";
+        for(size_t distIdx = 0; distIdx < dists.size() && (int)distIdx < 10; distIdx++) {
+            std::cout << dists.at(distIdx) << ", ";
+        }
+        std::cout << "\n";
+    }
+    */
+    //printf("!!! Final Prediction: [%d, %f]\n", minClass, minDist);
+    //std::cout << "\n  -->  Max Dist = " << maxDist << " | Min Dist = " << minDist<< "\n";
+}
+
+int LBPH::predict(InputArray _src) const {
+    int label;
+    double dummy;
+    predict(_src, label, dummy);
+    return label;
 }
 
 Ptr<LBPHFaceRecognizer> createLBPHFaceRecognizer(int radius, int neighbors,
@@ -412,6 +891,5 @@ Ptr<LBPHFaceRecognizer> createLBPHFaceRecognizer(int radius, int neighbors,
 {
     return makePtr<LBPH>(radius, neighbors, grid_x, grid_y, threshold);
 }
-
 
 }}

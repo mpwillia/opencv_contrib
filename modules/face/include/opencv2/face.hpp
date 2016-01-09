@@ -48,7 +48,6 @@ the use of this software, even if advised of the possibility of such damage.
 */
 
 #include "opencv2/core.hpp"
-#include "face/predict_collector.hpp"
 #include <map>
 
 namespace cv { namespace face {
@@ -256,8 +255,7 @@ public:
     CV_WRAP virtual void update(InputArrayOfArrays src, InputArray labels);
 
     /** @overload */
-    CV_WRAP int predict(InputArray src) const;
-
+    virtual int predict(InputArray src) const = 0;
 
     /** @brief Predicts a label and associated confidence (e.g. distance) for a given input image.
 
@@ -294,18 +292,7 @@ public:
     model->predict(img, predicted_label, predicted_confidence);
     @endcode
      */
-    CV_WRAP void predict(InputArray src, CV_OUT int &label, CV_OUT double &confidence) const;
-
-
-    /** @brief - if implemented - send all result of prediction to collector that can be used for somehow custom result handling
-    @param src Sample image to get a prediction from.
-    @param collector User-defined collector object that accepts all results
-    @param state - optional user-defined state token that should be passed back from FaceRecognizer implementation
-
-    To implement this method u just have to do same internal cycle as in predict(InputArray src, CV_OUT int &label, CV_OUT double &confidence) but
-    not try to get "best@ result, just resend it to caller side with given collector
-    */
-    CV_WRAP virtual void predict(InputArray src, Ptr<PredictCollector> collector, const int state = 0) const = 0;
+    CV_WRAP virtual void predict(InputArray src, CV_OUT int &label, CV_OUT double &confidence) const = 0;
 
     /** @brief Saves a FaceRecognizer and its model state.
 
@@ -358,8 +345,7 @@ public:
     info.
      */
     CV_WRAP virtual std::vector<int> getLabelsByString(const String& str) const;
-    /** @brief threshhold parameter accessor - required for default BestMinDist collector */
-    virtual double getThreshold() const = 0;
+
 protected:
     // Stored pairs "label id - string info"
     std::map<int, String> _labelsInfo;
@@ -368,7 +354,5 @@ protected:
 //! @}
 
 }}
-
-#include "opencv2/face/facerec.hpp"
 
 #endif
