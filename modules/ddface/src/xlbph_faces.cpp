@@ -1995,7 +1995,7 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) cons
         default: predict_std(query, bestpreds); break;
     }
 
-    _preds.create(numPreds, 2, CV_32FC1);
+    _preds.create(numPreds, 2, CV_64FC1);
     Mat preds = _preds.getMat();
 
 
@@ -2005,8 +2005,8 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) cons
         //printf("[%d, %f]\n", it->first, it->second);
 
         if(i < numPreds) {
-            preds.at<float>(0, i) = it->second;
-            preds.at<float>(1, i) = it->first;
+            preds.at<double>(i, 0) = it->second;
+            preds.at<double>(i, 1) = it->first;
             i++;
         }
     }
