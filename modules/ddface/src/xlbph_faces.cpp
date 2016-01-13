@@ -1995,10 +1995,10 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) cons
         default: predict_std(query, bestpreds); break;
     }
     
-    if(bestpreds.size() < numPreds) {
+    if(bestpreds.size() < numPreds)
         numPreds = (int)bestpreds.size();
-    } 
-    _preds.create(, 2, CV_64FC1);
+
+    _preds.create(numPreds, 2, CV_64FC1);
     Mat preds = _preds.getMat();
 
 
