@@ -2005,7 +2005,7 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) cons
     //std::cout << "\nBest Prediction by PID:\n";
     int i = 0;
     for(tbb::concurrent_vector<std::pair<double, int>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
-        printf("[%d, %f]\n", it->second, it->first);
+        //printf("[%d, %f]\n", it->second, it->first);
 
         if(i < numPreds) {
             preds.at<double>(i, 0) = it->second;
