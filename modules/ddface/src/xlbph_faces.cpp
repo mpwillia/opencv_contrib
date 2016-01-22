@@ -1921,13 +1921,9 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
 }
 
 void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) const {
-
-    std::map<int, int> _labelinfo;
     std::vector<int> labels;
     for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
         labels.push_back(it->first);
-
-    printf("num labels: %d", labels.size());
 
     predictMulti(_src, _preds, numPreds, labels);
 }
