@@ -1887,8 +1887,8 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
     // Gets the list of labels to check
     Mat labelsMat = _labels.getMat();
     std::set<int> labels;
-    for(size_t labelIdx = 0; labelIdx < labels.total(); labelIdx++) {
-        labels.instert(labelsMat.at<int>((int)labelIdx));
+    for(size_t labelIdx = 0; labelIdx < labelsMat.total(); labelIdx++) {
+        labels.insert(labelsMat.at<int>((int)labelIdx));
     }
 
 
