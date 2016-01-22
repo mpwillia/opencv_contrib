@@ -102,9 +102,9 @@ private:
     //--------------------------------------------------------------------------
     // Prediction Functions
     //--------------------------------------------------------------------------
-    void predict_std(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds) const;
-    void predict_avg(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds) const;
-    void predict_avg_clustering(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds) const;
+    void predict_std(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const;
+    void predict_avg(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const;
+    void predict_avg_clustering(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const;
     
     /*
     void predict_avg(InputArray _src, int &label, double &dist) const;
@@ -251,8 +251,10 @@ public:
 
     // Predicts the label and confidence for a given sample.
     void predict(InputArray _src, int &label, double &dist) const;
-       //  predictMulti
+
+    // predictMulti
     void predictMulti(InputArray _src, OutputArray _preds, int numPreds) const;
+    void predictMulti(InputArray _src, OutputArray _preds, int numPreds, InputArray _labels) const;
 
     // See FaceRecognizer::load.
     void load(const FileStorage& fs);
@@ -1653,7 +1655,7 @@ void xLBPH::compareLabelWithQuery(const Mat &query, const std::vector<int> &labe
 }
 */
 
-void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds) const {
+void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const {
 //void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const {
 
     if(!_useClusters) {
@@ -1665,8 +1667,10 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     
     tbb::concurrent_vector<std::pair<double, int>> bestlabels;
     tbb::parallel_for_each(_histavgs.begin(), _histavgs.end(), 
-        [&bestlabels, &query](std::pair<int, Mat> it) {
-            bestlabels.push_back(std::pair<double, int>(compareHist(it.second, query, COMP_ALG), it.first));
+        [&bestlabels, &query, &labels](std::pair<int, Mat> it) {
+            if(labels.find(it.first) != labels.end()) {
+                bestlabels.push_back(std::pair<double, int>(compareHist(it.second, query, COMP_ALG), it.first));
+            }
         }
     );
     std::sort(bestlabels.begin(), bestlabels.end());
@@ -1773,8 +1777,6 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
         } 
     ); 
 
-    //performMultithreadedComp<Mat, std::pair<int, std::vector<Mat>>, std::pair<int, std::vector<double>>>(query, labelhists, labeldists, getLabelThreads(), &xLBPH::compareLabelHistograms);
-    
     /*
     printf(" - Dists found:\n");
     for(size_t idx = 0; idx < labeldists.size(); idx++) {
@@ -1798,52 +1800,18 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     }
     std::sort(bestpreds.begin(), bestpreds.end());
     
-    /*
-    minDist = bestpreds.at(0).first;
-    minClass = bestpreds.at(0).second;
-    */
-
-    /*
-    std::cout << "\nBest Prediction by PID:\n";
-    for(std::vector<std::pair<double, int>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
-        printf("[%d, %f]\n", it->first, it->second);
-    }
-    */
 } 
 
-void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds) const {
-//void xLBPH::predict_avg(InputArray _query, int &minClass, double &minDist) const {
+void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const {
     Mat query = _query.getMat();
 
-    //std::map<int, Mat> histavgs = _histavgs;
-    
-    
-    // we need to break histavgs into it's comps 
-    /*
-    std::vector<Mat> histavgs;
-    std::vector<int> labels;
-    for(std::map<int, Mat>::const_iterator it = _histavgs.begin(); it != _histavgs.end(); it++) {
-        labels.push_back(it->first);
-        histavgs.push_back(it->second);
-    }
-
-    // perform histogram comparison to find dists from query.
-    std::vector<double> avgdists;
-    performMultithreadedComp<Mat, Mat, double>(query, histavgs, avgdists, getMaxThreads(), &xLBPH::compareHistograms);
-    
-    // reassociate each dist with it's label
-    std::vector<std::pair<double, int>> bestlabels;
-    for(size_t idx = 0; idx < avgdists.size(); idx++) {
-        bestlabels.push_back(std::pair<double, int>(avgdists.at((int)idx), labels.at((int)idx)));
-    }
-    // sort the data by smallest distance first
-    std::sort(bestlabels.begin(), bestlabels.end());
-    */
     
     tbb::concurrent_vector<std::pair<double, int>> bestlabels;
     tbb::parallel_for_each(_histavgs.begin(), _histavgs.end(), 
-        [&bestlabels, &query](std::pair<int, Mat> it) {
-            bestlabels.push_back(std::pair<double, int>(compareHist(it.second, query, COMP_ALG), it.first));
+        [&bestlabels, &query, &labels](std::pair<int, Mat> it) {
+            if(labels.find(it.first) != labels.end()) {
+                bestlabels.push_back(std::pair<double, int>(compareHist(it.second, query, COMP_ALG), it.first));
+            }
         }
     );
     std::sort(bestlabels.begin(), bestlabels.end());
@@ -1871,112 +1839,40 @@ void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<doub
         } 
     );
     std::sort(bestpreds.begin(), bestpreds.end());
-
-    // setup data for multithreading
-    /*
-    std::vector<std::pair<int, std::vector<Mat>>> labelhists;
-    for(size_t idx = 0; idx < bestlabels.size() && (int)idx < numLabelsToCheck; idx++) {
-        int label = bestlabels.at(idx).second;
-        labelhists.push_back(std::pair<int, std::vector<Mat>>(label, _histograms.at(label)));
-    }
-    std::vector<std::pair<int, std::vector<double>>> labeldists;
-
-    // perform histogram comparison on all the histograms of the top <numLabelsToCheck> best averages
-    performMultithreadedComp<Mat, std::pair<int, std::vector<Mat>>, std::pair<int, std::vector<double>>>(query, labelhists, labeldists, getLabelThreads(), &xLBPH::compareLabelHistograms);
-    
-    // find best prediction for each label checked
-    std::vector<std::pair<double, int>> bestpreds;
-    for(size_t idx = 0; idx < labeldists.size(); idx++) {
-        std::vector<double> dists = labeldists.at((int)idx).second;
-        bestpreds.push_back(std::pair<double, int>(dists.at(0), labeldists.at((int)idx).first));
-    }
-    std::sort(bestpreds.begin(), bestpreds.end());
-    */
-    
-    /*
-    minDist = bestpreds.at(0).first;
-    minClass = bestpreds.at(0).second;
-    */
-
-    /*
-    std::cout << "\nBest Prediction by PID:\n";
-    for(tbb::concurrent_vector<std::pair<double, int>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
-        printf("[%d, %f]\n", it->first, it->second);
-    }
-    */
 } 
 
 
-void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds) const {
-//void xLBPH::predict_std(InputArray _query, int &minClass, double &minDist) const {
+void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const {
     Mat query = _query.getMat();
 
     //minDist = DBL_MAX;
     //minClass = -1;
-    //std::map<int, double> bestpreds;
-    //tbb::concurrent_vector<std::pair<double, int>> bestpreds;
-    //void performMultithreadedComp(const S &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const S &query, const std::vector<S> &src, std::vector<D> &dst) const) const
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(),
-        [&bestpreds, &query](std::pair<int, std::vector<Mat>> it) {
-    //for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); ++it) {
-        
-        //bestpreds[it->first] = DBL_MAX;
-        std::vector<Mat> hists = it.second;
-        //std::vector<double> dists;
-        tbb::concurrent_vector<double> dists;
-        tbb::parallel_for_each(hists.begin(), hists.end(), 
-            [&dists, &query](Mat hist) {
-                dists.push_back(compareHist(hist, query, COMP_ALG));
-            } 
+        [&bestpreds, &query, &labels](std::pair<int, std::vector<Mat>> it) {
+            if(labels.find(it.first) != labels.end()) {
+                std::vector<Mat> hists = it.second;
+                
+                tbb::concurrent_vector<double> dists;
+                tbb::parallel_for_each(hists.begin(), hists.end(), 
+                    [&dists, &query](Mat hist) {
+                        dists.push_back(compareHist(hist, query, COMP_ALG));
+                    } 
+            }
         );
 
-        //dists.push_back(compareHist(hists.at((int)idx), query, COMP_ALG));
-        //performMultithreadedComp<Mat, Mat, double>(query, hists, dists, getMaxThreads(), &xLBPH::compareHistograms);
         std::sort(dists.begin(), dists.end());
         
         bestpreds.push_back(std::pair<double, int>(dists.at(0), it.first));
-
-        /*
-        for(size_t histIdx = 0; histIdx < hists.size(); histIdx++) {
-            double dist = compareHist(hists.at(histIdx), query, COMP_ALG);
-            if((dist < minDist) && (dist < _threshold)) {
-                minDist = dist;
-                minClass = it->first;
-            }
-
-            if(dist < bestpreds[it->first]) {
-                bestpreds[it->first] = dist;
-            }
-        }
-        */
+    
     });
     std::sort(bestpreds.begin(), bestpreds.end());
     
-    /*
-    minDist = bestpreds.at(0).first;
-    minClass = bestpreds.at(0).second;
-    */
-
-    /*
-    std::cout << "\nBest Prediction by PID:\n";
-    for(tbb::concurrent_vector<std::pair<double, int>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
-        printf("[%d, %f]\n", it->first, it->second);
-    }
-    */
 }
 
 
-//void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
-//
-void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) const {
+void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, InputArray _labels) const {
     CV_Assert((int)_labelinfo.size() > 0);
     CV_Assert((int)_histograms.size() > 0);
-
-    /*
-    if((int)_labelinfo.size() <= 0) {
-        CV_Error(Error::StsError, "Given model path at '" + getModelPath() +"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
-    }
-    */
 
     Mat src = _src.getMat();
     // get the spatial histogram from input image
@@ -1988,6 +1884,14 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) cons
             _grid_y, /* grid size y */
             true /* normed histograms */);
     
+    // Gets the list of labels to check
+    Mat labelsMat = _labels.getMat();
+    std::set<int> labels;
+    for(size_t labelIdx = 0; labelIdx < labels.total(); labelIdx++) {
+        labels.instert(labelsMat.at<int>((int)labelIdx));
+    }
+
+
     tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     switch(_algToUse) {
         case 1: predict_avg(query, bestpreds); break;
@@ -2014,22 +1918,16 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) cons
         }
     }
 
-    
-     
-    /* 
-    minClass = bestpreds.at(0).second;
-    minDist = bestpreds.at(0).first;
-    */
+}
 
-    /*
-    switch(_algToUse) {
-        case 1: predict_avg(query, minClass, minDist); break;
-        case 2: predict_avg_clustering(query, minClass, minDist); break;
-        default: predict_std(query, minClass, minDist); break;
-    }
-    */
+void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) const {
 
-    //printf("!!! Final Prediction: [%d, %f]\n", minClass, minDist);
+    std::map<int, int> _labelinfo;
+    std::vector<int> labels;
+    for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
+        labels.push_back(it->first);
+
+    predictMulti(_src, _preds, numPreds, labels);
 }
 
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
