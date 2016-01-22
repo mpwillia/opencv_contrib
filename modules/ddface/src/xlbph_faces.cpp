@@ -1857,14 +1857,14 @@ void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<doub
                     [&dists, &query](Mat hist) {
                         dists.push_back(compareHist(hist, query, COMP_ALG));
                     } 
-            }
-        );
+                );
 
-        std::sort(dists.begin(), dists.end());
-        
-        bestpreds.push_back(std::pair<double, int>(dists.at(0), it.first));
-    
-    });
+                std::sort(dists.begin(), dists.end());
+                
+                bestpreds.push_back(std::pair<double, int>(dists.at(0), it.first));
+            }
+        }
+    );
     std::sort(bestpreds.begin(), bestpreds.end());
     
 }
@@ -1894,9 +1894,9 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
 
     tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     switch(_algToUse) {
-        case 1: predict_avg(query, bestpreds); break;
-        case 2: predict_avg_clustering(query, bestpreds); break;
-        default: predict_std(query, bestpreds); break;
+        case 1: predict_avg(query, bestpreds, labels); break;
+        case 2: predict_avg_clustering(query, bestpreds, labels); break;
+        default: predict_std(query, bestpreds, labels); break;
     }
     
     if(bestpreds.size() < numPreds)
