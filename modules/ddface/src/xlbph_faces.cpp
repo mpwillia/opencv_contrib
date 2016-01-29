@@ -102,10 +102,15 @@ private:
     //--------------------------------------------------------------------------
     // Prediction Functions
     //--------------------------------------------------------------------------
+    /*
     void predict_std(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const;
     void predict_avg(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const;
     void predict_avg_clustering(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const;
-    
+    */ 
+
+    void predict_std(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const;
+    void predict_avg(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const;
+    void predict_avg_clustering(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const;
     /*
     void predict_avg(InputArray _src, int &label, double &dist) const;
     void predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const;
@@ -292,6 +297,7 @@ public:
 
     void setUseClusters(bool flag);
     void test();
+
 };
 
 void xLBPH::setUseClusters(bool flag) {
@@ -1655,7 +1661,8 @@ void xLBPH::compareLabelWithQuery(const Mat &query, const std::vector<int> &labe
 }
 */
 
-void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const {
+//void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const {
+void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const {
 //void xLBPH::predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const {
 
     if(!_useClusters) {
@@ -1666,11 +1673,21 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     Mat query = _query.getMat();
     
     tbb::concurrent_vector<std::pair<double, int>> bestlabels;
+    /*
     tbb::parallel_for_each(_histavgs.begin(), _histavgs.end(), 
         [&bestlabels, &query, &labels](std::pair<int, Mat> it) {
             if(labels.find(it.first) != labels.end()) {
                 bestlabels.push_back(std::pair<double, int>(compareHist(it.second, query, COMP_ALG), it.first));
             }
+        }
+    );
+    */
+
+    tbb::parallel_for_each(labels.begin(), labels.end(),
+        [&bestlabels, &query, &_histavgs](int label) {
+            if(_histavgs.find(label) != _histavgs.end()) {
+                bestlabels.push_back(std::pair<double, int>(compareHist(_histavgs.at(label), query, COMP_ALG), label));
+            } 
         }
     );
     std::sort(bestlabels.begin(), bestlabels.end());
@@ -1802,11 +1819,13 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     
 } 
 
-void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const {
+//void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const {
+void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const {
     Mat query = _query.getMat();
 
     
     tbb::concurrent_vector<std::pair<double, int>> bestlabels;
+    /*
     tbb::parallel_for_each(_histavgs.begin(), _histavgs.end(), 
         [&bestlabels, &query, &labels](std::pair<int, Mat> it) {
             if(labels.find(it.first) != labels.end()) {
@@ -1814,6 +1833,15 @@ void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<doub
             }
         }
     );
+    */
+    tbb::parallel_for_each(labels.begin(), labels.end(),
+        [&bestlabels, &query, &_histavgs](int label) {
+            if(_histavgs.find(label) != _histavgs.end()) {
+                bestlabels.push_back(std::pair<double, int>(compareHist(_histavgs.at(label), query, COMP_ALG), label));
+            } 
+        }
+    );
+
     std::sort(bestlabels.begin(), bestlabels.end());
 
 
@@ -1842,11 +1870,13 @@ void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<doub
 } 
 
 
-void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const {
+//void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const {
+void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const {
     Mat query = _query.getMat();
 
     //minDist = DBL_MAX;
     //minClass = -1;
+    /*
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(),
         [&bestpreds, &query, &labels](std::pair<int, std::vector<Mat>> it) {
             if(labels.find(it.first) != labels.end()) {
@@ -1866,7 +1896,27 @@ void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<doub
         }
     );
     std::sort(bestpreds.begin(), bestpreds.end());
-    
+    */    
+
+    tbb:parallel_for_each(labels.begin(), labels.end(),
+        [&bestpreds, &query, &_histograms](int label) {
+            if(_histograms.find(label) != _histograms.end()) {
+                std::vector<Mat> hists = histograms.at(label);
+                
+                tbb::concurrent_vector<double> dists;
+                tbb::parallel_for_each(hists.begin(), hists.end(), 
+                    [&dists, &query](Mat hist) {
+                        dists.push_back(compareHist(hist, query, COMP_ALG));
+                    } 
+                );
+
+                std::sort(dists.begin(), dists.end());
+                
+                bestpreds.push_back(std::pair<double, int>(dists.at(0), label));
+            } 
+        }
+    );
+    std::sort(bestpreds.begin(), bestpreds.end());
 }
 
 
@@ -1886,11 +1936,17 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
     
     // Gets the list of labels to check
     Mat labelsMat = _labels.getMat();
+    std::vector<int> labels;
+    for(size_t labelIdx = 0; labelIdx < labelsMat.total(); labelIdx++)
+        labels.push_back(labelsMat.at<int>((int)labelIdx));
+
+
+    /*
     std::set<int> labels;
     for(size_t labelIdx = 0; labelIdx < labelsMat.total(); labelIdx++) {
         labels.insert(labelsMat.at<int>((int)labelIdx));
     }
-
+    */
 
     tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     switch(_algToUse) {
