@@ -1834,6 +1834,8 @@ void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<doub
         }
     );
     */
+    
+    printf("Finding bestlabels...\n");
     tbb::parallel_for_each(labels.begin(), labels.end(),
         [&bestlabels, &query, this](int label) {
             if(_histavgs.find(label) != _histavgs.end()) {
@@ -1851,6 +1853,8 @@ void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<doub
         numLabelsToCheck = minLabelsToCheck;
     if(numLabelsToCheck > (int)bestlabels.size())
         numLabelsToCheck = (int)bestlabels.size();
+
+    printf("Checking %d best labels...\n", numLabelsToCheck);
 
     //tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     tbb::parallel_for(0, numLabelsToCheck, 1, 
@@ -1934,11 +1938,13 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
             _grid_y, /* grid size y */
             true /* normed histograms */);
     
+    printf("Extracting labels...\n");
     // Gets the list of labels to check
     Mat labelsMat = _labels.getMat();
     std::vector<int> labels;
     for(size_t labelIdx = 0; labelIdx < labelsMat.total(); labelIdx++)
         labels.push_back(labelsMat.at<int>((int)labelIdx));
+    printf("Found %d labels...\n", (int)labels.size());
 
 
     /*
@@ -1948,6 +1954,7 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
     }
     */
 
+    printf("Calling prediction algorithm...\n");
     tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     switch(_algToUse) {
         case 1: predict_avg(query, bestpreds, labels); break;
@@ -1955,6 +1962,8 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
         default: predict_std(query, bestpreds, labels); break;
     }
     
+    
+    printf("Compiling prediction results...\n");
     if(bestpreds.size() < numPreds)
         numPreds = (int)bestpreds.size();
 
