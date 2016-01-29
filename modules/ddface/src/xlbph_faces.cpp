@@ -1684,7 +1684,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     */
 
     tbb::parallel_for_each(labels.begin(), labels.end(),
-        [&bestlabels, &query, &_histavgs](int label) {
+        [&bestlabels, &query, this](int label) {
             if(_histavgs.find(label) != _histavgs.end()) {
                 bestlabels.push_back(std::pair<double, int>(compareHist(_histavgs.at(label), query, COMP_ALG), label));
             } 
@@ -1835,7 +1835,7 @@ void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<doub
     );
     */
     tbb::parallel_for_each(labels.begin(), labels.end(),
-        [&bestlabels, &query, &_histavgs](int label) {
+        [&bestlabels, &query, this](int label) {
             if(_histavgs.find(label) != _histavgs.end()) {
                 bestlabels.push_back(std::pair<double, int>(compareHist(_histavgs.at(label), query, COMP_ALG), label));
             } 
@@ -1898,10 +1898,10 @@ void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<doub
     std::sort(bestpreds.begin(), bestpreds.end());
     */    
 
-    tbb:parallel_for_each(labels.begin(), labels.end(),
-        [&bestpreds, &query, &_histograms](int label) {
+    tbb::parallel_for_each(labels.begin(), labels.end(),
+        [&bestpreds, &query, this](int label) {
             if(_histograms.find(label) != _histograms.end()) {
-                std::vector<Mat> hists = histograms.at(label);
+                std::vector<Mat> hists = _histograms.at(label);
                 
                 tbb::concurrent_vector<double> dists;
                 tbb::parallel_for_each(hists.begin(), hists.end(), 
