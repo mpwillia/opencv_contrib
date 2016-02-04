@@ -3,7 +3,7 @@
 
 #include <cstring>
 #include <sys/stat.h>
-#include <sys/dirent.h>
+#include <dirent.h>
 #include <string.h>
 
 namespace cv { namespace face {
