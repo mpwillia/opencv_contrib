@@ -20,6 +20,7 @@
 #include "face_basic.hpp"
 #include "mcl.hpp"
 #include "cluster.hpp"
+#include "modelstorage.hpp"
 
 #include "tbb/tbb.h"
 
@@ -56,6 +57,8 @@ private:
     // model path info
     String _modelpath;
     String _modelname;
+
+    ModelStorage _model;            
 
     // label info
     std::map<int, int> _labelinfo;
@@ -210,7 +213,8 @@ public:
                 _grid_y(gridy),
                 _radius(radius_),
                 _neighbors(neighbors_),
-                _threshold(threshold) {
+                _threshold(threshold),
+                _model(modelpath) {
 
         _numThreads = 16;
         _algToUse = 0;
@@ -233,7 +237,8 @@ public:
                 _grid_y(gridy),
                 _radius(radius_),
                 _neighbors(neighbors_),
-                _threshold(threshold) {
+                _threshold(threshold),
+                _model(modelpath) {
         _numThreads = 16;
         _algToUse = 0;
         _useClusters = true;
@@ -434,94 +439,43 @@ static String matToString(const Mat &mat) {
 }
 
 void xLBPH::test() {
-    // make some fake hists
-    int numhists = 16;
-    int size = 4;
-    std::vector<Mat> histsToSave;
+
+    printf(" -=### Running xLBPH Tests ###=- \n");
     
-    std::cout << "Making test hists...\n";
-    for(int i = 0; i < numhists - 2; i++) {
-        Mat mat = Mat::zeros(1, size, CV_32FC1);
-        mat += i;
-        histsToSave.push_back(mat);
-    }
-    Mat matmax = Mat::zeros(1, size, CV_32FC1);
-    Mat matmin = Mat::zeros(1, size, CV_32FC1);
-    matmax = FLT_MAX;
-    matmin = FLT_MIN;
-    histsToSave.push_back(matmax);
-    histsToSave.push_back(matmin);
-  
-    std::cout << "Saving test hists...\n";
-    String testhistsfile = getHistogramsDir() + "/testhists.bin";
-    // write them to a fake file
-    FILE *writefp = fopen(testhistsfile.c_str(), "w");
-    if(writefp == NULL) 
-        CV_Error(Error::StsError, "Cannot open histogram file '"+testhistsfile+"'");
+    _model.test();
+    printf("\n\n");
 
-    float* writebuffer = new float[size * numhists];
-    for(size_t sampleIdx = 0; (int)sampleIdx < numhists; sampleIdx++) {
-        memcpy((writebuffer + sampleIdx * size), histsToSave.at((int)sampleIdx).ptr<float>(), size * sizeof(float));
-    }
-    fwrite(writebuffer, sizeof(float), size * numhists, writefp);
-    delete writebuffer;
-    fclose(writefp);
-  
+    String goodpath = "/dd-data/models/xlbph-test";
+    ModelStorage goodmodel(goodpath);
 
-    std::cout << "Mapping test hists file...\n";
-    // mmap fake file
-    int fd = open(testhistsfile.c_str(), O_RDONLY);
-    if(fd < 0)
-        CV_Error(Error::StsError, "Cannot open histogram file '"+testhistsfile+"'");
+    String badpath = "/dd-data/models/xlbph-test-bad-model";
+    ModelStorage badmodel(badpath);
 
-    char* mapPtr = (char*)mmap(NULL, size * numhists * sizeof(float), PROT_READ, MAP_PRIVATE, fd, 0);
-    if(mapPtr == MAP_FAILED)
-        CV_Error(Error::StsError, "Cannot mem map file '"+testhistsfile+"'");
+    printf("== Testing Model Storage Member Functions == \n");
+    printf(" - getModelPath\n");
+    printf("Expecting \"%s\" : \"%s\"\n", _modelpath, _model.getModelPath());
+    printf("Expecting \"%s\" : \"%s\"\n", goodpath, goodmodel.getModelPath());
+    printf("Expecting \"%s\" : \"%s\"\n", badpath, badmodel.getModelPath());
+    printf("\n");
+
+    printf(" - getModelName\n");
+    printf("Expecting \"%s\" : \"%s\"\n", _modelname, _model.getModelName());
+    printf("Expecting \"xlbph-test\" : \"%s\"\n", goodmodel.getModelName());
+    printf("Expecting \"xlbph-test-bad-model\" : \"%s\"\n", badmodel.getModelName());
+    printf("\n");
+
+    printf(" - modelExists\n");
+    printf("For \"%s\" Expects true : %s\n", _model.getModelPath(), (_model.modelExists()) ? "true" : "false");
+    printf("For \"%s\" Expects true : %s\n", goodmodel.getModelPath(), (goodmodel.modelExists()) ? "true" : "false");
+    printf("For \"%s\" Expects false : %s\n", badmodel.getModelPath(), (badmodel.modelExists()) ? "true" : "false");
+    printf("\n");
+
+    printf("\n");
+    printf(" !! End of Member Functions Tests !!\n");
+    printf("\n");
     
-    std::cout << "Loading query mats...\n";
-    // make matricies from map
-    std::vector<Mat> query;
-    for(int i = 0; i < numhists; i++) {
-        Mat mat(1, size, CV_32FC1, mapPtr + (size * sizeof(float) * i));
-        query.push_back(mat);
-    }
-
-    
-    std::cout << "Loading check mat...\n";
-    // load mats from file 
-    std::vector<Mat> check;
-    FILE *readfp = fopen(testhistsfile.c_str(), "r");
-    if(readfp == NULL) 
-        CV_Error(Error::StsError, "Cannot open histogram file '"+testhistsfile+"'");
-    
-    float readbuffer[size];
-    while(fread(readbuffer, sizeof(float), size, readfp) > 0) {
-        Mat hist = Mat::zeros(1, size, CV_32FC1);
-        memcpy(hist.ptr<float>(), readbuffer, size * sizeof(float));
-        check.push_back(hist);
-    }
-    fclose(readfp);
-
-    std::cout << "Comparing results...\n";
-    // compare results
-    CV_Assert(query.size() == check.size());
-    CV_Assert(query.size() == histsToSave.size());
-
-    std::cout << "saved size: " << histsToSave.size() << "  |  query size: " << query.size() << "  |  check size: " << check.size() << "\n";
-    for(size_t idx = 0; idx < query.size(); idx++) {
-        
-        std::cout << "idx: " << idx << std::flush;
-        std::cout << "  |  saved: " << matToHex(histsToSave.at(idx)) << std::flush;
-        std::cout << "  |  query: " << matToHex(query.at(idx)) << std::flush;
-        std::cout << "  |  check: " << matToHex(check.at(idx)) << std::flush;
-        std::cout << "\n";
-        //std::cout << "saved: " << matToString(histsToSave.at(idx)) <<"  |  query: " << matToString(query.at(idx)) << "  |  check: " << matToString(check.at(idx)) << "\n";
-        if(!matsEqual(query.at(idx), check.at(idx)))
-        {
-            //std::cout << "query: " << matToString(query.at(idx)) << "  |  " << matToString(check.at(idx)) << " :check" << "\n";
-            CV_Error(Error::StsError, "MATS NOT EQUAL!!!");
-        }
-    }
+    printf("\n");
+    printf("\n");
 }
 
 
