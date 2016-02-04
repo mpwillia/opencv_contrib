@@ -7,6 +7,13 @@
 namespace cv { namespace face {
 
 class ModelStorage {
+private: 
+
+   String _modelpath;
+   String _modelname;
+
+   void setModelPath(String path);
+
 public:
 
    ModelStorage(String path) {
