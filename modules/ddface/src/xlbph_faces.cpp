@@ -453,21 +453,21 @@ void xLBPH::test() {
 
     printf("== Testing Model Storage Member Functions == \n");
     printf(" - getModelPath\n");
-    printf("Expecting \"%s\" : \"%s\"\n", _modelpath, _model.getModelPath());
-    printf("Expecting \"%s\" : \"%s\"\n", goodpath, goodmodel.getModelPath());
-    printf("Expecting \"%s\" : \"%s\"\n", badpath, badmodel.getModelPath());
+    printf("Expecting \"%s\" : \"%s\"\n", _modelpath.c_str(), _model.getModelPath().c_str());
+    printf("Expecting \"%s\" : \"%s\"\n", goodpath.c_str(), goodmodel.getModelPath().c_str());
+    printf("Expecting \"%s\" : \"%s\"\n", badpath.c_str(), badmodel.getModelPath().c_str());
     printf("\n");
 
     printf(" - getModelName\n");
-    printf("Expecting \"%s\" : \"%s\"\n", _modelname, _model.getModelName());
-    printf("Expecting \"xlbph-test\" : \"%s\"\n", goodmodel.getModelName());
-    printf("Expecting \"xlbph-test-bad-model\" : \"%s\"\n", badmodel.getModelName());
+    printf("Expecting \"%s\" : \"%s\"\n", _modelname.c_str(), _model.getModelName().c_str());
+    printf("Expecting \"xlbph-test\" : \"%s\"\n", goodmodel.getModelName().c_str());
+    printf("Expecting \"xlbph-test-bad-model\" : \"%s\"\n", badmodel.getModelName().c_str());
     printf("\n");
 
     printf(" - modelExists\n");
-    printf("For \"%s\" Expects true : %s\n", _model.getModelPath(), (_model.modelExists()) ? "true" : "false");
-    printf("For \"%s\" Expects true : %s\n", goodmodel.getModelPath(), (goodmodel.modelExists()) ? "true" : "false");
-    printf("For \"%s\" Expects false : %s\n", badmodel.getModelPath(), (badmodel.modelExists()) ? "true" : "false");
+    printf("For \"%s\" Expects true : %s\n", _model.getModelPath().c_str(), (_model.modelExists()) ? "true" : "false");
+    printf("For \"%s\" Expects true : %s\n", goodmodel.getModelPath().c_str(), (goodmodel.modelExists()) ? "true" : "false");
+    printf("For \"%s\" Expects false : %s\n", badmodel.getModelPath().c_str(), (badmodel.modelExists()) ? "true" : "false");
     printf("\n");
 
     printf("\n");
