@@ -125,13 +125,13 @@ void ModelStorage::test() const {
    printf("\n");
 
    printf(" - getFileName\n");
-   printf("For \"%s\" Expects \"dd-dataset\" : %s\n", testdir1.c_str(), getFileName(testdir1));
-   printf("For \"%s\" Expects \"dd-dataset\" : %s\n", testdir2.c_str(), getFileName(testdir2));
-   printf("For \"%s\" Expects \"dd-dataset-2.tsv\" : %s\n", testfile1.c_str(), getFileName(testfile1));
-   printf("For \"%s\" Expects \"dd-dataset-2.tsv\" : %s\n", testfile2.c_str(), getFileName(testfile2));
-   printf("For \"%s\" Expects \"mytestfile.txt\" : %s\n", testsimple.c_str(), getFileName(testsimple));
-   printf("For \"%s\" Expects \"dd-dataset-bad\" : %s\n", testbad.c_str(), getFileName(testbad));
-   printf("For \"%s\" Expects \"\" : %s\n", testempty.c_str(), getFileName(testempty));
+   printf("For \"%s\" Expects \"dd-dataset\" : %s\n", testdir1.c_str(), getFileName(testdir1).c_str());
+   printf("For \"%s\" Expects \"dd-dataset\" : %s\n", testdir2.c_str(), getFileName(testdir2).c_str());
+   printf("For \"%s\" Expects \"dd-dataset-2.tsv\" : %s\n", testfile1.c_str(), getFileName(testfile1).c_str());
+   printf("For \"%s\" Expects \"dd-dataset-2.tsv\" : %s\n", testfile2.c_str(), getFileName(testfile2).c_str());
+   printf("For \"%s\" Expects \"mytestfile.txt\" : %s\n", testsimple.c_str(), getFileName(testsimple).c_str());
+   printf("For \"%s\" Expects \"dd-dataset-bad\" : %s\n", testbad.c_str(), getFileName(testbad).c_str());
+   printf("For \"%s\" Expects \"\" : %s\n", testempty.c_str(), getFileName(testempty).c_str());
    printf("\n");
 
    printf(" - listdir\n");
@@ -208,7 +208,7 @@ void ModelStorage::setModelPath(String path) {
 }
 
 // A valid model is one that exists and is structured properly 
-bool ModelStrong::isValidModel() const {
+bool ModelStorage::isValidModel() const {
    if(!modelExists()) 
       return false;
 
