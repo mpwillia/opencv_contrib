@@ -212,29 +212,15 @@ bool ModelStorage::isValidModel() const {
    if(!modelExists()) 
       return false;
 
-   // check model structure
-   struct dirent **namelist;
-   int n;
-
+   std::vector<String> contents = listdir(_modelpath);
    bool check = true;
-   n = scandir(_modelpath, &namelist, NULL, alphasort);
-   if (n < 0)
-      CV_Error(Error::StsError, "Error reading directory at '"+_modelpath+"'"); 
-   else {
-      while (n--) {
-         printf("%s\n", namelist[n]->d_name);
-
-         if(strstr(namelist[n]->d_name, _modelname) == NULL)
-            check = false;
-
-         free(namelist[n]);
-
-         if(!check)
-            break;
+   for(String s : contents) {
+      if(strstr(s.c_str(), _modelname.c_str()) == NULL) {
+         check = false;
+         break;
       }
-      free(namelist);
    }
-
+   
    return check;
 } 
 
