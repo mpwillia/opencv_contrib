@@ -1,7 +1,9 @@
 
 #include "modelstorage.hpp"
-#include "sys/stat.h"
-#include "sys/dirent.h"
+
+#include <cstring>
+#include <sys/stat.h>
+#include <sys/dirent.h>
 #include <string.h>
 
 namespace cv { namespace face {
