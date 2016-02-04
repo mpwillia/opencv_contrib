@@ -18,7 +18,7 @@ public:
 
    ModelStorage(String path) {
       setModelPath(path);
-   } 
+   };
 
    void test() const;
    bool isValidModel() const;
@@ -26,7 +26,7 @@ public:
    String getModelPath() const;
    String getModelName() const;
 
-}
+};
 
 }}
 

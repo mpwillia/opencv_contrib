@@ -13,7 +13,7 @@ namespace cv { namespace face {
 //------------------------------------------------------------------------------
 
 // Returns true if the file at the given path is a directory; false otherwise
-bool isDirectory(const String &filepath) const {
+bool isDirectory(const String &filepath) {
    struct stat buffer;
    if(stat(filepath.c_str(), &buffer)==0)
       return S_ISDIR(buffer.st_mode);
@@ -22,7 +22,7 @@ bool isDirectory(const String &filepath) const {
 } 
 
 // Returns true if the file at the given path is a regular file; false otherwise
-bool isRegularFile(const String &filepath) const {
+bool isRegularFile(const String &filepath) {
    struct stat buffer;
    if(stat(filepath.c_str(), &buffer)==0)
       return S_ISREG(buffer.st_mode);
@@ -31,20 +31,20 @@ bool isRegularFile(const String &filepath) const {
 } 
 
 // Returns true if the file at the given path exists; false otherwise
-bool exists(const String &filepath) const {
+bool exists(const String &filepath) {
    struct stat buffer;     
    return (stat(filepath.c_str(), &buffer) == 0);
 } 
 
 // Gets the name of the file from the given filepath
-String getFileName(const String &filepath) const {
+String getFileName(const String &filepath) {
    size_t idx = filepath.find_last_of('/');
 
    if((int)idx < 0) {
       // if we don't find a '/' at all then just return the path
       return filepath;
    }
-   else if((int)idx >= (int)path.length()-1) {
+   else if((int)idx >= (int)filepath.length()-1) {
       // if we have a trailing '/' then remove it and try again
       return getFileName(filepath.substr(0, path.length()-1));
    }
@@ -54,7 +54,7 @@ String getFileName(const String &filepath) const {
 // Returns filepaths to all of the files within the given directory
 // Assumes the given path is a valid existing directory with permissions
 // If the given path isn't a directory or it doesn't exist a empty vectory will be returned
-std::vector<String> listdir(const String &dirpath) const {
+std::vector<String> listdir(const String &dirpath) {
    std::vector<String> contents;
    if(!isDirectory(dirpath))
       return contents;
@@ -63,12 +63,12 @@ std::vector<String> listdir(const String &dirpath) const {
    int n;
 
    bool check = true;
-   n = scandir(path, &namelist, NULL, alphasort);
+   n = scandir(dirpath, &namelist, NULL, alphasort);
    if (n < 0)
-      CV_Error(Error::StsError, "Error reading directory at '"+_modelpath+"'"); 
+      CV_Error(Error::StsError, "Error reading directory at '"+dirpath+"'"); 
    else {
       while (n--) {
-         contents.push_back(String(namelist[n]->d_name))
+         contents.push_back(String(namelist[n]->d_name));
          free(namelist[n]);
       }
       free(namelist);
