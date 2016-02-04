@@ -46,7 +46,7 @@ String getFileName(const String &filepath) {
    }
    else if((int)idx >= (int)filepath.length()-1) {
       // if we have a trailing '/' then remove it and try again
-      return getFileName(filepath.substr(0, path.length()-1));
+      return getFileName(filepath.substr(0, filepath.length()-1));
    }
    return filepath.substr(idx + 1);
 } 
@@ -63,7 +63,7 @@ std::vector<String> listdir(const String &dirpath) {
    int n;
 
    bool check = true;
-   n = scandir(dirpath, &namelist, NULL, alphasort);
+   n = scandir(dirpath.c_str(), &namelist, NULL, alphasort);
    if (n < 0)
       CV_Error(Error::StsError, "Error reading directory at '"+dirpath+"'"); 
    else {
@@ -102,7 +102,7 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects false : %s\n", testsimple.c_str(), (isDirectory(testsimple)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (isDirectory(testbad)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (isDirectory(testempty)) ? "true" : "false");
-   print("\n");
+   printf("\n");
 
    printf(" - isRegularFile\n");
    printf("For \"%s\" Expects false : %s\n", testdir1.c_str(), (isRegularFile(testdir1)) ? "true" : "false");
@@ -112,7 +112,7 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects false : %s\n", testsimple.c_str(), (isRegularFile(testsimple)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (isRegularFile(testbad)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (isRegularFile(testempty)) ? "true" : "false");
-   print("\n");
+   printf("\n");
 
    printf(" - exists\n");
    printf("For \"%s\" Expects true : %s\n", testdir1.c_str(), (exists(testdir1)) ? "true" : "false");
@@ -122,7 +122,7 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects false : %s\n", testsimple.c_str(), (exists(testsimple)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (exists(testbad)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (exists(testempty)) ? "true" : "false");
-   print("\n");
+   printf("\n");
 
    printf(" - getFileName\n");
    printf("For \"%s\" Expects \"dd-dataset\" : %s\n", testdir1.c_str(), getFileName(testdir1));
@@ -132,7 +132,7 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects \"mytestfile.txt\" : %s\n", testsimple.c_str(), getFileName(testsimple));
    printf("For \"%s\" Expects \"dd-dataset-bad\" : %s\n", testbad.c_str(), getFileName(testbad));
    printf("For \"%s\" Expects \"\" : %s\n", testempty.c_str(), getFileName(testempty));
-   print("\n");
+   printf("\n");
 
    printf(" - listdir\n");
    contents = listdir(testdir1);
