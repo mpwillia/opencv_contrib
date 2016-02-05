@@ -24,6 +24,7 @@ private:
 
    // Model Creation/Manipulation
    void setModelPath(String path);
+   bool checkModel(const String &name, const String &path) const;
 
 public:
 
@@ -34,7 +35,7 @@ public:
    void test() const;
 
    // Model Creation/Manipulation
-   bool create(bool overwrite=false) const;
+   bool create(bool overwrite) const;
 
    // Model Information
    bool isValidModel() const;

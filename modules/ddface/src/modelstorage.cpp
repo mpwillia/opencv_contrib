@@ -122,7 +122,7 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
    if(isDirectory(parent)) {
       // good, our parent is a directory, so lets try to make ourselves
       // return true if we get no errors making it; false otherwise
-      return (mkdir(dirpath.c_str(), DEFFILEMOD) == 0);
+      return (mkdir(dirpath.c_str(), DEFFILEMODE) == 0);
    } 
    else {
       // our parent isn't a directory, we can't make a subdirectory under a normal file
@@ -316,7 +316,7 @@ void ModelStorage::setModelPath(String path) {
    _modelname = getFileName(_modelpath);
 }
 
-bool ModelStorage::create(bool overwrite=false) const { 
+bool ModelStorage::create(bool overwrite) const { 
    // check if a model already exists at our _modelpath
    if(exists()) {
       if(!overwrite) {
@@ -341,7 +341,7 @@ bool ModelStorage::create(bool overwrite=false) const {
 //------------------------------------------------------------------------------
 // Model Information Function
 //------------------------------------------------------------------------------
-bool checkModel(const String name, const String path) {
+bool ModelStorage::checkModel(const String &name, const String &path) const {
    printf("Checking model directory at \"%s\"...\n", path.c_str());
    std::vector<String> contents = listdir(path);
    bool check = true;
