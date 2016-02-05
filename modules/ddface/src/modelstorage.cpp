@@ -69,6 +69,7 @@ std::vector<String> listdir(const String &dirpath) {
    else {
       while (n--) {
          String name(namelist[n]->d_name);
+
          if(name != "." && name != "..")
             contents.push_back(dirpath + "/" + name);
          free(namelist[n]);
@@ -214,7 +215,8 @@ bool checkModel(const String name, const String path) {
    std::vector<String> contents = listdir(path);
    bool check = true;
    for(String file : contents) {
-      if(strstr(file.c_str(), name.c_str()) == NULL) {
+
+      if(strstr(getFileName(file).c_str(), name.c_str()) == NULL) {
          check = false;
       }
       else if(isDirectory(file)) {
