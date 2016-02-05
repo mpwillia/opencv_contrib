@@ -208,35 +208,45 @@ void ModelStorage::setModelPath(String path) {
    _modelname = getFileName(_modelpath);
 }
 
-// A valid model is one that exists and is structured properly 
-bool ModelStorage::isValidModel() const {
-   if(!modelExists()) 
-      return false;
-
+bool isValidModel(const String name, const String path) {
+   
    std::vector<String> contents = listdir(_modelpath);
    bool check = true;
-   for(String s : contents) {
-      if(strstr(s.c_str(), _modelname.c_str()) == NULL) {
+   for(String file : contents) {
+      if(strstr(file.c_str(), name.c_str()) == NULL) {
          check = false;
-         break;
       }
+      else if(isDirectory(file)) {
+         check = isValidModel(name, file);
+      } 
+
+      if(!check)
+         break;
    }
    
    return check;
 } 
 
+// A valid model is one that exists and is structured properly 
+bool ModelStorage::isValidModel() const {
+   if(!modelExists()) 
+      return false;
+   
+   return isValidModel(_modelname, _modelpath);
+} 
+
 // Returns true if the model already exists at it's _modelpath
-bool ModelStorage::modelExists() const {
+bool ModelStorage::exists() const {
    return exists(_modelpath);
 } 
 
 // Returns the model's path
-String ModelStorage::getModelPath() const {
+String ModelStorage::getPath() const {
    return _modelpath; 
 } 
 
 // Returns the model's name
-String ModelStorage::getModelName() const {
+String ModelStorage::getName() const {
    return _modelname; 
 }
 

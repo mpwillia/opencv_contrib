@@ -22,9 +22,9 @@ public:
 
    void test() const;
    bool isValidModel() const;
-   bool modelExists() const;
-   String getModelPath() const;
-   String getModelName() const;
+   bool exists() const;
+   String getPath() const;
+   String getName() const;
 
 };
 

@@ -451,23 +451,37 @@ void xLBPH::test() {
     String badpath = "/dd-data/models/xlbph-test-bad-model";
     ModelStorage badmodel(badpath);
 
+    String badpath2 = "/dd-data/dd-dataset/dd-dataset-2";
+    ModelStorage badmodel2(badpath2);
+
     printf("== Testing Model Storage Member Functions == \n");
     printf(" - getModelPath\n");
-    printf("Expecting \"%s\" : \"%s\"\n", _modelpath.c_str(), _model.getModelPath().c_str());
-    printf("Expecting \"%s\" : \"%s\"\n", goodpath.c_str(), goodmodel.getModelPath().c_str());
-    printf("Expecting \"%s\" : \"%s\"\n", badpath.c_str(), badmodel.getModelPath().c_str());
+    printf("Expecting \"%s\" : \"%s\"\n", _modelpath.c_str(), _model.getPath().c_str());
+    printf("Expecting \"%s\" : \"%s\"\n", goodpath.c_str(), goodmodel.getPath().c_str());
+    printf("Expecting \"%s\" : \"%s\"\n", badpath.c_str(), badmodel.getPath().c_str());
+    printf("Expecting \"%s\" : \"%s\"\n", badpath2.c_str(), badmodel2.getPath().c_str());
+
     printf("\n");
 
     printf(" - getModelName\n");
-    printf("Expecting \"%s\" : \"%s\"\n", _modelname.c_str(), _model.getModelName().c_str());
-    printf("Expecting \"xlbph-test\" : \"%s\"\n", goodmodel.getModelName().c_str());
-    printf("Expecting \"xlbph-test-bad-model\" : \"%s\"\n", badmodel.getModelName().c_str());
+    printf("Expecting \"%s\" : \"%s\"\n", _modelname.c_str(), _model.getName().c_str());
+    printf("Expecting \"xlbph-test\" : \"%s\"\n", goodmodel.getName().c_str());
+    printf("Expecting \"xlbph-test-bad-model\" : \"%s\"\n", badmodel.getName().c_str());
+    printf("Expecting \"dd-dataset-2\" : \"%s\"\n", badmodel2.getName().c_str());
     printf("\n");
 
     printf(" - modelExists\n");
-    printf("For \"%s\" Expects true : %s\n", _model.getModelPath().c_str(), (_model.modelExists()) ? "true" : "false");
-    printf("For \"%s\" Expects true : %s\n", goodmodel.getModelPath().c_str(), (goodmodel.modelExists()) ? "true" : "false");
-    printf("For \"%s\" Expects false : %s\n", badmodel.getModelPath().c_str(), (badmodel.modelExists()) ? "true" : "false");
+    printf("For \"%s\" Expects true : %s\n", _model.getPath().c_str(), (_model.exists()) ? "true" : "false");
+    printf("For \"%s\" Expects true : %s\n", goodmodel.getPath().c_str(), (goodmodel.exists()) ? "true" : "false");
+    printf("For \"%s\" Expects false : %s\n", badmodel.getPath().c_str(), (badmodel.exists()) ? "true" : "false");
+    printf("For \"%s\" Expects true : %s\n", badmodel2.getPath().c_str(), (badmodel2.exists()) ? "true" : "false");
+    printf("\n");
+
+    printf(" - isValidModel\n");
+    printf("For \"%s\" Expects true : %s\n", _model.getPath().c_str(), (_model.isValidModel()) ? "true" : "false");
+    printf("For \"%s\" Expects true : %s\n", goodmodel.getPath().c_str(), (goodmodel.isValidModel()) ? "true" : "false");
+    printf("For \"%s\" Expects false : %s\n", badmodel.getPath().c_str(), (badmodel.isValidModel()) ? "true" : "false");
+    printf("For \"%s\" Expects false : %s\n", badmodel2.getPath().c_str(), (badmodel2.isValidModel()) ? "true" : "false");
     printf("\n");
 
     printf("\n");
