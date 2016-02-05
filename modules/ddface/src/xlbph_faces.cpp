@@ -1661,7 +1661,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     std::sort(bestlabels.begin(), bestlabels.end());
 
     // figure out how many labels to check
-    int numLabelsToCheck = (int)((int)_labelinfo.size() * labelsToCheckRatio);
+    int numLabelsToCheck = (int)((int)labels.size() * labelsToCheckRatio);
     if(numLabelsToCheck < minLabelsToCheck)
         numLabelsToCheck = minLabelsToCheck;
     if(numLabelsToCheck > (int)bestlabels.size())
@@ -1816,7 +1816,7 @@ void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<doub
 
 
     // figure out how many labels to check
-    int numLabelsToCheck = (int)((int)_labelinfo.size() * labelsToCheckRatio);
+    int numLabelsToCheck = (int)((int)labels.size() * labelsToCheckRatio);
     if(numLabelsToCheck < minLabelsToCheck)
         numLabelsToCheck = minLabelsToCheck;
     if(numLabelsToCheck > (int)bestlabels.size())
@@ -1914,13 +1914,6 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
         labels.push_back(labelsMat.at<int>((int)labelIdx));
     printf("Found %d labels...\n", (int)labels.size());
 
-
-    /*
-    std::set<int> labels;
-    for(size_t labelIdx = 0; labelIdx < labelsMat.total(); labelIdx++) {
-        labels.insert(labelsMat.at<int>((int)labelIdx));
-    }
-    */
 
     printf("Calling prediction algorithm...\n");
     tbb::concurrent_vector<std::pair<double, int>> bestpreds;
