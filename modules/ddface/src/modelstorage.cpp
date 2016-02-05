@@ -209,7 +209,7 @@ void ModelStorage::setModelPath(String path) {
 }
 
 bool checkModel(const String name, const String path) {
-   
+   printf("Checking model directory at \"%s\"...\n", path.c_str());
    std::vector<String> contents = listdir(path);
    bool check = true;
    for(String file : contents) {
@@ -223,7 +223,6 @@ bool checkModel(const String name, const String path) {
       if(!check)
          break;
    }
-   
    return check;
 } 
 
