@@ -69,7 +69,7 @@ std::vector<String> listdir(const String &dirpath) {
    else {
       while (n--) {
          String name(namelist[n]->d_name);
-         if(name != "." || name != "..")
+         if(name != "." && name != "..")
             contents.push_back(dirpath + "/" + name);
          free(namelist[n]);
       }
