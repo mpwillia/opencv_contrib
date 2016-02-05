@@ -451,7 +451,7 @@ void xLBPH::test() {
     String badpath = "/dd-data/models/xlbph-test-bad-model";
     ModelStorage badmodel(badpath);
 
-    String badpath2 = "/dd-data/dd-dataset/dd-dataset-2";
+    String badpath2 = "/dd-data/videos/aws-test";
     ModelStorage badmodel2(badpath2);
 
     printf("== Testing Model Storage Member Functions == \n");
@@ -467,7 +467,7 @@ void xLBPH::test() {
     printf("Expecting \"%s\" : \"%s\"\n", _modelname.c_str(), _model.getName().c_str());
     printf("Expecting \"xlbph-test\" : \"%s\"\n", goodmodel.getName().c_str());
     printf("Expecting \"xlbph-test-bad-model\" : \"%s\"\n", badmodel.getName().c_str());
-    printf("Expecting \"dd-dataset-2\" : \"%s\"\n", badmodel2.getName().c_str());
+    printf("Expecting \"aws-test\" : \"%s\"\n", badmodel2.getName().c_str());
     printf("\n");
 
     printf(" - modelExists\n");
