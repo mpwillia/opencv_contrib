@@ -68,7 +68,8 @@ std::vector<String> listdir(const String &dirpath) {
       CV_Error(Error::StsError, "Error reading directory at '"+dirpath+"'"); 
    else {
       while (n--) {
-         contents.push_back(String(namelist[n]->d_name));
+         String name(namelist[n]->d_name)
+         contents.push_back(dirpath + "/" + name);
          free(namelist[n]);
       }
       free(namelist);
