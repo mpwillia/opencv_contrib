@@ -86,8 +86,8 @@ void ModelStorage::test() const {
    
    // test objects
    std::vector<String> contents;
-   String testdir1 = "/dd-data/dataset/dd-dataset"; // without trailing '/', ok
-   String testdir2 = "/dd-data/dataset/dd-dataset/"; // with trailing '/', ok
+   String testdir1 = "/dd-data/dataset/dd-dataset/dd-dataset-2"; // without trailing '/', ok
+   String testdir2 = "/dd-data/dataset/dd-dataset/dd-dataset-2"; // with trailing '/', ok
    String testfile1 = "/dd-data/dataset/dd-dataset/dd-dataset-2/dd-dataset-2.tsv"; // without trailing '/', ok
    String testfile2 = "/dd-data/dataset/dd-dataset/dd-dataset-2/dd-dataset-2.tsv/"; // with trailing '/', bad
    String testsimple = "mytestfile.txt"; // not a full path, just a file name (doesn't exists though)
@@ -125,8 +125,8 @@ void ModelStorage::test() const {
    printf("\n");
 
    printf(" - getFileName\n");
-   printf("For \"%s\" Expects \"dd-dataset\" : %s\n", testdir1.c_str(), getFileName(testdir1).c_str());
-   printf("For \"%s\" Expects \"dd-dataset\" : %s\n", testdir2.c_str(), getFileName(testdir2).c_str());
+   printf("For \"%s\" Expects \"dd-dataset-2\" : %s\n", testdir1.c_str(), getFileName(testdir1).c_str());
+   printf("For \"%s\" Expects \"dd-dataset-2\" : %s\n", testdir2.c_str(), getFileName(testdir2).c_str());
    printf("For \"%s\" Expects \"dd-dataset-2.tsv\" : %s\n", testfile1.c_str(), getFileName(testfile1).c_str());
    printf("For \"%s\" Expects \"dd-dataset-2.tsv\" : %s\n", testfile2.c_str(), getFileName(testfile2).c_str());
    printf("For \"%s\" Expects \"mytestfile.txt\" : %s\n", testsimple.c_str(), getFileName(testsimple).c_str());
