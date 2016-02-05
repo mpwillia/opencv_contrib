@@ -229,7 +229,7 @@ bool checkModel(const String name, const String path) {
 
 // A valid model is one that exists and is structured properly 
 bool ModelStorage::isValidModel() const {
-   if(!modelExists()) 
+   if(!exists()) 
       return false;
    
    return checkModel(_modelname, _modelpath);
@@ -237,7 +237,7 @@ bool ModelStorage::isValidModel() const {
 
 // Returns true if the model already exists at it's _modelpath
 bool ModelStorage::exists() const {
-   return exists(_modelpath);
+   return fileExists(_modelpath);
 } 
 
 // Returns the model's path
