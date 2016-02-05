@@ -672,9 +672,6 @@ void xLBPH::mmapHistograms() {
         if(fd < 0)
             CV_Error(Error::StsError, "Cannot open histogram file '"+filename+"'");
 
-        //struct stat st;
-        //stat(filename.c_str(), &st);
-        //char* mapPtr = (char*)mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
         unsigned char* mapPtr = (unsigned char*)mmap(NULL, getHistogramSize() * it->second * SIZEOF_CV_32FC1, PROT_READ, MAP_PRIVATE, fd, 0);
         if(mapPtr == MAP_FAILED)
             CV_Error(Error::StsError, "Cannot mem map file '"+filename+"'");
@@ -727,177 +724,6 @@ void xLBPH::printMat(const Mat &mat, int label) const {
 //------------------------------------------------------------------------------
 // Histogram Clustering (Using Markov Clustering) 
 //------------------------------------------------------------------------------
-// Calculates the weights between each histogram and puts them in weights
-/*
-void xLBPH::cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int numTiers) {
-    weights.create(dists.rows, dists.cols, dists.type());
-
-    // calculate tiers and weights
-    //for(size_t i = 0; i < dists.rows; i++) {
-    tbb::parallel_for(0, dists.rows, 1, [&](int i) {
-        // find best
-        double best = DBL_MAX;
-        for(size_t j = 0; j < dists.cols; j++) {
-            double check = dists.at<double>(j,i);
-            if(check > 0 && check < best) 
-                best = check;
-        }
-        
-        // calculate tiers
-        for(size_t j = 0; j < dists.cols; j++) {
-            double check = dists.at<double>(j,i);
-            if(check > 0 && check != best) 
-                weights.at<double>(j,i) = ceil(((check - best) / best) / tierStep);
-            else 
-                weights.at<double>(j,i) = 1; 
-        }
-
-        // calculate weights
-        for(size_t j = 0; j < dists.cols; j++) {
-            double weight = (numTiers+1) - weights.at<double>(j,i);
-            weights.at<double>(j,i) = (weight <= 0) ? 0 : weight;
-        }
-    });
-}
-
-// Finds clusters for the given label's dists and puts the MCL mat in mclmat
-void xLBPH::cluster_dists(Mat &dists, Mat &mclmat, double r) {
-    //printf("\t\t\t - clustering dists...\n");
-    mclmat.create(dists.rows, dists.cols, dists.type());
-
-    // find weights
-    cluster_calc_weights(dists, mclmat, cluster_tierStep, cluster_numTiers);
-
-    // iterate
-    mcl::cluster(mclmat, mcl_iterations, mcl_expansion_power, r, mcl_prune_min);
-}
-
-
-// Interprets a given MCL matrix as clusters
-void xLBPH::cluster_interpret(Mat &mclmat, std::vector<std::set<int>> &clusters) {
-    //printf("\t\t\t - interpreting clusters...\n");
-    // interpret clusters
-    std::map<int, std::set<int>> clusters_map;
-    for(int vert = 0; vert < mclmat.rows; vert++) {
-        //std::cout << "checking vert " << vert << "\n";
-        for(int check = 0; check < mclmat.cols; check ++) {
-            double dist = mclmat.at<double>(check, vert);
-            //std::cout << "\tchecking check " << check << " | dist: " << dist << "\n";
-            if(dist > 0) {
-                // we want to add it
-                // check if it already has been added somewhere
-                bool found = false;
-                for(int i = 0; i < vert; i++) {
-                    if(!clusters_map[i].empty() && clusters_map[i].find(vert) != clusters_map[i].end()) {
-                        //std::cout << "\t\tfound check at " << i << " - not adding\n";
-                        found = true; 
-                    } 
-                }
-                    
-                if(!found) {
-                    //std::cout << "\t\tdidn't find check adding\n";
-                    clusters_map[vert].insert(check);
-                }
-            }
-        } 
-    }
-    
-    for(std::map<int, std::set<int>>::const_iterator it = clusters_map.begin(); it != clusters_map.end(); it++) {
-        if(!it->second.empty())
-            clusters.push_back(it->second);
-    }
-}
-
-double xLBPH::cluster_ratio(std::vector<std::set<int>> &clusters) {
-    int numHists = 0;
-    int worstCase = 0;
-    for(size_t idx = 0; idx < clusters.size(); idx++) {
-        std::set<int> cluster = clusters.at(idx);
-        numHists += (int)cluster.size();
-        if((int)cluster.size() > worstCase)
-            worstCase = (int)cluster.size();
-    }
-    worstCase += (int)clusters.size();
-    return  worstCase / (double)numHists;
-}
-
-void xLBPH::cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &clusters) {
-    
-    int optimalClustersMax = ceil(sqrt(dists.rows));
-    int optimalClustersMin = floor(sqrt(dists.rows));
-    int optimalCase = (int)ceil(sqrt((int)dists.rows)*2);
-    double optimalRatio = optimalCase / (double)dists.rows;
-
-    Mat initial;
-    double r = mcl_inflation_power;
-
-    cluster_dists(dists, initial, r);
-    cluster_interpret(initial, clusters);
-    
-    int checkClusters = (int)clusters.size();
-    int iterations = 5;
-    int base = 7;
-    bool makeLarger = (checkClusters < optimalClustersMin);
-    for(int i = 0; i < iterations; i++) {
-        if(checkClusters < optimalClustersMin && makeLarger)
-            r *= (base + 1.0 + i) / base; // need more clusters - larger r
-        else if(checkClusters > optimalClustersMax && !makeLarger) 
-            r *= (base - 1.0 - i) / base; // need fewer clusters - smaller r
-        else
-            break;
-
-        if(r <= 1)
-            break;
-    
-
-        Mat mclmat;
-        cluster_dists(dists, mclmat, r);
-        clusters.clear();
-        cluster_interpret(mclmat, clusters);
-        checkClusters = (int)clusters.size();
-    }
-}
-
-void xLBPH::cluster_label(int label, std::vector<cluster_t> &matClusters) {
-//void xLBPH::cluster_label(int label, std::vector<std::set<int>> &clusters) {
-
-    std::vector<Mat> hists = _histograms[label];
-
-    Mat dists = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
-    // get raw dists
-    for(size_t i = 0; i < hists.size()-1; i++) {
-        for(size_t j = i; j < hists.size(); j++) {
-            double dist = compareHist(hists.at((int)i), hists.at((int)j), COMP_ALG);
-            dists.at<double>(i, j) = dist;
-            dists.at<double>(j, i) = dist;
-        } 
-    }
-
-    std::vector<std::set<int>> clusters;
-    cluster_find_optimal(dists, clusters);
-     
-    //std::vector<std::pair<Mat, std::vector<Mat>>> matClusters;
-    for(size_t i = 0; i < clusters.size(); i++) {
-        std::set<int> cluster = clusters.at((int)i);
-        
-        std::vector<Mat> clusterHists;
-        Mat clusterAvg;
-
-        for(std::set<int>::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
-            clusterHists.push_back(hists.at(*it));
-        }
-        
-        averageHistograms(clusterHists, clusterAvg);
-
-        matClusters.push_back(cluster_t(clusterAvg, clusterHists));
-    }
-    
-    //printf("\t - finished with %d who has %d clusters for %d histograms \n", label, (int)clusters.size(), (int)hists.size());
-
-    //void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const {
-}
-*/
-
 void xLBPH::clusterHistograms() {
     /* What is Histogram Clustering?
      * The idea is to group like histograms together
@@ -905,31 +731,17 @@ void xLBPH::clusterHistograms() {
      * Every cluster has an average histogram and a set of histograms
      */
     
-    //void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const {
-
     std::vector<int> labels;
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
         labels.push_back(it->first);
 
     std::vector<std::pair<int, std::vector<clstr::cluster_t>>> allClusters;
 
-
-    //double avgCheckRatio = 0;
-    //tbb::parallel_for(tbb::blocked_range<std::map<int, std::vector<Mat>>::const_iterator>(_histograms.begin(), _histograms.end()), [=](std::map<int, std::vector<Mat>>::const_iterator it) {
     int count = 0;
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(), 
         [&](std::pair<int, std::vector<Mat>> it) {
-    //for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         
-        //printf("Clustering histograms %d / %d    \r", count++, (int)_histograms.size());
         std::cout << "Clustering histograms " << count++ << " / " << (int)_histograms.size() << "                                \r" << std::flush;
-
-        //std::vector<Mat> hists = _histograms[label];
-        /*
-        int numHists = (int)it.second.size();
-        std::vector<cluster_t> labelClusters;
-        cluster_label(it.first, labelClusters);
-        */
 
         clstr::cluster_vars vars = {cluster_tierStep, 
                                     cluster_numTiers, 

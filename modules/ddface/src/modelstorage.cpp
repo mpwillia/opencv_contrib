@@ -13,7 +13,7 @@ namespace cv { namespace face {
 //------------------------------------------------------------------------------
 
 // Returns true if the file at the given path is a directory; false otherwise
-bool isDirectory(const String &filepath) {
+bool ModelStorage::isDirectory(const String &filepath) const {
    struct stat buffer;
    if(stat(filepath.c_str(), &buffer)==0)
       return S_ISDIR(buffer.st_mode);
@@ -22,7 +22,7 @@ bool isDirectory(const String &filepath) {
 } 
 
 // Returns true if the file at the given path is a regular file; false otherwise
-bool isRegularFile(const String &filepath) {
+bool ModelStorage::isRegularFile(const String &filepath) const {
    struct stat buffer;
    if(stat(filepath.c_str(), &buffer)==0)
       return S_ISREG(buffer.st_mode);
@@ -31,13 +31,13 @@ bool isRegularFile(const String &filepath) {
 } 
 
 // Returns true if the file at the given path exists; false otherwise
-bool fileExists(const String &filepath) {
+bool ModelStorage::fileExists(const String &filepath) const {
    struct stat buffer;     
    return (stat(filepath.c_str(), &buffer) == 0);
 } 
 
 // Gets the name of the file from the given filepath
-String getFileName(const String &filepath) {
+String ModelStorage::getFileName(const String &filepath) const {
    size_t idx = filepath.find_last_of('/');
 
    if((int)idx < 0) {
@@ -51,10 +51,34 @@ String getFileName(const String &filepath) {
    return filepath.substr(idx + 1);
 } 
 
+// Gets the path of the given file's parent
+String ModelStorage::getFileParent(const String &filepath) const {
+    
+   size_t idx = filepath.find_last_of('/');
+
+   if((int)idx < 0) {
+      // if we don't find a '/' at all then we don't know the parent 
+      return "";
+   }
+   else if((int)idx == 0) {
+      // if the last occurrence of '/' is at the start than just return root
+      return "/";
+   } 
+   else if((int)idx >= (int)filepath.length()-1) {
+      // if we have a trailing '/' then remove it and try again
+      return getFileName(filepath.substr(0, filepath.length()-1));
+   }
+   else {
+      // otherwise, strip everything after the '/'
+      return filepath.substr(0, idx);
+   }
+} 
+
+
 // Returns filepaths to all of the files within the given directory
 // Assumes the given path is a valid existing directory with permissions
 // If the given path isn't a directory or it doesn't exist a empty vectory will be returned
-std::vector<String> listdir(const String &dirpath) {
+std::vector<String> ModelStorage::listdir(const String &dirpath) const{
    std::vector<String> contents;
    if(!isDirectory(dirpath))
       return contents;
@@ -79,6 +103,58 @@ std::vector<String> listdir(const String &dirpath) {
    return contents;
 } 
 
+// Makes the directory at the given filepath along with all parents if they don't exist
+bool ModelStorage::mkdirs(const String &dirpath) const {
+  
+   if(fileExists(dirpath)) {
+      // a file already exists at that path, can't create
+      return false;
+   }
+
+   String parent = getFileParent(dirpath);
+   if(!fileExists(parent)) {
+      // our parent doesn't exist, so lets try to make it
+      if(!mkdirs(parent)) {
+         // if we failed to make our parent, return false
+      } 
+   } 
+
+   if(isDirectory(parent)) {
+      // good, our parent is a directory, so lets try to make ourselves
+      // return true if we get no errors making it; false otherwise
+      return (mkdir(dirpath.c_str()) == 0);
+   } 
+   else {
+      // our parent isn't a directory, we can't make a subdirectory under a normal file
+      return false; 
+   } 
+} 
+
+// Removes the given file and all it's contents recursively
+bool ModelStorage::rmr(const String &filepath) const {
+
+   if(filepath == "/" && (int)filepath.length() <= 0) {
+      return false; 
+   } 
+
+   if(!fileExists(dirpath)) {
+      // file doesn't exist, can't remove! 
+      return false;
+   } 
+   
+   // if the file is not a directory contents will be empty
+   std::vector<String> contents = listdir(filepath);
+   if(contents.size() > 0) {
+      // remove each child, if one fails the whole thing fails
+      for(String file : contents) {
+         if(!rmr(file)) 
+            return false;
+      } 
+   } 
+   
+   return (remove(filepath.c_str()) == 0);
+} 
+
 //------------------------------------------------------------------------------
 // ModelStorage Functions 
 //------------------------------------------------------------------------------
@@ -94,8 +170,11 @@ void ModelStorage::test() const {
    String testfile1 = "/dd-data/dataset/dd-dataset/dd-dataset-2/dd-dataset-2.tsv"; // without trailing '/', ok
    String testfile2 = "/dd-data/dataset/dd-dataset/dd-dataset-2/dd-dataset-2.tsv/"; // with trailing '/', bad
    String testsimple = "mytestfile.txt"; // not a full path, just a file name (doesn't exists though)
+   String testatroot = "/mytestfile.txt"; // file directoy under root
    String testbad = "/dd-data/dataset/dd-dataset/dd-dataset-bad"; // file doesn't exist
    String testempty = ""; // empty string
+   String testmkdir = "/dd-data/mkdir-parent/mkdir-child";
+   String testrmrdir = "/dd-data/rmr-parent/rmr-child";
 
    printf(" - isDirectory\n");
    printf("For \"%s\" Expects true : %s\n", testdir1.c_str(), (isDirectory(testdir1)) ? "true" : "false");
@@ -103,6 +182,7 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects false : %s\n", testfile1.c_str(), (isDirectory(testfile1)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testfile2.c_str(), (isDirectory(testfile2)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testsimple.c_str(), (isDirectory(testsimple)) ? "true" : "false");
+   printf("For \"%s\" Expects false : %s\n", testatroot.c_str(), (isDirectory(testatroot)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (isDirectory(testbad)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (isDirectory(testempty)) ? "true" : "false");
    printf("\n");
@@ -112,7 +192,8 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects false : %s\n", testdir2.c_str(), (isRegularFile(testdir2)) ? "true" : "false");
    printf("For \"%s\" Expects true : %s\n", testfile1.c_str(), (isRegularFile(testfile1)) ? "true" : "false");
    printf("For \"%s\" Expects false (true might be ok) : %s\n", testfile2.c_str(), (isRegularFile(testfile2)) ? "true" : "false");
-   printf("For \"%s\" Expects false : %s\n", testsimple.c_str(), (isRegularFile(testsimple)) ? "true" : "false");
+   printf("For \"%s\" Expects true : %s\n", testsimple.c_str(), (isRegularFile(testsimple)) ? "true" : "false");
+   printf("For \"%s\" Expects true : %s\n", testatroot.c_str(), (isRegularFile(testatroot)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (isRegularFile(testbad)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (isRegularFile(testempty)) ? "true" : "false");
    printf("\n");
@@ -123,6 +204,7 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects true : %s\n", testfile1.c_str(), (fileExists(testfile1)) ? "true" : "false");
    printf("For \"%s\" Expects false (true might be ok) : %s\n", testfile2.c_str(), (fileExists(testfile2)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testsimple.c_str(), (fileExists(testsimple)) ? "true" : "false");
+   printf("For \"%s\" Expects false : %s\n", testatroot.c_str(), (fileExists(testatroot)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (fileExists(testbad)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (fileExists(testempty)) ? "true" : "false");
    printf("\n");
@@ -133,9 +215,31 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects \"dd-dataset-2.tsv\" : %s\n", testfile1.c_str(), getFileName(testfile1).c_str());
    printf("For \"%s\" Expects \"dd-dataset-2.tsv\" : %s\n", testfile2.c_str(), getFileName(testfile2).c_str());
    printf("For \"%s\" Expects \"mytestfile.txt\" : %s\n", testsimple.c_str(), getFileName(testsimple).c_str());
+   printf("For \"%s\" Expects \"mytestfile.txt\" : %s\n", testatroot.c_str(), getFileName(testatroot).c_str());
    printf("For \"%s\" Expects \"dd-dataset-bad\" : %s\n", testbad.c_str(), getFileName(testbad).c_str());
    printf("For \"%s\" Expects \"\" : %s\n", testempty.c_str(), getFileName(testempty).c_str());
    printf("\n");
+
+   printf(" - getFileParent\n");
+   printf("For \"%s\" Expects \"/dd-data/dataset/dd-dataset\" : %s\n", testdir1.c_str(), getFileParent(testdir1).c_str());
+   printf("For \"%s\" Expects \"/dd-data/dataset/dd-dataset\" : %s\n", testdir2.c_str(), getFileParent(testdir2).c_str());
+   printf("For \"%s\" Expects \"/dd-data/dataset/dd-dataset/dd-dataset-2\" : %s\n", testfile1.c_str(), getFileParent(testfile1).c_str());
+   printf("For \"%s\" Expects \"/dd-data/dataset/dd-dataset/dd-dataset-2\" : %s\n", testfile2.c_str(), getFileParent(testfile2).c_str());
+   printf("For \"%s\" Expects \"\" : %s\n", testsimple.c_str(), getFileParent(testsimple).c_str());
+   printf("For \"%s\" Expects \"/\" : %s\n", testatroot.c_str(), getFileParent(testatroot).c_str());
+   printf("For \"%s\" Expects \"/dd-data/dataset/dd-dataset/dd-dataset-bad\" : %s\n", testbad.c_str(), getFileParent(testbad).c_str());
+   printf("For \"%s\" Expects \"\" : %s\n", testempty.c_str(), getFileParent(testempty).c_str());
+   printf("\n");
+
+   printf(" - mkdirs\n");
+   printf("For \"%s\" Expects true : \n", testmkdir.c_str(), (mkdirs(testmkdir)) ? "true" : "false");
+   printf("For \"%s\" Expects true : \n", testrmrdir.c_str(), (mkdirs(testrmrdir)) ? "true" : "false");
+   printf("For \"%s\" Expects true : \n", testempty.c_str(), (mkdirs(testempty)) ? "true" : "false");
+
+   printf(" - rmr\n");
+   printf("For \"%s\" Expects true : \n", testrmrdir.c_str(), (rmr(testrmrdir)) ? "true" : "false");
+   printf("For \"%s\" Expects false : \n", testbad.c_str(), (rmr(testbad)) ? "true" : "false");
+   printf("For \"%s\" Expects false : \n", testempty.c_str(), (rmr(testempty)) ? "true" : "false");
 
    printf(" - listdir\n");
    contents = listdir(testdir1);
@@ -186,7 +290,9 @@ void ModelStorage::test() const {
 } 
 
 
-
+//------------------------------------------------------------------------------
+// Model Creation/Manipulation Functions 
+//------------------------------------------------------------------------------
 void ModelStorage::setModelPath(String path) {
    // given path can't be empty
    CV_Assert(path.length() > 0);
@@ -210,6 +316,31 @@ void ModelStorage::setModelPath(String path) {
    _modelname = getFileName(_modelpath);
 }
 
+bool create(bool overwrite=false) const { 
+   // check if a model already exists at our _modelpath
+   if(exists()) {
+      if(!overwrite) {
+         // don't overwrite, told not to
+         CV_Error(Error::StsError, "Cannot create model at '"+getPath()+"' - a model already exists at that path! Set <overwrite> to true to overwrite the existing model.");
+         return false;
+      }
+      else if (!isValidModel()){
+         // can't overwrite, directory at our _modelpath isn't an xLBPH model, unsafe to overwrite it 
+         CV_Error(Error::StsError, "Given model path at '"+getPath()+"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
+         return false;
+      } 
+      else {
+         // overwrite the model by deleting the existing one
+      }
+
+   }
+
+   return true;
+} 
+
+//------------------------------------------------------------------------------
+// Model Information Function
+//------------------------------------------------------------------------------
 bool checkModel(const String name, const String path) {
    printf("Checking model directory at \"%s\"...\n", path.c_str());
    std::vector<String> contents = listdir(path);
@@ -241,7 +372,7 @@ bool ModelStorage::isValidModel() const {
 bool ModelStorage::exists() const {
    return fileExists(_modelpath);
 } 
-
+    
 // Returns the model's path
 String ModelStorage::getPath() const {
    return _modelpath; 
@@ -251,5 +382,85 @@ String ModelStorage::getPath() const {
 String ModelStorage::getName() const {
    return _modelname; 
 }
+
+
+//------------------------------------------------------------------------------
+// Model File Getters Functions 
+//------------------------------------------------------------------------------
+String ModelStorage::getInfoFile() const {
+   return getPath() + "/" + getName() + ".yml";
+} 
+
+String ModelStorage::getHistogramsDir() const {
+   return getPath() + "/" + getName() + "-histograms";
+} 
+
+String ModelStorage::getHistogramFile(int label) const {
+    char labelstr[16];
+    sprintf(labelstr, "%d", label);
+    return getHistogramsDir() + "/" + getName() + "-" + labelstr + ".bin";
+} 
+
+String ModelStorage::getHistogramAveragesFile() const {
+    return getHistogramsDir() + "/" + getName() + "-averages.bin";
+} 
+
+
+//------------------------------------------------------------------------------
+// Histogram Read/Write 
+//------------------------------------------------------------------------------
+
+// Wrapper functions for load/save/updating histograms for specific labels
+bool ModelStorage::loadHistograms(int label, std::vector<Mat> &histograms) const {
+    return readHistograms(getHistogramFile(label), histograms);
+}
+
+bool ModelStorage::saveHistograms(int label, const std::vector<Mat> &histograms) const {
+    return writeHistograms(getHistogramFile(label), histograms, false);
+}
+
+bool ModelStorage::updateHistograms(int label, const std::vector<Mat> &histograms) const {
+    return writeHistograms(getHistogramFile(label), histograms, true);
+}
+
+
+// Main read/write functions for histograms
+bool ModelStorage::readHistograms(const String &filename, std::vector<Mat> &histograms) const {
+    FILE *fp = fopen(filename.c_str(), "r");
+    if(fp == NULL) {
+        //std::cout << "cannot open file at '" << filename << "'\n";
+        return false;
+    }
+    
+    float buffer[getHistogramSize()];
+    while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
+        Mat hist = Mat::zeros(1, getHistogramSize(), CV_32FC1);
+        memcpy(hist.ptr<float>(), buffer, getHistogramSize() * sizeof(float));
+        histograms.push_back(hist);
+    }
+    fclose(fp);
+    return true;
+}
+
+
+bool ModelStorage::writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const {
+    FILE *fp = fopen(filename.c_str(), (appendhists == true ? "a" : "w"));
+    if(fp == NULL) {
+        //std::cout << "cannot open file at '" << filename << "'\n";
+        return false;
+    }
+
+    float* buffer = new float[getHistogramSize() * (int)histograms.size()];
+    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
+        float* writeptr = buffer + ((int)sampleIdx * getHistogramSize());
+        memcpy(writeptr, histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
+    }
+    fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
+    delete buffer;
+
+    fclose(fp);
+    return true;
+}
+
 
 }}
