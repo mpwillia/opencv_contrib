@@ -31,7 +31,7 @@ bool isRegularFile(const String &filepath) {
 } 
 
 // Returns true if the file at the given path exists; false otherwise
-bool exists(const String &filepath) {
+bool fileExists(const String &filepath) {
    struct stat buffer;     
    return (stat(filepath.c_str(), &buffer) == 0);
 } 
@@ -115,14 +115,14 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (isRegularFile(testempty)) ? "true" : "false");
    printf("\n");
 
-   printf(" - exists\n");
-   printf("For \"%s\" Expects true : %s\n", testdir1.c_str(), (exists(testdir1)) ? "true" : "false");
-   printf("For \"%s\" Expects true : %s\n", testdir2.c_str(), (exists(testdir2)) ? "true" : "false");
-   printf("For \"%s\" Expects true : %s\n", testfile1.c_str(), (exists(testfile1)) ? "true" : "false");
-   printf("For \"%s\" Expects false (true might be ok) : %s\n", testfile2.c_str(), (exists(testfile2)) ? "true" : "false");
-   printf("For \"%s\" Expects false : %s\n", testsimple.c_str(), (exists(testsimple)) ? "true" : "false");
-   printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (exists(testbad)) ? "true" : "false");
-   printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (exists(testempty)) ? "true" : "false");
+   printf(" - fileExists\n");
+   printf("For \"%s\" Expects true : %s\n", testdir1.c_str(), (fileExists(testdir1)) ? "true" : "false");
+   printf("For \"%s\" Expects true : %s\n", testdir2.c_str(), (fileExists(testdir2)) ? "true" : "false");
+   printf("For \"%s\" Expects true : %s\n", testfile1.c_str(), (fileExists(testfile1)) ? "true" : "false");
+   printf("For \"%s\" Expects false (true might be ok) : %s\n", testfile2.c_str(), (fileExists(testfile2)) ? "true" : "false");
+   printf("For \"%s\" Expects false : %s\n", testsimple.c_str(), (fileExists(testsimple)) ? "true" : "false");
+   printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (fileExists(testbad)) ? "true" : "false");
+   printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (fileExists(testempty)) ? "true" : "false");
    printf("\n");
 
    printf(" - getFileName\n");
@@ -208,16 +208,16 @@ void ModelStorage::setModelPath(String path) {
    _modelname = getFileName(_modelpath);
 }
 
-bool isValidModel(const String name, const String path) {
+bool checkModel(const String name, const String path) {
    
-   std::vector<String> contents = listdir(_modelpath);
+   std::vector<String> contents = listdir(path);
    bool check = true;
    for(String file : contents) {
       if(strstr(file.c_str(), name.c_str()) == NULL) {
          check = false;
       }
       else if(isDirectory(file)) {
-         check = isValidModel(name, file);
+         check = checkModel(name, file);
       } 
 
       if(!check)
@@ -232,7 +232,7 @@ bool ModelStorage::isValidModel() const {
    if(!modelExists()) 
       return false;
    
-   return isValidModel(_modelname, _modelpath);
+   return checkModel(_modelname, _modelpath);
 } 
 
 // Returns true if the model already exists at it's _modelpath
