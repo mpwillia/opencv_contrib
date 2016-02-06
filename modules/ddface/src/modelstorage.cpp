@@ -110,6 +110,7 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
 
    if(fileExists(dirpath)) {
       // a file already exists at that path, can't create
+      printf(" - return 1\n");
       return false;
    }
 
@@ -118,6 +119,7 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
       // our parent doesn't exist, so lets try to make it
       if(!mkdirs(parent)) {
          // if we failed to make our parent, return false
+         printf(" - return 2\n");
          return false;
       } 
    } 
@@ -125,10 +127,12 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
    if((int)parent.length() <= 0 || isDirectory(parent)) {
       // good, our parent is a directory, so lets try to make ourselves
       // return true if we get no errors making it; false otherwise
+      printf(" - return 3\n");
       return (mkdir(dirpath.c_str(), DEFFILEMODE) == 0);
    } 
    else {
       // our parent isn't a directory, we can't make a subdirectory under a normal file
+      printf(" - return 4\n");
       return false; 
    } 
 } 
@@ -237,7 +241,7 @@ void ModelStorage::test() const {
    printf(" - mkdirs\n");
    printf("For \"%s\" Expects true : %s\n", testmkdir.c_str(), (mkdirs(testmkdir)) ? "true" : "false");
    printf("For \"%s\" Expects true : %s\n", testrmrdir.c_str(), (mkdirs(testrmrdir)) ? "true" : "false");
-   printf("For \"%s\" Expects true : %s\n", testempty.c_str(), (mkdirs(testempty)) ? "true" : "false");
+   printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (mkdirs(testempty)) ? "true" : "false");
    printf("\n");
 
    printf(" - rmr\n");
@@ -248,43 +252,43 @@ void ModelStorage::test() const {
 
    printf(" - listdir\n");
    contents = listdir(testdir1);
-   printf("Contents of \"%s\" (should be 7 items):", testdir1.c_str());
+   printf("Contents of \"%s\" (should be 7 items):\n", testdir1.c_str());
    for(String s : contents)
       printf("\t\"%s\"\n", s.c_str());
    printf("\n");
 
    contents = listdir(testdir2);
-   printf("Contents of \"%s\" (should be 7 items):", testdir2.c_str());
+   printf("Contents of \"%s\" (should be 7 items):\n", testdir2.c_str());
    for(String s : contents)
       printf("\t\"%s\"\n", s.c_str());
    printf("\n");
 
    contents = listdir(testfile1);
-   printf("Contents of \"%s\" (should be empty):", testfile1.c_str());
+   printf("Contents of \"%s\" (should be empty):\n", testfile1.c_str());
    for(String s : contents)
       printf("\t\"%s\"\n", s.c_str());
    printf("\n");
 
    contents = listdir(testfile2);
-   printf("Contents of \"%s\" (should be empty):", testfile2.c_str());
+   printf("Contents of \"%s\" (should be empty):\n", testfile2.c_str());
    for(String s : contents)
       printf("\t\"%s\"\n", s.c_str());
    printf("\n");
 
    contents = listdir(testsimple);
-   printf("Contents of \"%s\" (should be empty):", testsimple.c_str());
+   printf("Contents of \"%s\" (should be empty):\n", testsimple.c_str());
    for(String s : contents)
       printf("\t\"%s\"\n", s.c_str());
    printf("\n");
 
    contents = listdir(testbad);
-   printf("Contents of \"%s\" (should be empty):", testbad.c_str());
+   printf("Contents of \"%s\" (should be empty):\n", testbad.c_str());
    for(String s : contents)
       printf("\t\"%s\"\n", s.c_str());
    printf("\n");
 
    contents = listdir(testempty);
-   printf("Contents of \"%s\" (should be empty):", testempty.c_str());
+   printf("Contents of \"%s\" (should be empty):\n", testempty.c_str());
    for(String s : contents)
       printf("\t\"%s\"\n", s.c_str());
    printf("\n");
