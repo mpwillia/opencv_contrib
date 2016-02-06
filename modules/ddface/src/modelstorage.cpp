@@ -114,7 +114,7 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
    }
 
    String parent = getFileParent(dirpath);
-   if(!fileExists(parent)) {
+   if((int)parent.length() > 0 && !fileExists(parent)) {
       // our parent doesn't exist, so lets try to make it
       if(!mkdirs(parent)) {
          // if we failed to make our parent, return false
@@ -122,7 +122,7 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
       } 
    } 
 
-   if(isDirectory(parent)) {
+   if((int)parent.length() > 0 || isDirectory(parent)) {
       // good, our parent is a directory, so lets try to make ourselves
       // return true if we get no errors making it; false otherwise
       return (mkdir(dirpath.c_str(), DEFFILEMODE) == 0);
