@@ -235,14 +235,14 @@ void ModelStorage::test() const {
    printf("\n");
 
    printf(" - mkdirs\n");
-   printf("For \"%s\" Expects true : \n", testmkdir.c_str(), (mkdirs(testmkdir)) ? "true" : "false");
-   printf("For \"%s\" Expects true : \n", testrmrdir.c_str(), (mkdirs(testrmrdir)) ? "true" : "false");
-   printf("For \"%s\" Expects true : \n", testempty.c_str(), (mkdirs(testempty)) ? "true" : "false");
+   printf("For \"%s\" Expects true : %s\n", testmkdir.c_str(), (mkdirs(testmkdir)) ? "true" : "false");
+   printf("For \"%s\" Expects true : %s\n", testrmrdir.c_str(), (mkdirs(testrmrdir)) ? "true" : "false");
+   printf("For \"%s\" Expects true : %s\n", testempty.c_str(), (mkdirs(testempty)) ? "true" : "false");
 
    printf(" - rmr\n");
-   printf("For \"%s\" Expects true : \n", testrmrdir.c_str(), (rmr(testrmrdir)) ? "true" : "false");
-   printf("For \"%s\" Expects false : \n", testbad.c_str(), (rmr(testbad)) ? "true" : "false");
-   printf("For \"%s\" Expects false : \n", testempty.c_str(), (rmr(testempty)) ? "true" : "false");
+   printf("For \"%s\" Expects true : %s\n", testrmrdir.c_str(), (rmr(testrmrdir)) ? "true" : "false");
+   printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (rmr(testbad)) ? "true" : "false");
+   printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (rmr(testempty)) ? "true" : "false");
 
    printf(" - listdir\n");
    contents = listdir(testdir1);
