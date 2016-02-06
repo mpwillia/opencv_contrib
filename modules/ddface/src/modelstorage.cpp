@@ -133,7 +133,7 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
 // Removes the given file and all it's contents recursively
 bool ModelStorage::rmr(const String &filepath) const {
 
-   if(filepath == "/" && (int)filepath.length() <= 0) {
+   if(filepath == "/" || (int)filepath.length() <= 0) {
       return false; 
    } 
 
@@ -191,9 +191,9 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects false : %s\n", testdir1.c_str(), (isRegularFile(testdir1)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testdir2.c_str(), (isRegularFile(testdir2)) ? "true" : "false");
    printf("For \"%s\" Expects true : %s\n", testfile1.c_str(), (isRegularFile(testfile1)) ? "true" : "false");
-   printf("For \"%s\" Expects false (true might be ok) : %s\n", testfile2.c_str(), (isRegularFile(testfile2)) ? "true" : "false");
-   printf("For \"%s\" Expects true : %s\n", testsimple.c_str(), (isRegularFile(testsimple)) ? "true" : "false");
-   printf("For \"%s\" Expects true : %s\n", testatroot.c_str(), (isRegularFile(testatroot)) ? "true" : "false");
+   printf("For \"%s\" Expects false : %s\n", testfile2.c_str(), (isRegularFile(testfile2)) ? "true" : "false");
+   printf("For \"%s\" Expects false : %s\n", testsimple.c_str(), (isRegularFile(testsimple)) ? "true" : "false");
+   printf("For \"%s\" Expects false : %s\n", testatroot.c_str(), (isRegularFile(testatroot)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (isRegularFile(testbad)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (isRegularFile(testempty)) ? "true" : "false");
    printf("\n");

@@ -279,7 +279,7 @@ public:
     CV_IMPL_PROPERTY(int, Radius, _radius)
     CV_IMPL_PROPERTY(int, Neighbors, _neighbors)
     CV_IMPL_PROPERTY(double, Threshold, _threshold)
-    
+   
     // path getters/setters
     void setModelPath(String modelpath);
     String getModelPath() const;
