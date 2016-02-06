@@ -116,6 +116,7 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
       // our parent doesn't exist, so lets try to make it
       if(!mkdirs(parent)) {
          // if we failed to make our parent, return false
+         return false;
       } 
    } 
 
