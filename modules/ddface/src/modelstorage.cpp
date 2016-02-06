@@ -127,8 +127,9 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
    if((int)parent.length() <= 0 || isDirectory(parent)) {
       // good, our parent is a directory, so lets try to make ourselves
       // return true if we get no errors making it; false otherwise
-      printf(" - return 3\n");
-      return (mkdir(dirpath.c_str(), DEFFILEMODE) == 0);
+      bool result = (mkdir(dirpath.c_str(), DEFFILEMODE) == 0);
+      printf(" - return 3 => result = %d\n", result);
+      return result;
    } 
    else {
       // our parent isn't a directory, we can't make a subdirectory under a normal file
