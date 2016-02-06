@@ -122,7 +122,7 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
       } 
    } 
 
-   if((int)parent.length() > 0 || isDirectory(parent)) {
+   if((int)parent.length() <= 0 || isDirectory(parent)) {
       // good, our parent is a directory, so lets try to make ourselves
       // return true if we get no errors making it; false otherwise
       return (mkdir(dirpath.c_str(), DEFFILEMODE) == 0);
@@ -238,11 +238,13 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects true : %s\n", testmkdir.c_str(), (mkdirs(testmkdir)) ? "true" : "false");
    printf("For \"%s\" Expects true : %s\n", testrmrdir.c_str(), (mkdirs(testrmrdir)) ? "true" : "false");
    printf("For \"%s\" Expects true : %s\n", testempty.c_str(), (mkdirs(testempty)) ? "true" : "false");
+   printf("\n");
 
    printf(" - rmr\n");
    printf("For \"%s\" Expects true : %s\n", testrmrdir.c_str(), (rmr(testrmrdir)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (rmr(testbad)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (rmr(testempty)) ? "true" : "false");
+   printf("\n");
 
    printf(" - listdir\n");
    contents = listdir(testdir1);
