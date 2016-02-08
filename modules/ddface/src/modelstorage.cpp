@@ -110,7 +110,6 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
 
    if(fileExists(dirpath)) {
       // a file already exists at that path, can't create
-      printf(" - return 1\n");
       return false;
    }
 
@@ -119,7 +118,6 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
       // our parent doesn't exist, so lets try to make it
       if(!mkdirs(parent)) {
          // if we failed to make our parent, return false
-         printf(" - return 2\n");
          return false;
       } 
    } 
@@ -139,13 +137,10 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
        * S_IRWXG - RWX Group
        * S_IRWXO - RWX Other
        */
-      bool result = (mkdir(dirpath.c_str(), ACCESSPERMS) == 0);
-      printf(" - return 3 => result = %d  dirpath = \"%s\"  parent = \"%s\"\n", result, dirpath.c_str(), parent.c_str());
-      return result;
+      return (mkdir(dirpath.c_str(), ACCESSPERMS) == 0);
    } 
    else {
       // our parent isn't a directory, we can't make a subdirectory under a normal file
-      printf(" - return 4\n");
       return false; 
    } 
 } 
@@ -154,13 +149,11 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
 bool ModelStorage::rmr(const String &filepath) const {
 
    if(filepath == "/" || (int)filepath.length() <= 0) {
-      printf(" - rmr return 1 \"%s\"\n", filepath.c_str());
       return false; 
    } 
 
    if(!fileExists(filepath)) {
       // file doesn't exist, can't remove! 
-      printf(" - rmr return 2 \"%s\"\n", filepath.c_str());
       return false;
    } 
    
@@ -170,14 +163,11 @@ bool ModelStorage::rmr(const String &filepath) const {
       // remove each child, if one fails the whole thing fails
       for(String file : contents) {
          if(!rmr(file)) {
-            printf(" - rmr return 3, see child\n");
             return false;
          }
       } 
    } 
-   bool result = (remove(filepath.c_str()) == 0);
-   printf(" - rmr return 4 => result = %d\n", result);
-   return result;
+   return (remove(filepath.c_str()) == 0);
 } 
 
 //------------------------------------------------------------------------------
