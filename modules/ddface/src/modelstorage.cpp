@@ -106,8 +106,6 @@ std::vector<String> ModelStorage::listdir(const String &dirpath) const{
 // Makes the directory at the given filepath along with all parents if they don't exist
 bool ModelStorage::mkdirs(const String &dirpath) const {
 
-   printf("Making dirs for '%s'\n", dirpath.c_str());
-
    if(fileExists(dirpath)) {
       // a file already exists at that path, can't create
       return false;
