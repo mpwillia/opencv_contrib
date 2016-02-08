@@ -127,7 +127,19 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
    if((int)parent.length() <= 0 || isDirectory(parent)) {
       // good, our parent is a directory, so lets try to make ourselves
       // return true if we get no errors making it; false otherwise
-      bool result = (mkdir(dirpath.c_str(), DEFFILEMODE) == 0);
+      // dir has rwxrwxrwx perms
+      /* Perms are as follows:
+       * S_I<Perm><Who>
+       * Where <Perm> is:        And <Who> is
+       * R - Read                USR - User
+       * W - Write               GRP - Group
+       * X - Execute             OTH - Other
+       * Shortcuts for RWX
+       * S_IRWXU - RWX User
+       * S_IRWXG - RWX Group
+       * S_IRWXO - RWX Other
+       */
+      bool result = (mkdir(dirpath.c_str(), ACCESSPERMS) == 0);
       printf(" - return 3 => result = %d  dirpath = \"%s\"  parent = \"%s\"\n", result, dirpath.c_str(), parent.c_str());
       return result;
    } 
