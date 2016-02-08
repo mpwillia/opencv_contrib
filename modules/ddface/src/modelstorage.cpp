@@ -128,7 +128,7 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
       // good, our parent is a directory, so lets try to make ourselves
       // return true if we get no errors making it; false otherwise
       bool result = (mkdir(dirpath.c_str(), DEFFILEMODE) == 0);
-      printf(" - return 3 => result = %d\n", result);
+      printf(" - return 3 => result = %d  dirpath = \"%s\"  parent = \"%s\"\n", result, dirpath.c_str(), parent.c_str());
       return result;
    } 
    else {
@@ -142,11 +142,13 @@ bool ModelStorage::mkdirs(const String &dirpath) const {
 bool ModelStorage::rmr(const String &filepath) const {
 
    if(filepath == "/" || (int)filepath.length() <= 0) {
+      printf(" - rmr return 1 \"%s\"\n", filepath.c_str());
       return false; 
    } 
 
    if(!fileExists(filepath)) {
       // file doesn't exist, can't remove! 
+      printf(" - rmr return 2 \"%s\"\n", filepath.c_str());
       return false;
    } 
    
@@ -155,12 +157,15 @@ bool ModelStorage::rmr(const String &filepath) const {
    if(contents.size() > 0) {
       // remove each child, if one fails the whole thing fails
       for(String file : contents) {
-         if(!rmr(file)) 
+         if(!rmr(file)) {
+            printf(" - rmr return 3, see child\n");
             return false;
+         }
       } 
    } 
-   
-   return (remove(filepath.c_str()) == 0);
+   bool result = (remove(filepath.c_str()) == 0);
+   printf(" - rmr return 4 => result = %d\n", result);
+   return result;
 } 
 
 //------------------------------------------------------------------------------
@@ -250,6 +255,9 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (rmr(testbad)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (rmr(testempty)) ? "true" : "false");
    printf("\n");
+
+   system(("rm -r " + testmkdir).c_str());
+   system(("rm -r " + testrmrdir).c_str());
 
    printf(" - listdir\n");
    contents = listdir(testdir1);
