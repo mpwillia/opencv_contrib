@@ -327,9 +327,9 @@ String ModelStorage::getName() const {
 // Model File Getters Functions - NEW
 //------------------------------------------------------------------------------
 String ModelStorage::intToString(int num) const {
-    char labelstr[16];
-    sprintf(labelstr, "%d", label);
-    return labelstr;
+    char numstr[16];
+    sprintf(numstr, "%d", num);
+    return numstr;
 } 
 
 String ModelStorage::getLabelFilePrefix(int label) const {
@@ -337,7 +337,7 @@ String ModelStorage::getLabelFilePrefix(int label) const {
 } 
 
 String ModelStorage::getMetadataFile() const {
-   return getPath() + "/" + getNmae() + ".yml";
+   return getPath() + "/" + getName() + ".yml";
 } 
 
 String ModelStorage::getLabelsDir() const {

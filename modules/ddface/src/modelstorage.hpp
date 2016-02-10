@@ -35,7 +35,7 @@ private:
    bool checkModel(const String &name, const String &path) const;
    
    String intToString(int num) const;
-   String getLabelFilePrefix(int label);
+   String getLabelFilePrefix(int label) const;
 
 public:
 

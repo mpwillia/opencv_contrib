@@ -459,7 +459,7 @@ void xLBPH::test() {
 
     String goodpath = "/dd-data/models/xlbph-test";
     ModelStorage goodmodel(goodpath);
-i
+
     String badpath = "/dd-data/models/xlbph-test-bad-model";
     ModelStorage badmodel(badpath);
 
