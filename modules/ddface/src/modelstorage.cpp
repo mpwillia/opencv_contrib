@@ -168,8 +168,283 @@ bool ModelStorage::rmr(const String &filepath) const {
    return (remove(filepath.c_str()) == 0);
 } 
 
+
+
+
+
 //------------------------------------------------------------------------------
-// ModelStorage Functions 
+// Model Creation/Manipulation Functions 
+//------------------------------------------------------------------------------
+void ModelStorage::setModelPath(String path) {
+   // given path can't be empty
+   CV_Assert(path.length() > 0);
+          
+   // path can't contain "//"
+   CV_Assert((int)path.find("//") == -1);
+
+   // find last index of '/' 
+   size_t idx = path.find_last_of('/');
+
+   if((int)idx < 0) {
+     _modelpath = path;
+   }
+   else if((int)idx >= (int)path.length()-1) {
+     setModelPath(path.substr(0, path.length()-1));
+   }
+   else {
+     _modelpath = path;
+   }
+
+   _modelname = getFileName(_modelpath);
+}
+
+bool ModelStorage::create(bool overwrite) const { 
+   // check if a model already exists at our _modelpath
+   if(exists()) {
+      if(!overwrite) {
+         // don't overwrite, told not to
+         CV_Error(Error::StsError, "Cannot create model at '"+getPath()+"' - a model already exists at that path! Set <overwrite> to true to overwrite the existing model.");
+         return false;
+      }
+      else if (!isValidModel()){
+         // can't overwrite, directory at our _modelpath isn't an xLBPH model, unsafe to overwrite it 
+         CV_Error(Error::StsError, "Given model path at '"+getPath()+"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
+         return false;
+      } 
+      else {
+         // overwrite the model by deleting the existing one
+         if(!rmr(getPath())) {
+            CV_Error(Error::StsError, "Given model path at '"+getPath()+"' cannot be overwritten; failed to remove the old model.");
+            return false;
+         } 
+      }
+   }
+
+   // Start making the model
+   if(!mkdirs(getPath())) {
+      CV_Error(Error::StsError, "Failed to create model at '"+getPath()+"'; unable to create directory");
+      return false;
+   } 
+
+   if(!mkdirs(getLabelsDir())) {
+      CV_Error(Error::StsError, "Failed to create model at '"+getPath()+"'; unable to create directory");
+      return false;
+   } 
+   
+   FileStorage metadata_file(getMetadataFile(), FileStorage::READ);
+    if (!infofile.isOpened())
+        CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for reading!");
+
+   return true;
+} 
+
+bool ModelStorage::writeMetadata(AlgSettings alg, std::vector<int> &labels, std::vector<int> &numhists) const {
+
+   CV_Assert((int)labels.size() == (int)numhists.size());
+
+   FileStorage metadata(getMetadataFile(), FileStorage::WRITE);
+   if(!metadata.isOpened()) {
+      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for reading!");
+      return false;
+   }
+
+   // alg settings
+   metadata << "radius" << alg.radius;
+   metadata << "neighbors" << alg.neighbors;
+   metadata << "grid_x" << alg.grid_x;
+   metadata << "grid_y" << alg.grid_y;
+
+   metadata << "numlabels" << (int)labels.size();
+   metadata << "label_info" << "{";
+   metadata << "labels" << labels;
+   metadata << "numhists" << numhists;
+   metadata << "}";
+   metadata.release();
+
+   return true;
+}
+
+bool ModelStorage::writeMetadata(AlgSettings alg, std::map<int, int> &labelinfo) const {
+   
+   // label_info
+   std::vector<int> labels;
+   std::vector<int> numhists;
+
+   for(std::map<int,int>::const_iterator it = labelinfo.begin(); it != labelinfo.end(); it++)
+      labels.push_back(it->first);
+      numhists.push_back(it->second);
+   }
+
+   return writeMetadata(alg, labels, numhists);
+} 
+
+//------------------------------------------------------------------------------
+// Model Information Function
+//------------------------------------------------------------------------------
+bool ModelStorage::checkModel(const String &name, const String &path) const {
+   printf("Checking model directory at \"%s\"...\n", path.c_str());
+   std::vector<String> contents = listdir(path);
+   bool check = true;
+   for(String file : contents) {
+
+      if(strstr(getFileName(file).c_str(), name.c_str()) == NULL) {
+         check = false;
+      }
+      else if(isDirectory(file)) {
+         check = checkModel(name, file);
+      } 
+
+      if(!check)
+         break;
+   }
+   return check;
+} 
+
+// A valid model is one that exists and is structured properly 
+bool ModelStorage::isValidModel() const {
+   if(!exists()) 
+      return false;
+   
+   return checkModel(_modelname, _modelpath);
+} 
+
+// Returns true if the model already exists at it's _modelpath
+bool ModelStorage::exists() const {
+   return fileExists(_modelpath);
+} 
+    
+// Returns the model's path
+String ModelStorage::getPath() const {
+   return _modelpath; 
+} 
+
+// Returns the model's name
+String ModelStorage::getName() const {
+   return _modelname; 
+}
+
+//------------------------------------------------------------------------------
+// Model File Getters Functions - NEW
+//------------------------------------------------------------------------------
+String ModelStorage::intToString(int num) const {
+    char labelstr[16];
+    sprintf(labelstr, "%d", label);
+    return labelstr;
+} 
+
+String ModelStorage::getLabelFilePrefix(int label) const {
+   return getName() + "-label-" + intToString(label);
+} 
+
+String ModelStorage::getMetadataFile() const {
+   return getPath() + "/" + getNmae() + ".yml";
+} 
+
+String ModelStorage::getLabelsDir() const {
+   return getPath() + "/" + getName() + "-labels";
+}
+
+String ModelStorage::getLabelAveragesFile() const {
+   return getLabelsDir() + "/" + getName() + "-label-averages.bin";
+} 
+
+String ModelStorage::getLabelDir(int label) const {
+   return getLabelsDir() + "/" + getLabelFilePrefix(label);
+} 
+
+String ModelStorage::getLabelHistogramsFile(int label) const {
+   return getLabelDir(label) + "/" + getLabelFilePrefix(label) + "-histograms.bin";
+} 
+
+String ModelStorage::getLabelClusterAveragesFile(int label) const {
+   return getLabelDir(label) + "/" + getLabelFilePrefix(label) + "-cluster-averages.bin";
+} 
+
+String ModelStorage::getLabelClustersFile(int label) const {
+   return getLabelDir(label) + "/" + getLabelFilePrefix(label) + "-clusters.yml";
+} 
+
+//------------------------------------------------------------------------------
+// Model File Getters Functions - OLD
+//------------------------------------------------------------------------------
+String ModelStorage::getInfoFile() const {
+   return getPath() + "/" + getName() + ".yml";
+} 
+
+String ModelStorage::getHistogramsDir() const {
+   return getPath() + "/" + getName() + "-histograms";
+} 
+
+String ModelStorage::getHistogramFile(int label) const {
+    char labelstr[16];
+    sprintf(labelstr, "%d", label);
+    return getHistogramsDir() + "/" + getName() + "-" + labelstr + ".bin";
+} 
+
+String ModelStorage::getHistogramAveragesFile() const {
+    return getHistogramsDir() + "/" + getName() + "-averages.bin";
+} 
+
+
+//------------------------------------------------------------------------------
+// Histogram Read/Write 
+//------------------------------------------------------------------------------
+
+// Wrapper functions for load/save/updating histograms for specific labels
+bool ModelStorage::loadHistograms(int label, std::vector<Mat> &histograms, int histSize) const {
+    return readHistograms(getHistogramFile(label), histograms, histSize);
+}
+
+bool ModelStorage::saveHistograms(int label, const std::vector<Mat> &histograms, int histSize) const {
+    return writeHistograms(getHistogramFile(label), histograms, false, histSize);
+}
+
+bool ModelStorage::updateHistograms(int label, const std::vector<Mat> &histograms, int histSize) const {
+    return writeHistograms(getHistogramFile(label), histograms, true, histSize);
+}
+
+
+// Main read/write functions for histograms
+bool ModelStorage::readHistograms(const String &filename, std::vector<Mat> &histograms, int histSize) const {
+    FILE *fp = fopen(filename.c_str(), "r");
+    if(fp == NULL) {
+        //std::cout << "cannot open file at '" << filename << "'\n";
+        return false;
+    }
+    
+    float buffer[histSize];
+    while(fread(buffer, sizeof(float), histSize, fp) > 0) {
+        Mat hist = Mat::zeros(1, histSize, CV_32FC1);
+        memcpy(hist.ptr<float>(), buffer, histSize * sizeof(float));
+        histograms.push_back(hist);
+    }
+    fclose(fp);
+    return true;
+}
+
+
+bool ModelStorage::writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists, int histSize) const {
+    FILE *fp = fopen(filename.c_str(), (appendhists == true ? "a" : "w"));
+    if(fp == NULL) {
+        //std::cout << "cannot open file at '" << filename << "'\n";
+        return false;
+    }
+
+    float* buffer = new float[histSize * (int)histograms.size()];
+    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
+        float* writeptr = buffer + ((int)sampleIdx * histSize);
+        memcpy(writeptr, histograms.at((int)sampleIdx).ptr<float>(), histSize * sizeof(float));
+    }
+    fwrite(buffer, sizeof(float), histSize * (int)histograms.size(), fp);
+    delete buffer;
+
+    fclose(fp);
+    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// ModelStorage Test Function
 //------------------------------------------------------------------------------
 
 
@@ -199,7 +474,7 @@ void ModelStorage::test() const {
    printf("For \"%s\" Expects false : %s\n", testbad.c_str(), (isDirectory(testbad)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testempty.c_str(), (isDirectory(testempty)) ? "true" : "false");
    printf("\n");
-
+   
    printf(" - isRegularFile\n");
    printf("For \"%s\" Expects false : %s\n", testdir1.c_str(), (isRegularFile(testdir1)) ? "true" : "false");
    printf("For \"%s\" Expects false : %s\n", testdir2.c_str(), (isRegularFile(testdir2)) ? "true" : "false");
@@ -306,179 +581,6 @@ void ModelStorage::test() const {
    printf(" !! End of Utility Functions Tests !!\n");
    printf("\n");
 } 
-
-
-//------------------------------------------------------------------------------
-// Model Creation/Manipulation Functions 
-//------------------------------------------------------------------------------
-void ModelStorage::setModelPath(String path) {
-   // given path can't be empty
-   CV_Assert(path.length() > 0);
-          
-   // path can't contain "//"
-   CV_Assert((int)path.find("//") == -1);
-
-   // find last index of '/' 
-   size_t idx = path.find_last_of('/');
-
-   if((int)idx < 0) {
-     _modelpath = path;
-   }
-   else if((int)idx >= (int)path.length()-1) {
-     setModelPath(path.substr(0, path.length()-1));
-   }
-   else {
-     _modelpath = path;
-   }
-
-   _modelname = getFileName(_modelpath);
-}
-
-bool ModelStorage::create(bool overwrite) const { 
-   // check if a model already exists at our _modelpath
-   if(exists()) {
-      if(!overwrite) {
-         // don't overwrite, told not to
-         CV_Error(Error::StsError, "Cannot create model at '"+getPath()+"' - a model already exists at that path! Set <overwrite> to true to overwrite the existing model.");
-         return false;
-      }
-      else if (!isValidModel()){
-         // can't overwrite, directory at our _modelpath isn't an xLBPH model, unsafe to overwrite it 
-         CV_Error(Error::StsError, "Given model path at '"+getPath()+"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
-         return false;
-      } 
-      else {
-         // overwrite the model by deleting the existing one
-      }
-
-   }
-
-   return true;
-} 
-
-//------------------------------------------------------------------------------
-// Model Information Function
-//------------------------------------------------------------------------------
-bool ModelStorage::checkModel(const String &name, const String &path) const {
-   printf("Checking model directory at \"%s\"...\n", path.c_str());
-   std::vector<String> contents = listdir(path);
-   bool check = true;
-   for(String file : contents) {
-
-      if(strstr(getFileName(file).c_str(), name.c_str()) == NULL) {
-         check = false;
-      }
-      else if(isDirectory(file)) {
-         check = checkModel(name, file);
-      } 
-
-      if(!check)
-         break;
-   }
-   return check;
-} 
-
-// A valid model is one that exists and is structured properly 
-bool ModelStorage::isValidModel() const {
-   if(!exists()) 
-      return false;
-   
-   return checkModel(_modelname, _modelpath);
-} 
-
-// Returns true if the model already exists at it's _modelpath
-bool ModelStorage::exists() const {
-   return fileExists(_modelpath);
-} 
-    
-// Returns the model's path
-String ModelStorage::getPath() const {
-   return _modelpath; 
-} 
-
-// Returns the model's name
-String ModelStorage::getName() const {
-   return _modelname; 
-}
-
-
-//------------------------------------------------------------------------------
-// Model File Getters Functions 
-//------------------------------------------------------------------------------
-String ModelStorage::getInfoFile() const {
-   return getPath() + "/" + getName() + ".yml";
-} 
-
-String ModelStorage::getHistogramsDir() const {
-   return getPath() + "/" + getName() + "-histograms";
-} 
-
-String ModelStorage::getHistogramFile(int label) const {
-    char labelstr[16];
-    sprintf(labelstr, "%d", label);
-    return getHistogramsDir() + "/" + getName() + "-" + labelstr + ".bin";
-} 
-
-String ModelStorage::getHistogramAveragesFile() const {
-    return getHistogramsDir() + "/" + getName() + "-averages.bin";
-} 
-
-
-//------------------------------------------------------------------------------
-// Histogram Read/Write 
-//------------------------------------------------------------------------------
-
-// Wrapper functions for load/save/updating histograms for specific labels
-bool ModelStorage::loadHistograms(int label, std::vector<Mat> &histograms, int histSize) const {
-    return readHistograms(getHistogramFile(label), histograms, histSize);
-}
-
-bool ModelStorage::saveHistograms(int label, const std::vector<Mat> &histograms, int histSize) const {
-    return writeHistograms(getHistogramFile(label), histograms, false, histSize);
-}
-
-bool ModelStorage::updateHistograms(int label, const std::vector<Mat> &histograms, int histSize) const {
-    return writeHistograms(getHistogramFile(label), histograms, true, histSize);
-}
-
-
-// Main read/write functions for histograms
-bool ModelStorage::readHistograms(const String &filename, std::vector<Mat> &histograms, int histSize) const {
-    FILE *fp = fopen(filename.c_str(), "r");
-    if(fp == NULL) {
-        //std::cout << "cannot open file at '" << filename << "'\n";
-        return false;
-    }
-    
-    float buffer[histSize];
-    while(fread(buffer, sizeof(float), histSize, fp) > 0) {
-        Mat hist = Mat::zeros(1, histSize, CV_32FC1);
-        memcpy(hist.ptr<float>(), buffer, histSize * sizeof(float));
-        histograms.push_back(hist);
-    }
-    fclose(fp);
-    return true;
-}
-
-
-bool ModelStorage::writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists, int histSize) const {
-    FILE *fp = fopen(filename.c_str(), (appendhists == true ? "a" : "w"));
-    if(fp == NULL) {
-        //std::cout << "cannot open file at '" << filename << "'\n";
-        return false;
-    }
-
-    float* buffer = new float[histSize * (int)histograms.size()];
-    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
-        float* writeptr = buffer + ((int)sampleIdx * histSize);
-        memcpy(writeptr, histograms.at((int)sampleIdx).ptr<float>(), histSize * sizeof(float));
-    }
-    fwrite(buffer, sizeof(float), histSize * (int)histograms.size(), fp);
-    delete buffer;
-
-    fclose(fp);
-    return true;
-}
 
 
 }}

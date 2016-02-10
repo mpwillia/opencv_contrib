@@ -438,6 +438,18 @@ static String matToString(const Mat &mat) {
     return s;
 }
 
+bool checkBool(bool expected, bool got) {
+    bool result = (expected == got);
+    printf("%s - Expects %s : Got %s\n", (result ? "PASS" : "FAIL"), (expected ? "true" : "false"), (got ? "true" : "false"));
+    return result;
+}
+
+bool checkStr(String expected, String got) {
+    bool result = (expected.compare(got) == 0);
+    printf("%s - Expects \"%s\" : Got \"%s\"\n", (result ? "PASS" : "FAIL"), expected.c_str(), got.c_str());
+    return result;
+} 
+
 void xLBPH::test() {
 
     printf(" -=### Running xLBPH Tests ###=- \n");
@@ -447,42 +459,67 @@ void xLBPH::test() {
 
     String goodpath = "/dd-data/models/xlbph-test";
     ModelStorage goodmodel(goodpath);
-
+i
     String badpath = "/dd-data/models/xlbph-test-bad-model";
     ModelStorage badmodel(badpath);
 
     String badpath2 = "/dd-data/videos/aws-test";
     ModelStorage badmodel2(badpath2);
 
-    printf("== Testing Model Storage Member Functions == \n");
+    printf(" -==## Testing Model Storage Member Functions ##==- \n");
+    printf("== Testing Model Information Functions == \n");
     printf(" - getModelPath\n");
-    printf("Expecting \"%s\" : \"%s\"\n", _modelpath.c_str(), _model.getPath().c_str());
-    printf("Expecting \"%s\" : \"%s\"\n", goodpath.c_str(), goodmodel.getPath().c_str());
-    printf("Expecting \"%s\" : \"%s\"\n", badpath.c_str(), badmodel.getPath().c_str());
-    printf("Expecting \"%s\" : \"%s\"\n", badpath2.c_str(), badmodel2.getPath().c_str());
-
+    checkStr(_modelpath, _model.getPath());
+    checkStr(goodpath, goodmodel.getPath());
+    checkStr(badpath, badmodel.getPath());
+    checkStr(badpath2, badmodel2.getPath());
     printf("\n");
-
+    
     printf(" - getModelName\n");
-    printf("Expecting \"%s\" : \"%s\"\n", _modelname.c_str(), _model.getName().c_str());
-    printf("Expecting \"xlbph-test\" : \"%s\"\n", goodmodel.getName().c_str());
-    printf("Expecting \"xlbph-test-bad-model\" : \"%s\"\n", badmodel.getName().c_str());
-    printf("Expecting \"aws-test\" : \"%s\"\n", badmodel2.getName().c_str());
+    checkStr(_modelname, _model.getName());
+    checkStr("xlbph-test", goodmodel.getName());
+    checkStr("xlbph-test-bad-model", badmodel.getName());
+    checkStr("aws-test", badmodel2.getName());
     printf("\n");
 
     printf(" - modelExists\n");
-    printf("For \"%s\" Expects true : %s\n", _model.getPath().c_str(), (_model.exists()) ? "true" : "false");
-    printf("For \"%s\" Expects true : %s\n", goodmodel.getPath().c_str(), (goodmodel.exists()) ? "true" : "false");
-    printf("For \"%s\" Expects false : %s\n", badmodel.getPath().c_str(), (badmodel.exists()) ? "true" : "false");
-    printf("For \"%s\" Expects true : %s\n", badmodel2.getPath().c_str(), (badmodel2.exists()) ? "true" : "false");
+    checkBool(true, _model.exists());
+    checkBool(true, moodmodel.exists());
+    checkBool(false, badmodel.exists());
+    checkBool(true, badmodel2.exists());
     printf("\n");
 
     printf(" - isValidModel\n");
-    printf("For \"%s\" Expects true : %s\n", _model.getPath().c_str(), (_model.isValidModel()) ? "true" : "false");
-    printf("For \"%s\" Expects true : %s\n", goodmodel.getPath().c_str(), (goodmodel.isValidModel()) ? "true" : "false");
-    printf("For \"%s\" Expects false : %s\n", badmodel.getPath().c_str(), (badmodel.isValidModel()) ? "true" : "false");
-    printf("For \"%s\" Expects false : %s\n", badmodel2.getPath().c_str(), (badmodel2.isValidModel()) ? "true" : "false");
+    checkBool(true, _model.isValidModel();
+    checkBool(true, goodmodel.isValidModel());
+    checkBool(false, badmodel.isValidModel());
+    checkBool(false, badmodel2.isValidModel());
     printf("\n");
+
+    printf("== Testing Model File Getters (new) Functions == \n");
+    printf(" - getLabelHistogramsFile()\n");
+    checkStr(_model.getPath() + "/" + _model.getName() + "-labels/" + _model.getName() + "-label-12/" + _model.getName() + "-label-12-histograms.bin", _model.getLabelHistogramsFile(12));
+    checkStr("/dd-data/models/xlbph-test/xlbph-test-labels/xlbph-test-label-12/xlbph-test-label-12-histograms.bin", goodmodel.getLabelHistogramsFile(12));
+    printf("\n");
+
+    printf("== Testing Model Creation/Manipulation Functions == \n");
+    String testpath = "/dd-data/models/xlbph-model-storage-test";
+    ModelStorage testmodel(testpath);
+
+    printf(" - create\n");
+    testmodel.create();
+
+    AlgSettings testalg = {12, 12, 1, 8};
+
+    std::map<int, int> testlabelinfo;
+    testlabelinfo[1] = 11;
+    testlabelinfo[2] = 22;
+    testlabelinfo[3] = 33;
+    testlabelinfo[4] = 44;
+    testlabelinfo[5] = 55;
+
+    printf(" - writeMetadata\n");
+    testmodel.writeMetadata(testalg, testlabelinfo);
 
     printf("\n");
     printf(" !! End of Member Functions Tests !!\n");

@@ -6,12 +6,20 @@
 
 namespace cv { namespace face {
 
+typedef struct AlgSettings {
+   int grid_x;
+   int grid_y;
+   int radius;
+   int neighbors;
+} AlgSettings;
+
+
 class ModelStorage {
 private: 
 
    String _modelpath;
    String _modelname;
-  
+
    // Basic Collection of Generic File/Directory Functions
    bool isDirectory(const String &filepath) const;
    bool isRegularFile(const String &filepath) const;
@@ -25,6 +33,9 @@ private:
    // Model Creation/Manipulation
    void setModelPath(String path);
    bool checkModel(const String &name, const String &path) const;
+   
+   String intToString(int num) const;
+   String getLabelFilePrefix(int label);
 
 public:
 
@@ -32,10 +43,27 @@ public:
       setModelPath(path);
    };
 
+   
+   void testCreation() const;
    void test() const;
 
+   /* --==##: New Model Structure Definition :##==--
+    *
+    * /<modelname>
+    *   - <modelname>-metadata.yml
+    *   + <modelname>-labels
+    *      - <modelname>-label-averages.bin
+    *      +... <modelname>-label-<label>
+    *            - <modelname>-label-<label>-histograms.bin
+    *            - <modelname>-label-<label>-cluster-averages.bin
+    *            - <modelname>-label-<label>-clusters.yml
+    *
+    */
+
    // Model Creation/Manipulation
-   bool create(bool overwrite) const;
+   bool create(bool overwrite = false) const;
+   bool writeMetadata(AlgSettings alg, std::vector<int> &labels, std::vector<int> &numhists) const;
+   bool writeMetadata(AlgSettings alg, std::map<int, int> &labelinfo) const;
 
    // Model Information
    bool isValidModel() const;
@@ -43,7 +71,17 @@ public:
    String getPath() const;
    String getName() const;
 
-   // Model File Getters   
+   // Model File Getters - New
+   String getMetadataFile() const;
+   String getLabelsDir() const;
+   String getLabelAveragesFile() const;
+   String getLabelDir(int label) const;
+   String getLabelHistogramsFile(int label) const;
+   String getLabelClusterAveragesFile(int label) const;
+   String getLabelClustersFile(int label) const;
+
+
+   // Model File Getters - Old
    String getInfoFile() const;
    String getHistogramsDir() const;
    String getHistogramFile(int label) const;
