@@ -230,10 +230,6 @@ bool ModelStorage::create(bool overwrite) const {
       CV_Error(Error::StsError, "Failed to create model at '"+getPath()+"'; unable to create directory");
       return false;
    } 
-   
-   FileStorage metadata_file(getMetadataFile(), FileStorage::READ);
-   if (!metadata_file.isOpened())
-      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for reading!");
 
    return true;
 } 
