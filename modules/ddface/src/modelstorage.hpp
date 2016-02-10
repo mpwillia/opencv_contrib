@@ -7,10 +7,10 @@
 namespace cv { namespace face {
 
 typedef struct AlgSettings {
-   int grid_x;
-   int grid_y;
    int radius;
    int neighbors;
+   int grid_x;
+   int grid_y;
 } AlgSettings;
 
 

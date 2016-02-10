@@ -509,7 +509,7 @@ i
     printf(" - create\n");
     testmodel.create();
 
-    AlgSettings testalg = {12, 12, 1, 8};
+    AlgSettings testalg = {1, 8, 12, 12};
 
     std::map<int, int> testlabelinfo;
     testlabelinfo[1] = 11;

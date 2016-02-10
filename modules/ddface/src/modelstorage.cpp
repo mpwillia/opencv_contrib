@@ -232,8 +232,8 @@ bool ModelStorage::create(bool overwrite) const {
    } 
    
    FileStorage metadata_file(getMetadataFile(), FileStorage::READ);
-    if (!infofile.isOpened())
-        CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for reading!");
+   if (!metadata_file.isOpened())
+      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for reading!");
 
    return true;
 } 
@@ -270,7 +270,7 @@ bool ModelStorage::writeMetadata(AlgSettings alg, std::map<int, int> &labelinfo)
    std::vector<int> labels;
    std::vector<int> numhists;
 
-   for(std::map<int,int>::const_iterator it = labelinfo.begin(); it != labelinfo.end(); it++)
+   for(std::map<int,int>::const_iterator it = labelinfo.begin(); it != labelinfo.end(); it++) {
       labels.push_back(it->first);
       numhists.push_back(it->second);
    }
