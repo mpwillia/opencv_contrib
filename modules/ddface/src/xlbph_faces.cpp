@@ -484,13 +484,13 @@ void xLBPH::test() {
 
     printf(" - modelExists\n");
     checkBool(true, _model.exists());
-    checkBool(true, moodmodel.exists());
+    checkBool(true, goodmodel.exists());
     checkBool(false, badmodel.exists());
     checkBool(true, badmodel2.exists());
     printf("\n");
 
     printf(" - isValidModel\n");
-    checkBool(true, _model.isValidModel();
+    checkBool(true, _model.isValidModel());
     checkBool(true, goodmodel.isValidModel());
     checkBool(false, badmodel.isValidModel());
     checkBool(false, badmodel2.isValidModel());
