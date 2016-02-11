@@ -286,10 +286,10 @@ AlgSettings ModelStorage::getAlgSettings() const {
 
    AlgSettings alg;
 
-   infofile["radius"] >> alg.radius;
-   infofile["neighbors"] >> alg.neighbors;
-   infofile["grid_x"] >> alg.grid_x;
-   infofile["grid_y"] >> alg.grid_y;
+   metadata["radius"] >> alg.radius;
+   metadata["neighbors"] >> alg.neighbors;
+   metadata["grid_x"] >> alg.grid_x;
+   metadata["grid_y"] >> alg.grid_y;
 
    metadata.release();
    
@@ -306,7 +306,7 @@ bool ModelStorage::getLabelInfo(std::map<int,int> &labelinfo) const {
 
    std::vector<int> labels;
    std::vector<int> numhists;
-   FileNode label_info = infofile["label_info"];
+   FileNode label_info = metadata["label_info"];
    label_info["labels"] >> labels;
    label_info["numhists"] >> numhists;
 
@@ -328,15 +328,15 @@ bool ModelStorage::loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) 
    }
    
    // load alg settings
-   infofile["radius"] >> alg.radius;
-   infofile["neighbors"] >> alg.neighbors;
-   infofile["grid_x"] >> alg.grid_x;
-   infofile["grid_y"] >> alg.grid_y;
+   metadata["radius"] >> alg.radius;
+   metadata["neighbors"] >> alg.neighbors;
+   metadata["grid_x"] >> alg.grid_x;
+   metadata["grid_y"] >> alg.grid_y;
 
    // load label info
    std::vector<int> labels;
    std::vector<int> numhists;
-   FileNode label_info = infofile["label_info"];
+   FileNode label_info = metadata["label_info"];
    label_info["labels"] >> labels;
    label_info["numhists"] >> numhists;
 
@@ -344,6 +344,9 @@ bool ModelStorage::loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) 
    for(size_t idx = 0; idx < labels.size(); idx++) {
      labelinfo[labels.at((int)idx)] = numhists.at((int)idx);
    }
+
+   metadata.release();
+   return true;
 } 
 
 //------------------------------------------------------------------------------
