@@ -440,6 +440,7 @@ String ModelStorage::getLabelClustersFile(int label) const {
 // Histogram Read/Write 
 //------------------------------------------------------------------------------
 
+/*(
 // Wrapper functions for load/save/updating histograms for specific labels
 bool ModelStorage::loadHistograms(int label, std::vector<Mat> &histograms, int histSize) const {
     return readHistograms(getHistogramFile(label), histograms, histSize);
@@ -491,7 +492,7 @@ bool ModelStorage::writeHistograms(const String &filename, const std::vector<Mat
     fclose(fp);
     return true;
 }
-
+*/
 
 //------------------------------------------------------------------------------
 // ModelStorage Test Function

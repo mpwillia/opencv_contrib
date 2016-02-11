@@ -528,7 +528,7 @@ void xLBPH::test() {
 
     printf(" - getLabelInfo\n");
     std::map<int,int> testlabelinfo1;
-    getLabelInfo(testlabelinfo1);
+    testmodel.getLabelInfo(testlabelinfo1);
     printf("testlabelinfo1:\n");
     for(std::map<int,int>::const_iterator it = testlabelinfo1.begin(); it != testlabelinfo1.end(); it++) {
         printf("  [%d] = %d\n", it->first, it->second)
@@ -538,7 +538,7 @@ void xLBPH::test() {
     printf(" - loadMetadata\n");
     AlgSettings alg2;
     std::map<int,int> testlabelinfo2;
-    loadMetadata(alg2, testlabelinfo2);
+    testmodel.loadMetadata(alg2, testlabelinfo2);
     printf("alg2.: {%d, %d, %d, %d}\n", alg2.radius, alg2.neighbors, alg2.grid_x, alg2.grid_y);
     for(std::map<int,int>::const_iterator it = testlabelinfo2.begin(); it != testlabelinfo2.end(); it++) {
         printf("  [%d] = %d\n", it->first, it->second)
