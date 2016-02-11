@@ -65,13 +65,18 @@ public:
    bool writeMetadata(AlgSettings alg, std::vector<int> &labels, std::vector<int> &numhists) const;
    bool writeMetadata(AlgSettings alg, std::map<int, int> &labelinfo) const;
 
+   // Model Reading/Parsing
+   AlgSettings getAlgSettings() const;
+   bool getLabelInfo(std::map<int,int> &labelinfo) const;
+   bool loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) const;
+
    // Model Information
    bool isValidModel() const;
    bool exists() const;
    String getPath() const;
    String getName() const;
 
-   // Model File Getters - New
+   // Model File Getters
    String getMetadataFile() const;
    String getLabelsDir() const;
    String getLabelAveragesFile() const;
@@ -80,19 +85,14 @@ public:
    String getLabelClusterAveragesFile(int label) const;
    String getLabelClustersFile(int label) const;
 
-
-   // Model File Getters - Old
-   String getInfoFile() const;
-   String getHistogramsDir() const;
-   String getHistogramFile(int label) const;
-   String getHistogramAveragesFile() const;
-
    // Reading/Writing Histograms
    bool loadHistograms(int label, std::vector<Mat> &histograms, int histSize) const;
    bool saveHistograms(int label, const std::vector<Mat> &histograms, int histSize) const;
    bool updateHistograms(int label, const std::vector<Mat> &histograms, int histSize) const;
    bool readHistograms(const String &filename, std::vector<Mat> &histograms, int histSize) const;
    bool writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists, int histSize) const;
+
+
 
 };
 

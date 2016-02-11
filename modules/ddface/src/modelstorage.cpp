@@ -240,7 +240,7 @@ bool ModelStorage::writeMetadata(AlgSettings alg, std::vector<int> &labels, std:
 
    FileStorage metadata(getMetadataFile(), FileStorage::WRITE);
    if(!metadata.isOpened()) {
-      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for reading!");
+      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for writing!");
       return false;
    }
 
@@ -272,6 +272,78 @@ bool ModelStorage::writeMetadata(AlgSettings alg, std::map<int, int> &labelinfo)
    }
 
    return writeMetadata(alg, labels, numhists);
+} 
+
+//------------------------------------------------------------------------------
+// Model Reading/Parsing 
+//------------------------------------------------------------------------------
+AlgSettings ModelStorage::getAlgSettings() const {
+    
+   FileStorage metadata(getMetadataFile(), FileStorage::READ);
+   if(!metadata.isOpened()) {
+      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for writing!");
+   }
+
+   AlgSettings alg;
+
+   infofile["radius"] >> alg.radius;
+   infofile["neighbors"] >> alg.neighbors;
+   infofile["grid_x"] >> alg.grid_x;
+   infofile["grid_y"] >> alg.grid_y;
+
+   metadata.release();
+   
+   return alg;
+} 
+
+bool ModelStorage::getLabelInfo(std::map<int,int> &labelinfo) const {
+    
+   FileStorage metadata(getMetadataFile(), FileStorage::READ);
+   if(!metadata.isOpened()) {
+      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for writing!");
+      return false;
+   }
+
+   std::vector<int> labels;
+   std::vector<int> numhists;
+   FileNode label_info = infofile["label_info"];
+   label_info["labels"] >> labels;
+   label_info["numhists"] >> numhists;
+
+   CV_Assert(labels.size() == numhists.size());
+   for(size_t idx = 0; idx < labels.size(); idx++) {
+     labelinfo[labels.at((int)idx)] = numhists.at((int)idx);
+   }
+
+   metadata.release();
+   return true;
+} 
+
+bool ModelStorage::loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) const {
+    
+   FileStorage metadata(getMetadataFile(), FileStorage::READ);
+   if(!metadata.isOpened()) {
+      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for writing!");
+      return false;
+   }
+   
+   // load alg settings
+   infofile["radius"] >> alg.radius;
+   infofile["neighbors"] >> alg.neighbors;
+   infofile["grid_x"] >> alg.grid_x;
+   infofile["grid_y"] >> alg.grid_y;
+
+   // load label info
+   std::vector<int> labels;
+   std::vector<int> numhists;
+   FileNode label_info = infofile["label_info"];
+   label_info["labels"] >> labels;
+   label_info["numhists"] >> numhists;
+
+   CV_Assert(labels.size() == numhists.size());
+   for(size_t idx = 0; idx < labels.size(); idx++) {
+     labelinfo[labels.at((int)idx)] = numhists.at((int)idx);
+   }
 } 
 
 //------------------------------------------------------------------------------
@@ -358,27 +430,6 @@ String ModelStorage::getLabelClusterAveragesFile(int label) const {
 
 String ModelStorage::getLabelClustersFile(int label) const {
    return getLabelDir(label) + "/" + getLabelFilePrefix(label) + "-clusters.yml";
-} 
-
-//------------------------------------------------------------------------------
-// Model File Getters Functions - OLD
-//------------------------------------------------------------------------------
-String ModelStorage::getInfoFile() const {
-   return getPath() + "/" + getName() + ".yml";
-} 
-
-String ModelStorage::getHistogramsDir() const {
-   return getPath() + "/" + getName() + "-histograms";
-} 
-
-String ModelStorage::getHistogramFile(int label) const {
-    char labelstr[16];
-    sprintf(labelstr, "%d", label);
-    return getHistogramsDir() + "/" + getName() + "-" + labelstr + ".bin";
-} 
-
-String ModelStorage::getHistogramAveragesFile() const {
-    return getHistogramsDir() + "/" + getName() + "-averages.bin";
 } 
 
 
