@@ -19,6 +19,7 @@ private:
 
    String _modelpath;
    String _modelname;
+   AlgSettings _alg;
 
    // Basic Collection of Generic File/Directory Functions
    bool isDirectory(const String &filepath) const;
@@ -36,11 +37,18 @@ private:
    
    String intToString(int num) const;
    String getLabelFilePrefix(int label) const;
+   int getHistogramSize() const;
 
 public:
 
-   ModelStorage(String path) {
+   ModelStorage(String path, int radius, int neighbors, int grid_x, int grid_y) {
       setModelPath(path);
+      setAlgSettings(radius, neighbors, grid_x, grid_y);
+   };
+
+   ModelStorage(String path, AlgSettings alg) {
+      setModelPath(path);
+      setAlgSettings(alg);
    };
 
    
@@ -61,13 +69,16 @@ public:
     */
 
    // Model Creation/Manipulation
+   void setAlgSettings(int radius, int neighbors, int grid_x, int grid_y);
+   void setAlgSettings(AlgSettings alg);
+
    bool create(bool overwrite = false) const;
    bool writeMetadata(AlgSettings alg, std::vector<int> &labels, std::vector<int> &numhists) const;
    bool writeMetadata(AlgSettings alg, std::map<int, int> &labelinfo) const;
 
    // Model Reading/Parsing
-   AlgSettings getAlgSettings() const;
-   bool getLabelInfo(std::map<int,int> &labelinfo) const;
+   AlgSettings loadAlgSettings() const;
+   bool loadLabelInfo(std::map<int,int> &labelinfo) const;
    bool loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) const;
 
    // Model Information
@@ -75,6 +86,7 @@ public:
    bool exists() const;
    String getPath() const;
    String getName() const;
+   AlgSettings getAlgSettings() const;
 
    // Model File Getters
    String getMetadataFile() const;

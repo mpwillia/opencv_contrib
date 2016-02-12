@@ -214,7 +214,7 @@ public:
                 _radius(radius_),
                 _neighbors(neighbors_),
                 _threshold(threshold),
-                _model(modelpath) {
+                _model(modelpath, radius_, neighbors_, gridx, gridy) {
 
         _numThreads = 16;
         _algToUse = 0;
@@ -458,13 +458,13 @@ void xLBPH::test() {
     printf("\n\n");
 
     String goodpath = "/dd-data/models/xlbph-test";
-    ModelStorage goodmodel(goodpath);
+    ModelStorage goodmodel(goodpath, 1, 8, 12, 12);
 
     String badpath = "/dd-data/models/xlbph-test-bad-model";
-    ModelStorage badmodel(badpath);
+    ModelStorage badmodel(badpath, 1, 8, 12, 12);
 
     String badpath2 = "/dd-data/videos/aws-test";
-    ModelStorage badmodel2(badpath2);
+    ModelStorage badmodel2(badpath2, 1, 8, 12, 12);
 
     printf(" -==## Testing Model Storage Member Functions ##==- \n");
     printf("== Testing Model Information Functions == \n");

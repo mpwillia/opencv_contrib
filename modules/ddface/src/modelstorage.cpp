@@ -198,6 +198,20 @@ void ModelStorage::setModelPath(String path) {
    _modelname = getFileName(_modelpath);
 }
 
+void ModelStorage::setAlgSettings(int radius, int neighbors, int grid_x, int grid_y) {
+   _alg.radius = radius;
+   _alg.neighbors = neighbors;
+   _alg.grid_x = grid_x;
+   _alg.grid_y = grid_y;
+} 
+
+void ModelStorage::setAlgSettings(AlgSettings alg) {
+   _alg.radius = alg.radius;
+   _alg.neighbors = alg.neighbors;
+   _alg.grid_x = alg.grid_x;
+   _alg.grid_y = alg.grid_y;;
+} 
+
 bool ModelStorage::create(bool overwrite) const { 
    // check if a model already exists at our _modelpath
    if(exists()) {
@@ -277,7 +291,7 @@ bool ModelStorage::writeMetadata(AlgSettings alg, std::map<int, int> &labelinfo)
 //------------------------------------------------------------------------------
 // Model Reading/Parsing 
 //------------------------------------------------------------------------------
-AlgSettings ModelStorage::getAlgSettings() const {
+AlgSettings ModelStorage::loadAlgSettings() const {
     
    FileStorage metadata(getMetadataFile(), FileStorage::READ);
    if(!metadata.isOpened()) {
@@ -291,12 +305,14 @@ AlgSettings ModelStorage::getAlgSettings() const {
    metadata["grid_x"] >> alg.grid_x;
    metadata["grid_y"] >> alg.grid_y;
 
+   setAlgSettings(alg);
+
    metadata.release();
    
    return alg;
 } 
 
-bool ModelStorage::getLabelInfo(std::map<int,int> &labelinfo) const {
+bool ModelStorage::loadLabelInfo(std::map<int,int> &labelinfo) const {
     
    FileStorage metadata(getMetadataFile(), FileStorage::READ);
    if(!metadata.isOpened()) {
@@ -332,6 +348,8 @@ bool ModelStorage::loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) 
    metadata["neighbors"] >> alg.neighbors;
    metadata["grid_x"] >> alg.grid_x;
    metadata["grid_y"] >> alg.grid_y;
+
+   setAlgSettings(alg);
 
    // load label info
    std::vector<int> labels;
@@ -393,6 +411,15 @@ String ModelStorage::getPath() const {
 String ModelStorage::getName() const {
    return _modelname; 
 }
+
+AlgSettings ModelStorage::getAlgSettings() const {
+   return _alg;
+}
+
+// Returns the size of the histograms in this model
+int ModelStorage::getHistogramSize() const {
+   return (int)(std::pow(2.0, static_cast<double>(_alg.neighbors)) * _alg.grid_x * _alg.grid_y);
+} 
 
 //------------------------------------------------------------------------------
 // Model File Getters Functions - NEW
@@ -627,6 +654,18 @@ void ModelStorage::test() const {
    for(String s : contents)
       printf("\t\"%s\"\n", s.c_str());
    printf("\n");
+
+   
+   printf(" - getAlgSettings\n");
+   AlgSettings alg = getAlgSettings();
+   printf("radius = %d\n", alg.radius);
+   printf("neighbors = %d\n", alg.neighbors);
+   printf("grid_x = %d\n", alg.grid_x);
+   printf("grid_y = %d\n", alg.grid_y);
+   printf("\n");
+
+   printf(" - getHistogramSize\n");
+   printf("histsize = %d\n", getHistogramSize());
 
    printf("\n");
    printf(" !! End of Utility Functions Tests !!\n");
