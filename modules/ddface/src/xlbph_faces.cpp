@@ -238,7 +238,7 @@ public:
                 _radius(radius_),
                 _neighbors(neighbors_),
                 _threshold(threshold),
-                _model(modelpath, radius_, neighbors_, girdx, gridy) {
+                _model(modelpath, radius_, neighbors_, gridx, gridy) {
         _numThreads = 16;
         _algToUse = 0;
         _useClusters = true;
@@ -504,7 +504,7 @@ void xLBPH::test() {
 
     printf("== Testing Model Creation/Manipulation Functions == \n");
     String testpath = "/dd-data/models/xlbph-model-storage-test";
-    ModelStorage testmodel(testpath, 1, 8, 12, 12);
+    ModelStorage testmodel(testpath, -1, -1, -1, -1);
 
     printf(" - create\n");
     testmodel.create();
@@ -518,17 +518,27 @@ void xLBPH::test() {
     testlabelinfo[4] = 44;
     testlabelinfo[5] = 55;
 
+    printf(" - getAlgSettings - pre write/load\n");
+    AlgSettings alg11 = testmodel.loadAlgSettings();
+    printf("alg11.: {%d, %d, %d, %d}\n", alg11.radius, alg11.neighbors, alg11.grid_x, alg11.grid_y);
+    printf("\n");
+
     printf(" - writeMetadata\n");
     testmodel.writeMetadata(testalg, testlabelinfo);
 
-    printf(" - getAlgSettings\n");
-    AlgSettings alg1 = testmodel.getAlgSettings();
+    printf(" - loadAlgSettings\n");
+    AlgSettings alg1 = testmodel.loadAlgSettings();
     printf("alg1.: {%d, %d, %d, %d}\n", alg1.radius, alg1.neighbors, alg1.grid_x, alg1.grid_y);
+    printf("\n");
+
+    printf(" - getAlgSettings - post write/load\n");
+    AlgSettings alg12 = testmodel.loadAlgSettings();
+    printf("alg12.: {%d, %d, %d, %d}\n", alg12.radius, alg12.neighbors, alg12.grid_x, alg12.grid_y);
     printf("\n");
 
     printf(" - getLabelInfo\n");
     std::map<int,int> testlabelinfo1;
-    testmodel.getLabelInfo(testlabelinfo1);
+    testmodel.loadLabelInfo(testlabelinfo1);
     printf("testlabelinfo1:\n");
     for(std::map<int,int>::const_iterator it = testlabelinfo1.begin(); it != testlabelinfo1.end(); it++) {
         printf("  [%d] = %d\n", it->first, it->second);
