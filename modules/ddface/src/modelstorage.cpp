@@ -291,7 +291,7 @@ bool ModelStorage::writeMetadata(AlgSettings alg, std::map<int, int> &labelinfo)
 //------------------------------------------------------------------------------
 // Model Reading/Parsing 
 //------------------------------------------------------------------------------
-AlgSettings ModelStorage::loadAlgSettings() const {
+AlgSettings ModelStorage::loadAlgSettings() {
     
    FileStorage metadata(getMetadataFile(), FileStorage::READ);
    if(!metadata.isOpened()) {
@@ -335,7 +335,7 @@ bool ModelStorage::loadLabelInfo(std::map<int,int> &labelinfo) const {
    return true;
 } 
 
-bool ModelStorage::loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) const {
+bool ModelStorage::loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) {
     
    FileStorage metadata(getMetadataFile(), FileStorage::READ);
    if(!metadata.isOpened()) {
