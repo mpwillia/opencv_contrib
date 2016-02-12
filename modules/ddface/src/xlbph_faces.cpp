@@ -238,7 +238,7 @@ public:
                 _radius(radius_),
                 _neighbors(neighbors_),
                 _threshold(threshold),
-                _model(modelpath) {
+                _model(modelpath, radius_, neighbors_, girdx, gridy) {
         _numThreads = 16;
         _algToUse = 0;
         _useClusters = true;
@@ -504,7 +504,7 @@ void xLBPH::test() {
 
     printf("== Testing Model Creation/Manipulation Functions == \n");
     String testpath = "/dd-data/models/xlbph-model-storage-test";
-    ModelStorage testmodel(testpath);
+    ModelStorage testmodel(testpath, 1, 8, 12, 12);
 
     printf(" - create\n");
     testmodel.create();
