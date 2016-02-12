@@ -77,9 +77,9 @@ public:
    bool writeMetadata(AlgSettings alg, std::map<int, int> &labelinfo) const;
 
    // Model Reading/Parsing
-   AlgSettings loadAlgSettings() const;
+   AlgSettings loadAlgSettings();
    bool loadLabelInfo(std::map<int,int> &labelinfo) const;
-   bool loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) const;
+   bool loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo);
 
    // Model Information
    bool isValidModel() const;
