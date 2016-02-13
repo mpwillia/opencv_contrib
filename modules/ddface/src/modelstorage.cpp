@@ -295,7 +295,7 @@ AlgSettings ModelStorage::loadAlgSettings() {
     
    FileStorage metadata(getMetadataFile(), FileStorage::READ);
    if(!metadata.isOpened()) {
-      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for writing!");
+      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for reading!");
    }
 
    AlgSettings alg;
@@ -316,7 +316,7 @@ bool ModelStorage::loadLabelInfo(std::map<int,int> &labelinfo) const {
     
    FileStorage metadata(getMetadataFile(), FileStorage::READ);
    if(!metadata.isOpened()) {
-      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for writing!");
+      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for reading!");
       return false;
    }
 
@@ -339,7 +339,7 @@ bool ModelStorage::loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) 
     
    FileStorage metadata(getMetadataFile(), FileStorage::READ);
    if(!metadata.isOpened()) {
-      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for writing!");
+      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for reading!");
       return false;
    }
    

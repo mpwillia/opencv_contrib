@@ -519,7 +519,7 @@ void xLBPH::test() {
     testlabelinfo[5] = 55;
 
     printf(" - getAlgSettings - pre write/load\n");
-    AlgSettings alg11 = testmodel.loadAlgSettings();
+    AlgSettings alg11 = testmodel.getAlgSettings();
     printf("alg11.: {%d, %d, %d, %d}\n", alg11.radius, alg11.neighbors, alg11.grid_x, alg11.grid_y);
     printf("\n");
 
@@ -532,7 +532,7 @@ void xLBPH::test() {
     printf("\n");
 
     printf(" - getAlgSettings - post write/load\n");
-    AlgSettings alg12 = testmodel.loadAlgSettings();
+    AlgSettings alg12 = testmodel.getAlgSettings();
     printf("alg12.: {%d, %d, %d, %d}\n", alg12.radius, alg12.neighbors, alg12.grid_x, alg12.grid_y);
     printf("\n");
 
