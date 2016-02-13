@@ -340,7 +340,7 @@ bool ModelStorage::loadLabelInfo(std::map<int,int> &labelinfo) const {
 } 
 */
 
-bool ModelStorage::loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) {
+void ModelStorage::loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) {
  
    if(!fileExists(getMetadataFile())) {
       CV_Error(Error::StsError, "File '"+getMetadataFile()+"' doesn't exist; malformed model!");
