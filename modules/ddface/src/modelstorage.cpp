@@ -412,7 +412,7 @@ bool ModelStorage::isValidModel() const {
    } 
 
    // we have to have a metadata file, without it model is useless
-   if(!isRegularFile(getMetadatafile())) {
+   if(!isRegularFile(getMetadataFile())) {
       return false; 
    } 
 
