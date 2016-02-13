@@ -34,10 +34,10 @@ private:
    // Model Creation/Manipulation
    void setModelPath(String path);
    bool checkModel(const String &name, const String &path) const;
-   
+
+   // Utility Functions for File Paths
    String intToString(int num) const;
    String getLabelFilePrefix(int label) const;
-   int getHistogramSize() const;
 
 public:
 
@@ -72,14 +72,15 @@ public:
    void setAlgSettings(int radius, int neighbors, int grid_x, int grid_y);
    void setAlgSettings(AlgSettings alg);
 
+   // Model Writing
    bool create(bool overwrite = false) const;
    bool writeMetadata(AlgSettings alg, std::vector<int> &labels, std::vector<int> &numhists) const;
    bool writeMetadata(AlgSettings alg, std::map<int, int> &labelinfo) const;
 
-   // Model Reading/Parsing
-   AlgSettings loadAlgSettings();
-   bool loadLabelInfo(std::map<int,int> &labelinfo) const;
-   bool loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo);
+   // Model Reading 
+   //AlgSettings loadAlgSettings();
+   //bool loadLabelInfo(std::map<int,int> &labelinfo) const; 
+   void loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo);
 
    // Model Information
    bool isValidModel() const;
@@ -87,6 +88,7 @@ public:
    String getPath() const;
    String getName() const;
    AlgSettings getAlgSettings() const;
+   int getHistogramSize() const;
 
    // Model File Getters
    String getMetadataFile() const;

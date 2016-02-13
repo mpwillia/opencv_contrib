@@ -519,41 +519,31 @@ void xLBPH::test() {
     testlabelinfo[5] = 55;
 
     printf(" - getAlgSettings - pre write/load\n");
-    AlgSettings alg11 = testmodel.getAlgSettings();
-    printf("alg11.: {%d, %d, %d, %d}\n", alg11.radius, alg11.neighbors, alg11.grid_x, alg11.grid_y);
+    AlgSettings algPreLoad = testmodel.getAlgSettings();
+    printf("algPreLoad.: {%d, %d, %d, %d}\n", algPreLoad.radius, algPreLoad.neighbors, algPreLoad.grid_x, algPreLoad.grid_y);
     printf("\n");
 
     printf(" - writeMetadata\n");
     testmodel.writeMetadata(testalg, testlabelinfo);
-
-    printf(" - loadAlgSettings\n");
-    AlgSettings alg1 = testmodel.loadAlgSettings();
-    printf("alg1.: {%d, %d, %d, %d}\n", alg1.radius, alg1.neighbors, alg1.grid_x, alg1.grid_y);
-    printf("\n");
-
-    printf(" - getAlgSettings - post write/load\n");
-    AlgSettings alg12 = testmodel.getAlgSettings();
-    printf("alg12.: {%d, %d, %d, %d}\n", alg12.radius, alg12.neighbors, alg12.grid_x, alg12.grid_y);
-    printf("\n");
-
-    printf(" - getLabelInfo\n");
-    std::map<int,int> testlabelinfo1;
-    testmodel.loadLabelInfo(testlabelinfo1);
-    printf("testlabelinfo1:\n");
-    for(std::map<int,int>::const_iterator it = testlabelinfo1.begin(); it != testlabelinfo1.end(); it++) {
-        printf("  [%d] = %d\n", it->first, it->second);
-    }
-    printf("\n");
+    
 
     printf(" - loadMetadata\n");
-    AlgSettings alg2;
-    std::map<int,int> testlabelinfo2;
-    testmodel.loadMetadata(alg2, testlabelinfo2);
-    printf("alg2.: {%d, %d, %d, %d}\n", alg2.radius, alg2.neighbors, alg2.grid_x, alg2.grid_y);
-    for(std::map<int,int>::const_iterator it = testlabelinfo2.begin(); it != testlabelinfo2.end(); it++) {
+    AlgSettings algLoad;
+    std::map<int,int> testlabelinfo;
+    testmodel.loadMetadata(algLoad, testlabelinfo);
+    printf("algLoad.: {%d, %d, %d, %d}\n", algLoad.radius, algLoad.neighbors, algLoad.grid_x, algLoad.grid_y);
+    printf("testlabelinfo:\n");
+    for(std::map<int,int>::const_iterator it = testlabelinfo.begin(); it != testlabelinfo.end(); it++) {
         printf("  [%d] = %d\n", it->first, it->second);
     }
     printf("\n");
+
+
+    printf(" - getAlgSettings - post write/load\n");
+    AlgSettings algPostLoad = testmodel.getAlgSettings();
+    printf("algPostLoad.: {%d, %d, %d, %d}\n", algPostLoad.radius, algPostLoad.neighbors, algPostLoad.grid_x, algPostLoad.grid_y);
+    printf("\n");
+
 
     printf("\n");
     printf(" !! End of Member Functions Tests !!\n");

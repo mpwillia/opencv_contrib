@@ -289,8 +289,10 @@ bool ModelStorage::writeMetadata(AlgSettings alg, std::map<int, int> &labelinfo)
 } 
 
 //------------------------------------------------------------------------------
-// Model Reading/Parsing 
+// Model Reading 
 //------------------------------------------------------------------------------
+
+/*
 AlgSettings ModelStorage::loadAlgSettings() {
     
    FileStorage metadata(getMetadataFile(), FileStorage::READ);
@@ -311,7 +313,9 @@ AlgSettings ModelStorage::loadAlgSettings() {
    
    return alg;
 } 
+*/
 
+/*
 bool ModelStorage::loadLabelInfo(std::map<int,int> &labelinfo) const {
     
    FileStorage metadata(getMetadataFile(), FileStorage::READ);
@@ -334,13 +338,17 @@ bool ModelStorage::loadLabelInfo(std::map<int,int> &labelinfo) const {
    metadata.release();
    return true;
 } 
+*/
 
 bool ModelStorage::loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) {
-    
+ 
+   if(!fileExists(getMetadataFile())) {
+      CV_Error(Error::StsError, "File '"+getMetadataFile()+"' doesn't exist; malformed model!");
+   } 
+
    FileStorage metadata(getMetadataFile(), FileStorage::READ);
    if(!metadata.isOpened()) {
       CV_Error(Error::StsError, "File '"+getMetadataFile()+"' can't be opened for reading!");
-      return false;
    }
    
    // load alg settings
@@ -364,7 +372,6 @@ bool ModelStorage::loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) 
    }
 
    metadata.release();
-   return true;
 } 
 
 //------------------------------------------------------------------------------
@@ -394,7 +401,22 @@ bool ModelStorage::isValidModel() const {
    if(!exists()) 
       return false;
    
-   return checkModel(_modelname, _modelpath);
+   // checks that all files in the model are prefixed with the model name
+   if(!checkModel(_modelname, _modelpath)) {
+      return false; 
+   } 
+
+   // we have to have a labels directory, even if it's empty
+   if(!isDirectory(getLabelsDir())) {
+      return false; 
+   } 
+
+   // we have to have a metadata file, without it model is useless
+   if(!isRegularFile(getMetadatafile())) {
+      return false; 
+   } 
+
+   return true; 
 } 
 
 // Returns true if the model already exists at it's _modelpath
