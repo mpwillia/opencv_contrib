@@ -126,8 +126,8 @@ private:
     int minLabelsToCheck = 10;
     double labelsToCheckRatio = 0.05;
 
-    int minClustersToCheck = 10;
-    double clustersToCheckRatio = 1.0;
+    int minClustersToCheck = 3;
+    double clustersToCheckRatio = 0.2;
 
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
 
@@ -544,6 +544,8 @@ void xLBPH::test() {
     printf("algPostLoad.: {%d, %d, %d, %d}\n", algPostLoad.radius, algPostLoad.neighbors, algPostLoad.grid_x, algPostLoad.grid_y);
     printf("\n");
 
+    
+    
 
     printf("\n");
     printf(" !! End of Member Functions Tests !!\n");

@@ -100,13 +100,11 @@ public:
    String getLabelClustersFile(int label) const;
 
    // Reading/Writing Histograms
-   /*
-   bool loadHistograms(int label, std::vector<Mat> &histograms, int histSize) const;
-   bool saveHistograms(int label, const std::vector<Mat> &histograms, int histSize) const;
-   bool updateHistograms(int label, const std::vector<Mat> &histograms, int histSize) const;
-   bool readHistograms(const String &filename, std::vector<Mat> &histograms, int histSize) const;
-   bool writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists, int histSize) const;
-   */
+   bool loadLabelHistograms(int label, std::vector<Mat> &histograms) const;
+   bool saveLabelHistograms(int label, const std::vector<Mat> &histograms) const;
+   bool updateLabelHistograms(int label, const std::vector<Mat> &histograms) const;
+   bool readHistograms(const String &filename, std::vector<Mat> &histograms) const;
+   bool writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const;
 
 
 

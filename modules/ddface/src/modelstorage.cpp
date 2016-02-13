@@ -489,33 +489,32 @@ String ModelStorage::getLabelClustersFile(int label) const {
 // Histogram Read/Write 
 //------------------------------------------------------------------------------
 
-/*(
 // Wrapper functions for load/save/updating histograms for specific labels
-bool ModelStorage::loadHistograms(int label, std::vector<Mat> &histograms, int histSize) const {
-    return readHistograms(getHistogramFile(label), histograms, histSize);
+bool ModelStorage::loadLabelHistograms(int label, std::vector<Mat> &histograms) const {
+    return readHistograms(getLabelHistogramFile(label), histograms);
 }
 
-bool ModelStorage::saveHistograms(int label, const std::vector<Mat> &histograms, int histSize) const {
-    return writeHistograms(getHistogramFile(label), histograms, false, histSize);
+bool ModelStorage::saveLabelHistograms(int label, const std::vector<Mat> &histograms) const {
+    return writeHistograms(getLabelHistogramFile(label), histograms, false);
 }
 
-bool ModelStorage::updateHistograms(int label, const std::vector<Mat> &histograms, int histSize) const {
-    return writeHistograms(getHistogramFile(label), histograms, true, histSize);
+bool ModelStorage::updateLabelHistograms(int label, const std::vector<Mat> &histograms) const {
+    return writeHistograms(getLabelHistogramFile(label), histograms, true);
 }
 
 
 // Main read/write functions for histograms
-bool ModelStorage::readHistograms(const String &filename, std::vector<Mat> &histograms, int histSize) const {
+bool ModelStorage::readHistograms(const String &filename, std::vector<Mat> &histograms) const {
     FILE *fp = fopen(filename.c_str(), "r");
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
         return false;
     }
     
-    float buffer[histSize];
-    while(fread(buffer, sizeof(float), histSize, fp) > 0) {
-        Mat hist = Mat::zeros(1, histSize, CV_32FC1);
-        memcpy(hist.ptr<float>(), buffer, histSize * sizeof(float));
+    float buffer[getHistogramSize()];
+    while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
+        Mat hist = Mat::zeros(1, getHistogramSize(), CV_32FC1);
+        memcpy(hist.ptr<float>(), buffer, getHistogramSize() * sizeof(float));
         histograms.push_back(hist);
     }
     fclose(fp);
@@ -523,25 +522,25 @@ bool ModelStorage::readHistograms(const String &filename, std::vector<Mat> &hist
 }
 
 
-bool ModelStorage::writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists, int histSize) const {
+bool ModelStorage::writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const {
     FILE *fp = fopen(filename.c_str(), (appendhists == true ? "a" : "w"));
     if(fp == NULL) {
         //std::cout << "cannot open file at '" << filename << "'\n";
         return false;
     }
 
-    float* buffer = new float[histSize * (int)histograms.size()];
+    float* buffer = new float[getHistogramSize() * (int)histograms.size()];
     for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
-        float* writeptr = buffer + ((int)sampleIdx * histSize);
-        memcpy(writeptr, histograms.at((int)sampleIdx).ptr<float>(), histSize * sizeof(float));
+        float* writeptr = buffer + ((int)sampleIdx * getHistogramSize());
+        memcpy(writeptr, histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
     }
-    fwrite(buffer, sizeof(float), histSize * (int)histograms.size(), fp);
+    fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
     delete buffer;
 
     fclose(fp);
     return true;
 }
-*/
+
 
 //------------------------------------------------------------------------------
 // ModelStorage Test Function
