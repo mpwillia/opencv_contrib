@@ -529,11 +529,11 @@ void xLBPH::test() {
 
     printf(" - loadMetadata\n");
     AlgSettings algLoad;
-    std::map<int,int> testlabelinfo;
-    testmodel.loadMetadata(algLoad, testlabelinfo);
+    std::map<int,int> testlabelinfoLoad;
+    testmodel.loadMetadata(algLoad, testlabelinfoLoad);
     printf("algLoad.: {%d, %d, %d, %d}\n", algLoad.radius, algLoad.neighbors, algLoad.grid_x, algLoad.grid_y);
-    printf("testlabelinfo:\n");
-    for(std::map<int,int>::const_iterator it = testlabelinfo.begin(); it != testlabelinfo.end(); it++) {
+    printf("testlabelinfoLoad:\n");
+    for(std::map<int,int>::const_iterator it = testlabelinfoLoad.begin(); it != testlabelinfoLoad.end(); it++) {
         printf("  [%d] = %d\n", it->first, it->second);
     }
     printf("\n");
