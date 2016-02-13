@@ -491,15 +491,15 @@ String ModelStorage::getLabelClustersFile(int label) const {
 
 // Wrapper functions for load/save/updating histograms for specific labels
 bool ModelStorage::loadLabelHistograms(int label, std::vector<Mat> &histograms) const {
-    return readHistograms(getLabelHistogramFile(label), histograms);
+    return readHistograms(getLabelHistogramsFile(label), histograms);
 }
 
 bool ModelStorage::saveLabelHistograms(int label, const std::vector<Mat> &histograms) const {
-    return writeHistograms(getLabelHistogramFile(label), histograms, false);
+    return writeHistograms(getLabelHistogramsFile(label), histograms, false);
 }
 
 bool ModelStorage::updateLabelHistograms(int label, const std::vector<Mat> &histograms) const {
-    return writeHistograms(getLabelHistogramFile(label), histograms, true);
+    return writeHistograms(getLabelHistogramsFile(label), histograms, true);
 }
 
 
