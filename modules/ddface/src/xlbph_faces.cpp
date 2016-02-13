@@ -126,8 +126,8 @@ private:
     int minLabelsToCheck = 10;
     double labelsToCheckRatio = 0.05;
 
-    int minClustersToCheck = 5;
-    double clustersToCheckRatio = 0.5;
+    int minClustersToCheck = 3;
+    double clustersToCheckRatio = 0.25;
 
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
 
@@ -812,6 +812,7 @@ void xLBPH::clusterHistograms() {
                                     mcl_expansion_power, 
                                     mcl_inflation_power, 
                                     mcl_prune_min};
+
         std::vector<clstr::cluster_t> labelClusters;
         clstr::clusterHistograms(_histograms[it.first], labelClusters, vars);
 
