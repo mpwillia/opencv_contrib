@@ -1627,6 +1627,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
                 for(size_t clusterIdx = 0; clusterIdx < cluster.size(); clusterIdx++) {
                    combinedClusters.push_back(cluster.at((int)clusterIdx));
                 }
+                printf(" - combinedClusters\n");
             }
 
             //printf(" - Pushing combined clusters to labelhists...\n");
