@@ -1527,6 +1527,8 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     );
     */
 
+    printf(" - averages\n");
+
     tbb::parallel_for_each(labels.begin(), labels.end(),
         [&bestlabels, &query, this](int label) {
             if(_histavgs.find(label) != _histavgs.end()) {
@@ -1592,6 +1594,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     tbb::parallel_for(0, numLabelsToCheck, 1, 
         [&](int i) {
 
+            printf(" - clusters part 1\n");
             int label = bestlabels.at(i).second;
             std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters = _clusters.at(label);
             tbb::concurrent_vector<std::pair<double, int>> clusterDists;
@@ -1611,6 +1614,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
             if(numClustersToCheck > (int)clusterDists.size())
                 numClustersToCheck = (int)clusterDists.size();
 
+            printf(" - clusters part 2\n");
             std::vector<Mat> combinedClusters;
             for(size_t bestIdx = 0; bestIdx < clusterDists.size() && (int)bestIdx < numClustersToCheck; bestIdx++) {
 
@@ -1627,6 +1631,8 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     //printf(" - Calculating distances for best clusters...\n");
    
     // check best labels by cluster
+
+    printf(" - organizing\n");
     tbb::concurrent_vector<std::pair<int, std::vector<double>>> labeldists;
     tbb::parallel_for_each(labelhists.begin(), labelhists.end(),
         [&labelhists, &labeldists, &query](std::pair<int, std::vector<Mat>> it) {
