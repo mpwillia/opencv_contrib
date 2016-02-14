@@ -126,8 +126,8 @@ private:
     int minLabelsToCheck = 10;
     double labelsToCheckRatio = 0.05;
 
-    int minClustersToCheck = 3;
-    double clustersToCheckRatio = 0.3;
+    int minClustersToCheck = 5;
+    double clustersToCheckRatio = 0.25;
 
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
 
@@ -1591,16 +1591,18 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     tbb::concurrent_vector<std::pair<int, std::vector<Mat>>> labelhists;
     tbb::parallel_for(0, numLabelsToCheck, 1, 
         [&](int i) {
+
             int label = bestlabels.at(i).second;
             std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters = _clusters.at(label);
             tbb::concurrent_vector<std::pair<double, int>> clusterDists;
+
             tbb::parallel_for(0, (int)labelClusters.size(), 1,
                 [&labelClusters, &clusterDists, &query](int clusterIdx) {
                     clusterDists.push_back(std::pair<double, int>(compareHist(labelClusters.at(clusterIdx).first, query, COMP_ALG), clusterIdx));
                 } 
             );
             std::sort(clusterDists.begin(), clusterDists.end());
-            
+
 
             // figure out how many labels to check
             int numClustersToCheck = (int)((int)clusterDists.size() * clustersToCheckRatio);
@@ -1611,6 +1613,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
 
             std::vector<Mat> combinedClusters;
             for(size_t bestIdx = 0; bestIdx < clusterDists.size() && (int)bestIdx < numClustersToCheck; bestIdx++) {
+
                 std::vector<Mat> cluster = labelClusters.at(clusterDists.at((int)bestIdx).second).second; 
                 for(size_t clusterIdx = 0; clusterIdx < cluster.size(); clusterIdx++) {
                    combinedClusters.push_back(cluster.at((int)clusterIdx));
@@ -1627,8 +1630,10 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     tbb::concurrent_vector<std::pair<int, std::vector<double>>> labeldists;
     tbb::parallel_for_each(labelhists.begin(), labelhists.end(),
         [&labelhists, &labeldists, &query](std::pair<int, std::vector<Mat>> it) {
+
             std::vector<Mat> hists = it.second;
             tbb::concurrent_vector<double> dists;
+
             tbb::parallel_for_each(hists.begin(), hists.end(), 
                 [&labeldists, &dists, &query](Mat hist) {
                     dists.push_back(compareHist(hist, query, COMP_ALG));
