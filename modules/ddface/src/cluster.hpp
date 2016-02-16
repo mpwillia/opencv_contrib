@@ -12,6 +12,7 @@ namespace cv { namespace clstr {
     struct cluster_vars {
         double cluster_tierStep;
         int cluster_numTiers;
+        int cluster_max_iterations;
 
         int mcl_iterations;
         int mcl_expansion_power;

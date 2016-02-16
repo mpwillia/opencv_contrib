@@ -105,7 +105,7 @@ namespace cv { namespace clstr {
         interpret_clusters(initial, idxClusters);
         
         int checkClusters = (int)idxClusters.size();
-        int iterations = vars.mcl_iterations;
+        int iterations = vars.cluster_max_iterations;
         int base = 7;
         bool makeLarger = (checkClusters < optimalClustersMin);
         for(int i = 0; i < iterations; i++) {

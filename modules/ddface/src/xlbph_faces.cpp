@@ -177,6 +177,7 @@ private:
     // Histogram Clustering - Settings
     double cluster_tierStep = 0.01; // Sets how large a tier is, default is 0.01 or 1%
     int cluster_numTiers = 10; // Sets how many tiers to keep, default is 10, or 10% max tier
+    int cluster_max_iterations = 5;
 
     // Markov Clustering Algorithm (MCL)- Settings
     /* Sets the number of MCL iterations, default is 10
@@ -310,9 +311,10 @@ void xLBPH::setUseClusters(bool flag) {
 }
 
 
-void xLBPH::setClusterSettings(double tierStep, int numTiers) {
+void xLBPH::setClusterSettings(double tierStep, int numTiers, int maxIters) {
     cluster_tierStep = tierStep;
     cluster_numTiers = numTiers;
+    cluster_max_iterations = maxIters;
 } 
 
 
@@ -808,6 +810,7 @@ void xLBPH::clusterHistograms() {
 
         clstr::cluster_vars vars = {cluster_tierStep, 
                                     cluster_numTiers, 
+                                    cluster_max_iterations,
                                     mcl_iterations, 
                                     mcl_expansion_power, 
                                     mcl_inflation_power, 
