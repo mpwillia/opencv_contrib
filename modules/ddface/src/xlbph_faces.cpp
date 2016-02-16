@@ -1622,21 +1622,24 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
             printf(" - clusters part 2\n");
             std::vector<Mat> combinedClusters;
             for(size_t bestIdx = 0; bestIdx < clusterDists.size() && (int)bestIdx < numClustersToCheck; bestIdx++) {
-
+                
+                printf(" - getting labelClustersIdx\n");
                 int labelClustersIdx = clusterDists.at((int)bestIdx).second;
                 printf(" - labelClustersIdx: %d\n", labelClustersIdx);
 
                 std::vector<Mat> cluster = labelClusters.at(labelClustersIdx).second; 
-                printf(" - cluster\n");
+                printf(" - got cluster\n");
 
                 for(size_t clusterIdx = 0; clusterIdx < cluster.size(); clusterIdx++) {
                    combinedClusters.push_back(cluster.at((int)clusterIdx));
                 }
-                printf(" - combinedClusters\n");
+                printf(" - set combinedClusters\n");
             }
 
             //printf(" - Pushing combined clusters to labelhists...\n");
             labelhists.push_back(std::pair<int, std::vector<Mat>>(label, combinedClusters));
+
+            printf(" - labelhist.push_back\n");
         }
     );
     //printf(" - Calculating distances for best clusters...\n");
