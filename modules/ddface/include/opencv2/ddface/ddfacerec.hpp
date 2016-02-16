@@ -51,7 +51,7 @@ public:
     CV_WRAP virtual void setNumThreads(int numThreads) = 0;
 
     CV_WRAP virtual void setMCLSettings(int numIters, int e, double r) = 0;
-    CV_WRAP virtual void setClusterSettings(double tierStep, int numTiers) = 0;
+    CV_WRAP virtual void setClusterSettings(double tierStep, int numTiers, int maxIters) = 0;
 
     CV_WRAP virtual void setUseClusters(bool flag) = 0;
 
