@@ -1592,9 +1592,10 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     }
     */
     
+    tbb::concurrent_vector<std::pair<int, std::vector<Mat>>> labelhists;
+
     // find best clusters
     try {
-        tbb::concurrent_vector<std::pair<int, std::vector<Mat>>> labelhists;
         tbb::parallel_for(0, numLabelsToCheck, 1, 
             [&](int i) {
 
