@@ -1597,11 +1597,13 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     tbb::parallel_for(0, numLabelsToCheck, 1, 
         [&](int i) {
 
-            printf(" - clusters part 1\n");
+            printf(" - clusters part 1 | i = %d\n", i);
             int label = bestlabels.at(i).second;
+            printf(" - clusters part 1 | label = %d\n", label);
             std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters = _clusters.at(label);
             tbb::concurrent_vector<std::pair<double, int>> clusterDists;
-
+            
+            printf(" - clusters part 1 parallel\n");
             tbb::parallel_for(0, (int)labelClusters.size(), 1,
                 [&labelClusters, &clusterDists, &query](int clusterIdx) {
                     clusterDists.push_back(std::pair<double, int>(compareHist(labelClusters.at(clusterIdx).first, query, COMP_ALG), clusterIdx));
