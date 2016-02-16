@@ -299,7 +299,7 @@ public:
     //--------------------------------------------------------------------------
     
     void setMCLSettings(int numIters, int e, double r);
-    void setClusterSettings(double tierStep, int numTiers);
+    void setClusterSettings(double tierStep, int numTiers, int maxIters);
 
     void setUseClusters(bool flag);
     void test();
