@@ -1646,7 +1646,8 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
         );
     }
     catch (const std::exception& e) {
-        std::cout << e.what();
+        printf("caught expection: \n");
+        std::cout << e.what() << "\n";
         std::exit(1);
     } 
 
