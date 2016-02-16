@@ -1599,15 +1599,16 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
         tbb::parallel_for(0, numLabelsToCheck, 1, 
             [&](int i) {
 
-                printf(" - %d: clusters part 1\n", i);
+                printf(" - %d: bestlabels.at\n", i);
                 int label = bestlabels.at(i).second;
-                printf(" - %d: clusters part 1 | label = %d\n", i, label);
+                printf(" - %d: label = %d | _clusters.at\n", i, label);
                 std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters = _clusters.at(label);
                 tbb::concurrent_vector<std::pair<double, int>> clusterDists;
                 
                 printf(" - %d: clusters part 1 parallel\n", i);
                 tbb::parallel_for(0, (int)labelClusters.size(), 1,
                     [&labelClusters, &clusterDists, &query](int clusterIdx) {
+                        printf(" - %d: clusterIdx = %d | labelClusters.at in clusterDists.push_back\n", i, clusterIdx);
                         clusterDists.push_back(std::pair<double, int>(compareHist(labelClusters.at(clusterIdx).first, query, COMP_ALG), clusterIdx));
                     } 
                 );
@@ -1621,27 +1622,25 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
                 if(numClustersToCheck > (int)clusterDists.size())
                     numClustersToCheck = (int)clusterDists.size();
 
-                printf(" - %d: clusters part 2\n", i);
                 std::vector<Mat> combinedClusters;
                 for(size_t bestIdx = 0; bestIdx < clusterDists.size() && (int)bestIdx < numClustersToCheck; bestIdx++) {
                     
-                    printf(" - %d: getting labelClustersIdx\n", i);
+                    printf(" - %d: bestIdx = %d | clusterDists.at\n", i, (int)bestIdx);
                     int labelClustersIdx = clusterDists.at((int)bestIdx).second;
-                    printf(" - %d: labelClustersIdx: %d\n", i, labelClustersIdx);
 
+                    printf(" - %d: bestIdx = %d | labelClustersIdx = %d | labelClusters.at\n", i, (int)bestIdx, labelClustersIdx);
                     std::vector<Mat> cluster = labelClusters.at(labelClustersIdx).second; 
-                    printf(" - %d: got cluster\n", i);
 
                     for(size_t clusterIdx = 0; clusterIdx < cluster.size(); clusterIdx++) {
+                        printf(" - %d: bestIdx = %d | clusterIdx = %d | cluster.at\n", i, (int)bestIdx, (int)clusterIdx);
                        combinedClusters.push_back(cluster.at((int)clusterIdx));
                     }
-                    printf(" - %d: set combinedClusters\n", i);
                 }
 
                 //printf(" - Pushing combined clusters to labelhists...\n");
                 labelhists.push_back(std::pair<int, std::vector<Mat>>(label, combinedClusters));
 
-                printf(" - %d: labelhist.push_back\n", i);
+                printf(" - %d: done\n", i);
             }
         );
     }
