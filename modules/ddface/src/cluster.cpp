@@ -126,7 +126,7 @@ namespace cv { namespace cluster {
                     break; 
                 } 
                 else {
-                    prevmat = mclmat; 
+                    mclmat.copyTo(prevmat);
                 }
             } 
 
