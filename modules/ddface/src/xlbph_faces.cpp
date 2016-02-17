@@ -1595,9 +1595,10 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     tbb::concurrent_vector<std::pair<int, std::vector<Mat>>> labelhists;
 
     // find best clusters
-    try {
-        tbb::parallel_for(0, numLabelsToCheck, 1, 
-            [&](int i) {
+    tbb::parallel_for(0, numLabelsToCheck, 1, 
+        [&](int i) {
+
+            try {
 
                 printf(" - %d: bestlabels.at\n", i);
                 int label = bestlabels.at(i).second;
@@ -1641,14 +1642,14 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
                 labelhists.push_back(std::pair<int, std::vector<Mat>>(label, combinedClusters));
 
                 printf(" - %d: done\n", i);
+
             }
-        );
-    }
-    catch (const std::exception& e) {
-        printf("caught expection: \n");
-        std::cout << e.what() << "\n";
-        std::exit(1);
-    } 
+            catch (const std::exception& e) {
+                printf("- %d: caught expection | %s \n", i, e.what());
+                std::exit(1);
+            } 
+        }
+    );
 
     //printf(" - Calculating distances for best clusters...\n");
    
