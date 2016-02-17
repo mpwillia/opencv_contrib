@@ -1591,7 +1591,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     */
     
     printf("_clusters keys:\n");
-    for(std::map<int, std::vector<clstr::cluster_t>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
+    for(std::map<int, std::vector<clstr::cluster_t>>::const_iterator it = _clusters.begin(); it != _clusters.end(); ++it) {
         printf("%d\n", it->first);
     }
     printf("\n");
