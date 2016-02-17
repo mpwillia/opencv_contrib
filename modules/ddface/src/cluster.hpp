@@ -6,7 +6,12 @@
 
 namespace cv { namespace cluster {
 
-    typedef std::pair<Mat, std::vector<Mat>> cluster_t;
+    // type of a single cluster
+    // Mat - average of all histograms in the cluster
+    // std::vector<Mat> - all histograms in the cluster
+    typedef std::pair<Mat, std::vector<Mat>> cluster_t; 
+
+    // set of indexes corresponding to the histograms in the cluster
     typedef std::set<int> idx_cluster_t;
 
     struct cluster_vars {

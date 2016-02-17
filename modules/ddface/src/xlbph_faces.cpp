@@ -829,8 +829,8 @@ void xLBPH::clusterHistograms() {
 
     });
 
-    for(std::map<int, cluster::cluster_t>::const_iterator it = _clusters.begin(); it != _clusters.end(); it++) {
-        if((int)it->second.size() <= 0)
+    for(std::map<int, std::vector<cluster::cluster_t>>::const_iterator it = _clusters.begin(); it != _clusters.end(); it++) {
+        if((int)(it->second).size() <= 0)
             CV_Error(Error::StsError, "Error clustering histograms for label %d - made zero clusters!", it->first);
     } 
 
