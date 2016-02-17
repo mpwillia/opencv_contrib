@@ -4,7 +4,7 @@
 
 #include "precomp.hpp"
 
-namespace cv { namespace clstr {
+namespace cv { namespace cluster {
 
     typedef std::pair<Mat, std::vector<Mat>> cluster_t;
     typedef std::set<int> idx_cluster_t;

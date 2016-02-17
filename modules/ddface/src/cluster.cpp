@@ -5,7 +5,7 @@
 
 #define COMP_ALG HISTCMP_CHISQR_ALT
 
-namespace cv { namespace clstr {
+namespace cv { namespace cluster {
 
     // Calculates the weights between each histogram and puts them in weights
     void calc_weights(Mat &dists, Mat &weights, double tierStep, int numTiers) {
@@ -53,6 +53,7 @@ namespace cv { namespace clstr {
 
     // Interprets a given MCL matrix as clusters
     void interpret_clusters(Mat &mclmat, std::vector<idx_cluster_t> &clusters) {
+
         //printf("\t\t\t - interpreting clusters...\n");
         // interpret clusters
         std::map<int, idx_cluster_t> clusters_map;
@@ -108,6 +109,7 @@ namespace cv { namespace clstr {
         int iterations = vars.cluster_max_iterations;
         int base = 7;
         bool makeLarger = (checkClusters < optimalClustersMin);
+
         for(int i = 0; i < iterations; i++) {
             if(checkClusters < optimalClustersMin && makeLarger)
                 r *= (base + 1.0 + i) / base; // need more clusters - larger r
@@ -118,7 +120,7 @@ namespace cv { namespace clstr {
 
             if(r <= 1)
                 break;
-        
+
 
             Mat mclmat;
             cluster_dists(dists, mclmat, r, vars);
@@ -152,7 +154,7 @@ namespace cv { namespace clstr {
                         dists.at<double>(i, j) = dist;
                         dists.at<double>(j, i) = dist;
                     } 
-               );
+                );
             } 
         );
         

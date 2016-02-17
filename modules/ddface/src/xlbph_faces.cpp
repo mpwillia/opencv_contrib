@@ -67,7 +67,7 @@ private:
     std::map<int, std::vector<Mat>> _histograms;
     std::map<int, Mat> _histavgs;
     std::map<int, Mat> _distmats;    
-    std::map<int, std::vector<clstr::cluster_t>> _clusters;
+    std::map<int, std::vector<cluster::cluster_t>> _clusters;
 
     // defines what prediction algorithm to use
     int _algToUse;
@@ -800,7 +800,7 @@ void xLBPH::clusterHistograms() {
     for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
         labels.push_back(it->first);
 
-    std::vector<std::pair<int, std::vector<clstr::cluster_t>>> allClusters;
+    std::vector<std::pair<int, std::vector<cluster::cluster_t>>> allClusters;
 
     int count = 0;
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(), 
@@ -808,7 +808,7 @@ void xLBPH::clusterHistograms() {
         
         std::cout << "Clustering histograms " << count++ << " / " << (int)_histograms.size() << "                                \r" << std::flush;
 
-        clstr::cluster_vars vars = {cluster_tierStep, 
+        cluster::cluster_vars vars = {cluster_tierStep, 
                                     cluster_numTiers, 
                                     cluster_max_iterations,
                                     mcl_iterations, 
@@ -816,8 +816,11 @@ void xLBPH::clusterHistograms() {
                                     mcl_inflation_power, 
                                     mcl_prune_min};
 
-        std::vector<clstr::cluster_t> labelClusters;
-        clstr::clusterHistograms(_histograms[it.first], labelClusters, vars);
+        std::vector<cluster::cluster_t> labelClusters;
+        cluster::clusterHistograms(_histograms[it.first], labelClusters, vars);
+
+        if((int)labelClusters.size() <= 0) 
+            CV_Error(Error::StsError, "Error clustering histograms for label %d - made zero clusters!", it.first);
 
         printf("Found %d clusters for label %d\n", labelClusters.size(), it.first);
 
@@ -1596,55 +1599,36 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     tbb::parallel_for(0, numLabelsToCheck, 1, 
         [&](int i) {
             
-            try {
+            int label = bestlabels.at(i).second;
+            std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters = _clusters.at(label);
+            tbb::concurrent_vector<std::pair<double, int>> clusterDists;
+            
+            tbb::parallel_for(0, (int)labelClusters.size(), 1,
+                [&i, &labelClusters, &clusterDists, &query](int clusterIdx) {
+                    clusterDists.push_back(std::pair<double, int>(compareHist(labelClusters.at(clusterIdx).first, query, COMP_ALG), clusterIdx));
+                } 
+            );
+            std::sort(clusterDists.begin(), clusterDists.end());
 
-                //printf(" - %d: bestlabels.at\n", i);
-                int label = bestlabels.at(i).second;
-                //printf(" - %d: label = %d | _clusters.at\n", i, label);
-                std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters = _clusters.at(label);
-                tbb::concurrent_vector<std::pair<double, int>> clusterDists;
+            // figure out how many labels to check
+            int numClustersToCheck = (int)((int)clusterDists.size() * clustersToCheckRatio);
+            if(numClustersToCheck < minClustersToCheck)
+                numClustersToCheck = minClustersToCheck;
+            if(numClustersToCheck > (int)clusterDists.size())
+                numClustersToCheck = (int)clusterDists.size();
+
+            std::vector<Mat> combinedClusters;
+            for(size_t bestIdx = 0; bestIdx < clusterDists.size() && (int)bestIdx < numClustersToCheck; bestIdx++) {
                 
-                //printf(" - %d: clusters part 1 parallel\n", i);
-                tbb::parallel_for(0, (int)labelClusters.size(), 1,
-                    [&i, &labelClusters, &clusterDists, &query](int clusterIdx) {
-                        //printf(" - %d: clusterIdx = %d | labelClusters.at in clusterDists.push_back\n", i, clusterIdx);
-                        clusterDists.push_back(std::pair<double, int>(compareHist(labelClusters.at(clusterIdx).first, query, COMP_ALG), clusterIdx));
-                    } 
-                );
-                std::sort(clusterDists.begin(), clusterDists.end());
+                int labelClustersIdx = clusterDists.at((int)bestIdx).second;
+                std::vector<Mat> cluster = labelClusters.at(labelClustersIdx).second; 
 
-
-                // figure out how many labels to check
-                int numClustersToCheck = (int)((int)clusterDists.size() * clustersToCheckRatio);
-                if(numClustersToCheck < minClustersToCheck)
-                    numClustersToCheck = minClustersToCheck;
-                if(numClustersToCheck > (int)clusterDists.size())
-                    numClustersToCheck = (int)clusterDists.size();
-
-                std::vector<Mat> combinedClusters;
-                for(size_t bestIdx = 0; bestIdx < clusterDists.size() && (int)bestIdx < numClustersToCheck; bestIdx++) {
-                    
-                    //printf(" - %d: bestIdx = %d | clusterDists.at\n", i, (int)bestIdx);
-                    int labelClustersIdx = clusterDists.at((int)bestIdx).second;
-
-                    //printf(" - %d: bestIdx = %d | labelClustersIdx = %d | labelClusters.at\n", i, (int)bestIdx, labelClustersIdx);
-                    std::vector<Mat> cluster = labelClusters.at(labelClustersIdx).second; 
-
-                    for(size_t clusterIdx = 0; clusterIdx < cluster.size(); clusterIdx++) {
-                        //printf(" - %d: bestIdx = %d | clusterIdx = %d | cluster.at\n", i, (int)bestIdx, (int)clusterIdx);
-                       combinedClusters.push_back(cluster.at((int)clusterIdx));
-                    }
+                for(size_t clusterIdx = 0; clusterIdx < cluster.size(); clusterIdx++) {
+                   combinedClusters.push_back(cluster.at((int)clusterIdx));
                 }
+            }
 
-                //printf(" - Pushing combined clusters to labelhists...\n");
-                labelhists.push_back(std::pair<int, std::vector<Mat>>(label, combinedClusters));
-
-                //printf(" - %d: done\n", i);
-            }            
-            catch (const std::exception &e) {
-                printf(" - %d: CAUGHT EXCEPTION | %s\n", i, e.what()); 
-                std::exit(1);
-            } 
+            labelhists.push_back(std::pair<int, std::vector<Mat>>(label, combinedClusters));
 
         }
     );
