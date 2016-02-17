@@ -1642,7 +1642,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
                 labelhists.push_back(std::pair<int, std::vector<Mat>>(label, combinedClusters));
 
                 printf(" - %d: done\n", i);
-            
+            }            
             catch (const std::exception &e) {
                 printf(" - %d: CAUGHT EXCEPTION | %s\n", i, e.what()); 
                 std::exit(1);
