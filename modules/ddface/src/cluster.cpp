@@ -94,22 +94,25 @@ namespace cv { namespace cluster {
         Mat initial;
         double r = vars.mcl_inflation_power;
         double r_dec = r - 1;
-        double multStep = 0.75;
+        double multStep = 0.8;
 
         cluster_dists(dists, initial, r, vars);
         interpret_clusters(initial, idxClusters);
         
         double clusterRatio = (int)idxClusters.size() / (double)optimalClusters;
         int iterations = vars.cluster_max_iterations;
-            
+
+        double r_used = r;
+
         if(clusterRatio < 1) {
             // want more clusters - larger r
             Mat prevmat;
             for(int i = 0; i < iterations; i++) {
                 r_dec *= (1 - multStep) + 1;
+                r_used = 1 + r_dec;
 
                 Mat mclmat;
-                cluster_dists(dists, mclmat, 1 + r_dec, vars);
+                cluster_dists(dists, mclmat, r_used, vars);
                 idxClusters.clear();
                 interpret_clusters(mclmat, idxClusters);
                 clusterRatio = (int)idxClusters.size() / (double)optimalClusters;
@@ -126,15 +129,17 @@ namespace cv { namespace cluster {
                 }
             } 
 
+            printf("Using r of %6.3f to get %3d clusters from %3d hists\n", r_used, (int)idxClusters.size(), dists.rows);
         } 
         else if(clusterRatio > 1) {
             // want fewer clusters - smaller r 
 
             for(int i = 0; i < iterations; i++) {
                 r_dec *= multStep;
+                r_used = 1 + r_dec;
 
                 Mat mclmat;
-                cluster_dists(dists, mclmat, 1 + r_dec, vars);
+                cluster_dists(dists, mclmat, r_used, vars);
                 idxClusters.clear();
                 interpret_clusters(mclmat, idxClusters);
                 clusterRatio = (int)idxClusters.size() / (double)optimalClusters;
@@ -143,6 +148,8 @@ namespace cv { namespace cluster {
                     break; 
                 } 
             } 
+
+            printf("Using r of %6.3f to get %3d clusters from %3d hists\n", r_used, (int)idxClusters.size(), dists.rows);
         } 
         
         /*
