@@ -819,8 +819,6 @@ void xLBPH::clusterHistograms() {
         std::vector<cluster::cluster_t> labelClusters;
         cluster::clusterHistograms(_histograms[it.first], labelClusters, vars);
 
-        if((int)labelClusters.size() <= 0) 
-            CV_Error(Error::StsError, "Error clustering histograms for label %d - made zero clusters!", it.first);
 
         printf("Found %d clusters for label %d\n", labelClusters.size(), it.first);
 
@@ -830,6 +828,11 @@ void xLBPH::clusterHistograms() {
         }
 
     });
+
+    for(std::map<int, cluster::cluster_t>::const_iterator it = _clusters.begin(); it != _clusters.end(); it++) {
+        if((int)it->second.size() <= 0)
+            CV_Error(Error::StsError, "Error clustering histograms for label %d - made zero clusters!", it->first);
+    } 
 
     printf("Finished clustering histograms for %d labels                                        \n", (int)_histograms.size());
 
