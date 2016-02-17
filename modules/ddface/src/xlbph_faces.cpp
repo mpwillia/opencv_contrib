@@ -1530,8 +1530,6 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     );
     */
 
-    printf(" - averages\n");
-
     tbb::parallel_for_each(labels.begin(), labels.end(),
         [&bestlabels, &query, this](int label) {
             if(_histavgs.find(label) != _histavgs.end()) {
@@ -1592,6 +1590,12 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     }
     */
     
+    printf("_clusters keys:\n");
+    for(std::map<int, std::vector<clstr::cluster_t>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
+        printf("%d\n", it->first);
+    }
+    printf("\n");
+
     tbb::concurrent_vector<std::pair<int, std::vector<Mat>>> labelhists;
 
     // find best clusters
