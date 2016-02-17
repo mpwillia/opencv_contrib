@@ -94,7 +94,7 @@ namespace cv { namespace cluster {
         Mat initial;
         double r = vars.mcl_inflation_power;
         double r_dec = r - 1;
-        double multStep = 0.9;
+        double multStep = 0.75;
 
         cluster_dists(dists, initial, r, vars);
         interpret_clusters(initial, idxClusters);
