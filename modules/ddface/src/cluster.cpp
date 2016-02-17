@@ -129,7 +129,7 @@ namespace cv { namespace cluster {
                 }
             } 
 
-            printf("Using r of %6.3f to get %3d clusters from %3d hists\n", r_used, (int)idxClusters.size(), dists.rows);
+            printf(" - Using r of %6.3f to get %3d clusters from %3d hists for a clusterRatio of %6.3f\n", r_used, (int)idxClusters.size(), dists.rows, clusterRatio);
         } 
         else if(clusterRatio > 1) {
             // want fewer clusters - smaller r 
@@ -149,7 +149,7 @@ namespace cv { namespace cluster {
                 } 
             } 
 
-            printf("Using r of %6.3f to get %3d clusters from %3d hists\n", r_used, (int)idxClusters.size(), dists.rows);
+            printf(" - Using r of %6.3f to get %3d clusters from %3d hists for a clusterRatio of %6.3f\n", r_used, (int)idxClusters.size(), dists.rows, clusterRatio);
         } 
         
         /*
