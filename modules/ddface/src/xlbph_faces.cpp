@@ -1437,7 +1437,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         }
     }
     
-    std::cout << "Finished calculating histograms for " << labelImages.size() << " labels.                      \n";
+    std::cout << "Finished calculating histograms for " << labelImages.size() << " labels.                                      \n";
 
     std::cout << "Writing infofile\n";
     String infofilepath(_modelpath + "/" + getModelName() + ".yml");

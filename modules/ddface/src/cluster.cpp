@@ -89,16 +89,76 @@ namespace cv { namespace cluster {
 
     void find_optimal_clustering(Mat &dists, std::vector<idx_cluster_t> &idxClusters, const cluster_vars &vars) {
 
+        int optimalClusters = floor(sqrt(dists.rows));
+        
+        Mat initial;
+        double r = vars.mcl_inflation_power;
+        double r_dec = r - 1;
+        double multStep = 0.9;
+
+        cluster_dists(dists, initial, r, vars);
+        interpret_clusters(initial, idxClusters);
+        
+        double clusterRatio = (int)idxClusters.size() / (double)optimalClusters;
+        int iterations = vars.cluster_maxiterations;
+            
+        if(clusterRatio < 1) {
+            // want more clusters - larger r
+            Mat prevmat;
+            for(int i = 0; i < iterations; i++) {
+                r_dec *= (1 - multStep) + 1;
+
+                Mat mclmat;
+                cluster_dists(dists, mclmat, 1 + r_dec, vars);
+                idxClusters.clear();
+                interpret_clusters(mclmat, idxClusters);
+                clusterRatio = (int)idxClusters.size() / (double)optimalClusters;
+
+                if(clusterRatio > 1) {
+                    interpret_clusters(prevmat, idxClusters);
+                    break;
+                } 
+                else if(clusterRatio == 1.0) {
+                    break; 
+                } 
+                else {
+                    prevmat = mclmat; 
+                }
+            } 
+
+        } 
+        else if(clusterRatio > 1) {
+            // want fewer clusters - smaller r 
+
+            for(int i = 0; i < iterations; i++) {
+                r_dec *= multStep;
+
+                Mat mclmat;
+                cluster_dists(dists, mclmat, 1 + r_dec, vars);
+                idxClusters.clear();
+                interpret_clusters(mclmat, idxClusters);
+                clusterRatio = (int)idxClusters.size() / (double)optimalClusters;
+
+                if(clusterRatio <= 1.0) {
+                    break; 
+                } 
+            } 
+        } 
+        
+        /*
         int optimalClustersMax = ceil(sqrt(dists.rows));
         int optimalClustersMin = floor(sqrt(dists.rows));
         int optimalCase = (int)ceil(sqrt((int)dists.rows)*2);
         double optimalRatio = optimalCase / (double)dists.rows;
+        */
+
         /*
         printf("Optimal Case Checks: %d\n", optimalCase);
         printf("Optimal Check Ratio: %.3f\n", optimalRatio);
         printf("Optimal Clusters: %d - %d\n\n", optimalClustersMin, optimalClustersMax);
         */
-
+        
+        /*
         Mat initial;
         double r = vars.mcl_inflation_power;
 
@@ -128,6 +188,7 @@ namespace cv { namespace cluster {
             interpret_clusters(mclmat, idxClusters);
             checkClusters = (int)idxClusters.size();
         }
+        */
     }
 
     void averageHistograms(const std::vector<Mat> &hists, Mat &histavg) {
