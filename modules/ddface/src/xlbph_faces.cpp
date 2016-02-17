@@ -803,10 +803,11 @@ void xLBPH::clusterHistograms() {
     std::vector<std::pair<int, std::vector<cluster::cluster_t>>> allClusters;
 
     int count = 0;
+    bool fail = false;
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(), 
         [&](std::pair<int, std::vector<Mat>> it) {
         
-        std::cout << "Clustering histograms " << count++ << " / " << (int)_histograms.size() << "                                \r" << std::flush;
+        std::cout << "Clustering histograms " << count++ << " / " << (int)_histograms.size() << "                                      \r" << std::flush;
 
         cluster::cluster_vars vars = {cluster_tierStep, 
                                     cluster_numTiers, 
@@ -819,8 +820,13 @@ void xLBPH::clusterHistograms() {
         std::vector<cluster::cluster_t> labelClusters;
         cluster::clusterHistograms(_histograms[it.first], labelClusters, vars);
 
-
-        printf("Found %d clusters for label %d\n", labelClusters.size(), it.first);
+        if((int)labelClusters.size() <= 0) {
+            printf("Found %3d clusters for label %5d !!!\n", labelClusters.size(), it.first);
+            fail = true;
+        }
+        else {
+            printf("Found %3d clusters for label %5d\n", labelClusters.size(), it.first);
+        } 
 
         //push all of the label clusters to the main clusters
         for(size_t i = 0; i < labelClusters.size(); i++) {
@@ -828,17 +834,12 @@ void xLBPH::clusterHistograms() {
         }
 
     });
-
-    for(std::map<int, std::vector<cluster::cluster_t>>::const_iterator it = _clusters.begin(); it != _clusters.end(); it++) {
-        if((int)(it->second).size() <= 0) {
-            char numstr[16];
-            sprintf(numstr, "%d", it->first);
-            String labelstr(numstr);
-            CV_Error(Error::StsError, "Error clustering histograms for label " + labelstr + " - made zero clusters!"); 
-        }
+    
+    if(fail) {
+        CV_Error(Error::StsError, "Error clustering histograms!!!"); 
     } 
 
-    printf("Finished clustering histograms for %d labels                                        \n", (int)_histograms.size());
+    printf("Finished clustering histograms for %d labels                                                       \n", (int)_histograms.size());
 
 }
 
