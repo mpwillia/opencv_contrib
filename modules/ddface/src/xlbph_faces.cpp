@@ -819,6 +819,8 @@ void xLBPH::clusterHistograms() {
         std::vector<clstr::cluster_t> labelClusters;
         clstr::clusterHistograms(_histograms[it.first], labelClusters, vars);
 
+        printf("Found %d clusters for label %d\n", labelClusters.size(), it.first);
+
         //push all of the label clusters to the main clusters
         for(size_t i = 0; i < labelClusters.size(); i++) {
             _clusters[it.first].push_back(labelClusters.at((int)i));
