@@ -100,7 +100,7 @@ namespace cv { namespace cluster {
         interpret_clusters(initial, idxClusters);
         
         double clusterRatio = (int)idxClusters.size() / (double)optimalClusters;
-        int iterations = vars.cluster_maxiterations;
+        int iterations = vars.cluster_max_iterations;
             
         if(clusterRatio < 1) {
             // want more clusters - larger r
