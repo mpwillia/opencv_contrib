@@ -110,13 +110,14 @@ namespace cv { namespace cluster {
             for(int i = 0; i < iterations; i++) {
                 r_dec *= (1 - multStep) + 1;
                 r_used = 1 + r_dec;
+
                 Mat mclmat;
                 cluster_dists(dists, mclmat, r_used, vars);
                 idxClusters.clear();
                 interpret_clusters(mclmat, idxClusters);
                 clusterRatio = (int)idxClusters.size() / (double)optimalClusters;
 
-                printf(" - Testing r of %6.3f and got clusterRatio of %6.3f\n", r_used, clusterRatio);
+                printf(" - %3d: Testing r of %6.3f and got clusterRatio of %6.3f\n", i, r_used, clusterRatio);
 
                 if(clusterRatio > 1) {
                     interpret_clusters(prevmat, idxClusters);
@@ -144,6 +145,8 @@ namespace cv { namespace cluster {
                 idxClusters.clear();
                 interpret_clusters(mclmat, idxClusters);
                 clusterRatio = (int)idxClusters.size() / (double)optimalClusters;
+
+                printf(" - %3d: Testing r of %6.3f and got clusterRatio of %6.3f\n", i, r_used, clusterRatio);
 
                 if(clusterRatio <= 1.0) {
                     break; 
