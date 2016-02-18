@@ -298,7 +298,7 @@ public:
     // NOTE: Remember to add header to opencv2/face/facerec.hpp
     //--------------------------------------------------------------------------
     
-    void setLablesToCheck(int min, double ratio);
+    void setLabelsToCheck(int min, double ratio);
     void setClustersToCheck(int min, double ratio);
     void setMCLSettings(int numIters, int e, double r);
     void setClusterSettings(double tierStep, int numTiers, int maxIters);
