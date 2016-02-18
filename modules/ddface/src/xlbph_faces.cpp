@@ -818,19 +818,19 @@ void xLBPH::clusterHistograms() {
                                     mcl_prune_min};
 
         std::vector<cluster::cluster_t> labelClusters;
-        cluster::clusterHistograms(_histograms[it->first], labelClusters, vars);
+        cluster::clusterHistograms(_histograms[it.first], labelClusters, vars);
 
         if((int)labelClusters.size() <= 0) {
-            printf("Found %3d clusters for label %5d from %5d histograms !!!\n", labelClusters.size(), it->first, (int)it->second.size());
+            printf("Found %3d clusters for label %5d from %5d histograms !!!\n", labelClusters.size(), it.first, (int)it.second.size());
             fail = true;
         }
         else {
-            printf("Found %3d clusters for label %5d from %5d histograms\n", labelClusters.size(), it->first, (int)it->second.size());
+            printf("Found %3d clusters for label %5d from %5d histograms\n", labelClusters.size(), it.first, (int)it.second.size());
         } 
 
         //push all of the label clusters to the main clusters
         for(size_t i = 0; i < labelClusters.size(); i++) {
-            _clusters[it->first].push_back(labelClusters.at((int)i));
+            _clusters[it.first].push_back(labelClusters.at((int)i));
         }
     //}
     });
