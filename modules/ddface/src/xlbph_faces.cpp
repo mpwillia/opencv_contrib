@@ -1606,7 +1606,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     */
 
     //tbb::concurrent_vector<std::pair<int, std::vector<Mat>>> labelhists;
-    tbb::concurrent_vector<std::pair<int, clusters::idx_cluster_t>> labelhists;
+    tbb::concurrent_vector<std::pair<int, cluster::idx_cluster_t>> labelhists;
     tbb::parallel_for(0, numLabelsToCheck, 1, 
         [&](int i) {
             
@@ -1652,7 +1652,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     // check best labels by cluster
     tbb::concurrent_vector<std::pair<int, std::vector<double>>> labeldists;
     tbb::parallel_for_each(labelhists.begin(), labelhists.end(),
-        [&labelhists, &labeldists, &query, &_histograms](std::pair<int, std::vector<Mat>> it) {
+        [&labelhists, &labeldists, &query, this](std::pair<int, std::vector<Mat>> it) {
             
             cluster::idx_cluster_t cluster = it.second;
             std::vector<Mat> allHists = _histograms.at(it.first).second;
