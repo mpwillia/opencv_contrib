@@ -804,11 +804,9 @@ void xLBPH::clusterHistograms() {
 
     int count = 0;
     bool fail = false;
-    /*
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(), 
         [&](std::pair<int, std::vector<Mat>> it) {
-    */
-    for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
+    //for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
         std::cout << "Clustering histograms " << count++ << " / " << (int)_histograms.size() << "                                      \r" << std::flush;
 
         cluster::cluster_vars vars = {cluster_tierStep, 
@@ -834,8 +832,8 @@ void xLBPH::clusterHistograms() {
         for(size_t i = 0; i < labelClusters.size(); i++) {
             _clusters[it->first].push_back(labelClusters.at((int)i));
         }
-    }
-    //});
+    //}
+    });
     
     if(fail) {
         CV_Error(Error::StsError, "Error clustering histograms!!!"); 
