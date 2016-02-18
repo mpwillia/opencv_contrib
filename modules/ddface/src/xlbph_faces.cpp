@@ -808,7 +808,7 @@ void xLBPH::clusterHistograms() {
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(), 
         [&](std::pair<int, std::vector<Mat>> it) {
     */
-    for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end()) {
+    for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); i++) {
         std::cout << "Clustering histograms " << count++ << " / " << (int)_histograms.size() << "                                      \r" << std::flush;
 
         cluster::cluster_vars vars = {cluster_tierStep, 
