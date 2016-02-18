@@ -1655,7 +1655,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
         [&labelhists, &labeldists, &query, this](std::pair<int, cluster::idx_cluster_t> it) {
             
             cluster::idx_cluster_t cluster = it.second;
-            std::vector<Mat> allHists = _histograms.at(it.first).second;
+            std::vector<Mat> allHists = _histograms.at(it.first);
             std::vector<Mat> hists;
             for(size_t i = 0; i < cluster.size(); i++) {
                 hists.push_back(allHists.at(cluster.at(i)));
