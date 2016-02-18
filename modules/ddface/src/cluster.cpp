@@ -234,20 +234,21 @@ namespace cv { namespace cluster {
         std::vector<idx_cluster_t> idxClusters;
         find_optimal_clustering(dists, idxClusters, vars);
 
-        // convert from idx_cluster_t to cluster_t
+        // calculate the cluster average for each cluster
         for(size_t i = 0; i < idxClusters.size(); i++) {
             idx_cluster_t cluster = idxClusters.at((int)i);
             
             std::vector<Mat> clusterHists;
             Mat clusterAvg;
-
-            for(idx_cluster_t::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
-                clusterHists.push_back(hists.at(*it));
+            
+            for(size_t i = 0; i < cluster.begin(); i++) {
+            //for(idx_cluster_t::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
+                clusterHists.push_back(hists.at(cluster.at(i)));
             }
             
             averageHistograms(clusterHists, clusterAvg);
 
-            clusters.push_back(cluster_t(clusterAvg, clusterHists));
+            clusters.push_back(cluster_t(clusterAvg, cluster));
         }
     }
 

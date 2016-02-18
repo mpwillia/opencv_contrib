@@ -1610,9 +1610,10 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
         [&](int i) {
             
             int label = bestlabels.at(i).second;
-            std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters = _clusters.at(label);
+            std::vector<std::pair<Mat, cluster::idx_cluster_t>> labelClusters = _clusters.at(label);
             tbb::concurrent_vector<std::pair<double, int>> clusterDists;
             
+            // find the best clusters
             tbb::parallel_for(0, (int)labelClusters.size(), 1,
                 [&i, &labelClusters, &clusterDists, &query](int clusterIdx) {
                     clusterDists.push_back(std::pair<double, int>(compareHist(labelClusters.at(clusterIdx).first, query, COMP_ALG), clusterIdx));
@@ -1626,32 +1627,41 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
                 numClustersToCheck = minClustersToCheck;
             if(numClustersToCheck > (int)clusterDists.size())
                 numClustersToCheck = (int)clusterDists.size();
-
-            std::vector<Mat> combinedClusters;
+            
+            // group together all thehistograms in this labels best clusters 
+            cluster::idx_cluster_t combinedClusters;
             for(size_t bestIdx = 0; bestIdx < clusterDists.size() && (int)bestIdx < numClustersToCheck; bestIdx++) {
                 
                 int labelClustersIdx = clusterDists.at((int)bestIdx).second;
-                std::vector<Mat> cluster = labelClusters.at(labelClustersIdx).second; 
+                cluster::idx_cluster_t cluster = labelClusters.at(labelClustersIdx).second;
+                //std::set<Mat> cluster = labelClusters.at(labelClustersIdx).second; 
 
                 for(size_t clusterIdx = 0; clusterIdx < cluster.size(); clusterIdx++) {
                    combinedClusters.push_back(cluster.at((int)clusterIdx));
                 }
             }
 
-            labelhists.push_back(std::pair<int, std::vector<Mat>>(label, combinedClusters));
-
+            labelhists.push_back(std::pair<int, cluster::idx_cluster_t>(label, combinedClusters));
+        
         }
     );
 
     //printf(" - Calculating distances for best clusters...\n");
    
     // check best labels by cluster
-
     tbb::concurrent_vector<std::pair<int, std::vector<double>>> labeldists;
     tbb::parallel_for_each(labelhists.begin(), labelhists.end(),
         [&labelhists, &labeldists, &query](std::pair<int, std::vector<Mat>> it) {
+            
+            cluster::idx_cluster_t cluster = it.second;
+            std::vector<Mat> allHists = _histograms.at(it.first).second;
+            std::vector<Mat> hists;
+            for(size_t i = 0; i < cluster.size(); i++) {
+                hists.push_back(allHists.at(cluster.at(i)));
+            }
 
-            std::vector<Mat> hists = it.second;
+
+            //std::vector<Mat> hists = it.second;
             tbb::concurrent_vector<double> dists;
 
             tbb::parallel_for_each(hists.begin(), hists.end(), 
