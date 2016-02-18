@@ -241,7 +241,7 @@ namespace cv { namespace cluster {
             std::vector<Mat> clusterHists;
             Mat clusterAvg;
             
-            for(size_t i = 0; i < cluster.begin(); i++) {
+            for(size_t i = 0; i < cluster.size(); i++) {
             //for(idx_cluster_t::const_iterator it = cluster.begin(); it != cluster.end(); it++) {
                 clusterHists.push_back(hists.at(cluster.at(i)));
             }
