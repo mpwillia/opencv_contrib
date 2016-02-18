@@ -67,15 +67,25 @@ namespace cv { namespace cluster {
                     // check if it already has been added somewhere
                     bool found = false;
                     for(int i = 0; i < vert; i++) {
+                        if(!clusters_map[i].empty()) {
+                            for(size_t j = 0; j < clusters_map[i].size(); j++) {
+                                if(clusters_map[i].at(j) == vert) {
+                                    found = true;
+                                    break;
+                                } 
+                            } 
+                        }
+                        /*
                         if(!clusters_map[i].empty() && clusters_map[i].find(vert) != clusters_map[i].end()) {
                             //std::cout << "\t\tfound check at " << i << " - not adding\n";
                             found = true; 
                         } 
+                        */
                     }
                         
                     if(!found) {
                         //std::cout << "\t\tdidn't find check adding\n";
-                        clusters_map[vert].insert(check);
+                        clusters_map[vert].push_back(check);
                     }
                 }
             } 
