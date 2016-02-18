@@ -1660,7 +1660,8 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
             for(size_t i = 0; i < cluster.size(); i++) {
                 hists.push_back(allHists.at(cluster.at(i)));
             }
-
+            
+            printf("For label %d looking at %d histograms out of %d total\n", it.first, (int)hists.size(), (int)allHists.size());
 
             //std::vector<Mat> hists = it.second;
             tbb::concurrent_vector<double> dists;
