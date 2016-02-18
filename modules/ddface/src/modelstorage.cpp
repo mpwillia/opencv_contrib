@@ -5,6 +5,8 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 
 #define SIZEOF_CV_32FC1 4
 
@@ -553,7 +555,7 @@ void ModelStorage::mmapLabelHistograms(const std::map<int,int> &labelinfo, std::
     histograms.clear();
     for(std::map<int, int>::const_iterator it = labelinfo.begin(); it != labelinfo.end(); ++it) {
         // map histogram
-        String filename = getLabelHistogramFile(it->first);
+        String filename = getLabelHistogramsFile(it->first);
         int fd = open(filename.c_str(), O_RDONLY);
         if(fd < 0)
             CV_Error(Error::StsError, "Cannot open histogram file '"+filename+"'");
