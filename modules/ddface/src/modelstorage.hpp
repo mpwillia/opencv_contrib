@@ -106,7 +106,13 @@ public:
    bool readHistograms(const String &filename, std::vector<Mat> &histograms) const;
    bool writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const;
 
+   // Memory Mapping / Loading
 
+   void mmapLabelHistograms(const std::map<int,int> &labelinfo, std::map<int, std::vector<Mat>> &histograms) const;
+   void mmapLabelAverages(const std::map<int,int> &labelinfo, std::map<int, Mat> &histavgs) const;
+
+   // TODO
+   // void mmapLabelClusters(const std::map<int,int> &labelinfo, std::map<int, std::vector<cluster::cluster_t>> &clusters) const;
 
 };
 

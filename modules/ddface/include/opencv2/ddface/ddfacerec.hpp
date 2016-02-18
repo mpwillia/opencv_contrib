@@ -50,6 +50,8 @@ public:
     CV_WRAP virtual void setAlgToUse(int alg) = 0;
     CV_WRAP virtual void setNumThreads(int numThreads) = 0;
 
+    CV_WRAP virtual void setLablesToCheck(int min, double ratio) = 0;
+    CV_WRAP virtual void setClustersToCheck(int min, double ratio) = 0;
     CV_WRAP virtual void setMCLSettings(int numIters, int e, double r) = 0;
     CV_WRAP virtual void setClusterSettings(double tierStep, int numTiers, int maxIters) = 0;
 

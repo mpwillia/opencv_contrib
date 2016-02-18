@@ -179,7 +179,7 @@ private:
     int cluster_numTiers = 10; // Sets how many tiers to keep, default is 10, or 10% max tier
     int cluster_max_iterations = 5;
 
-    // Markov Clustering Algorithm (MCL)- Settings
+    // Markov Clustering Algorithm (MCL) - Settings
     /* Sets the number of MCL iterations, default is 10
      * If 0 then iterates until no change is found
      */
@@ -298,6 +298,8 @@ public:
     // NOTE: Remember to add header to opencv2/face/facerec.hpp
     //--------------------------------------------------------------------------
     
+    void setLablesToCheck(int min, double ratio);
+    void setClustersToCheck(int min, double ratio);
     void setMCLSettings(int numIters, int e, double r);
     void setClusterSettings(double tierStep, int numTiers, int maxIters);
 
@@ -310,13 +312,11 @@ void xLBPH::setUseClusters(bool flag) {
     _useClusters = flag;
 }
 
-
 void xLBPH::setClusterSettings(double tierStep, int numTiers, int maxIters) {
     cluster_tierStep = tierStep;
     cluster_numTiers = numTiers;
     cluster_max_iterations = maxIters;
 } 
-
 
 void xLBPH::setMCLSettings(int numIters, int e, double r) {
     mcl_iterations = numIters;
@@ -324,20 +324,35 @@ void xLBPH::setMCLSettings(int numIters, int e, double r) {
     mcl_inflation_power = r;
 }
 
+void xLBPH::setLabelsToCheck(int min, double ratio) {
+    minLabelsToCheck = min;
+    labelsToCheckRatio = ratio;
+} 
+
+void xLBPH::setClustersToCheck(int min, double ratio) {
+    minClustersToCheck = min;
+    clustersToCheckRatio = ratio;
+} 
+
+
+// TODO: Remove
 int xLBPH::getMaxThreads() const {
     return _numThreads; 
 }
 
+// TODO: Remove
 int xLBPH::getLabelThreads() const {
     int threads = (int)floor(sqrt(_numThreads));
     return threads <= 0 ? 1 : threads;
 }
 
+// TODO: Remove
 int xLBPH::getHistThreads() const {
     int threads = (int)ceil(sqrt(_numThreads));
     return threads <= 0 ? 1 : threads;
 }
 
+// TODO: Remove
 void xLBPH::setNumThreads(int numThreads) {
     _numThreads = numThreads; 
 }
@@ -354,6 +369,7 @@ void xLBPH::setAlgToUse(int alg) {
 
 // Sets _modelpath, extracts model name from path, and sets _modelname
 
+// TODO: Replace with modelstorage
 void xLBPH::setModelPath(String modelpath) {
     
     // given path can't be empty
@@ -379,28 +395,34 @@ void xLBPH::setModelPath(String modelpath) {
 
 }
 
+// TODO: Replace with modelstorage
 String xLBPH::getModelPath() const {
     return _modelpath; 
 }
 
+// TODO: Replace with modelstorage
 String xLBPH::getModelName() const {
     return _modelname;
 } 
 
+// TODO: Replace with modelstorage
 String xLBPH::getInfoFile() const {
     return getModelPath() + "/" + getModelName() + ".yml";
 }
 
+// TODO: Replace with modelstorage
 String xLBPH::getHistogramsDir() const {
     return getModelPath() + "/" + getModelName() + "-histograms";
 }
 
+// TODO: Replace with modelstorage
 String xLBPH::getHistogramFile(int label) const {
     char labelstr[16];
     sprintf(labelstr, "%d", label);
     return getHistogramsDir() + "/" + getModelName() + "-" + labelstr + ".bin";
 }
 
+// TODO: Replace with modelstorage
 String xLBPH::getHistogramAveragesFile() const {
     return getHistogramsDir() + "/" + getModelName() + "-averages.bin";
 }
@@ -566,12 +588,14 @@ int xLBPH::getHistogramSize() const {
     return (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
 }
 
+// TODO: Replace with modelstorage
 bool xLBPH::exists(const String &filepath) const {
     struct stat buffer;   
     return (stat (filepath.c_str(), &buffer) == 0);   
 }
 
 
+// TODO: Replace with modelstorage
 // Wrapper functions for load/save/updating histograms for specific labels
 bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) const {
     return readHistograms(getHistogramFile(label), histograms);
@@ -586,6 +610,7 @@ bool xLBPH::updateHistograms(int label, const std::vector<Mat> &histograms) cons
 }
 
 
+// TODO: Replace with modelstorage
 // Main read/write functions for histograms
 bool xLBPH::readHistograms(const String &filename, std::vector<Mat> &histograms) const {
     FILE *fp = fopen(filename.c_str(), "r");
@@ -605,6 +630,7 @@ bool xLBPH::readHistograms(const String &filename, std::vector<Mat> &histograms)
 }
 
 
+// TODO: Replace with modelstorage
 bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const {
     FILE *fp = fopen(filename.c_str(), (appendhists == true ? "a" : "w"));
     if(fp == NULL) {
@@ -636,6 +662,7 @@ void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const
     histavg.convertTo(histavg, CV_32FC1);
 }
 
+// TODO: Replace with modelstorage
 void xLBPH::calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) const {
     for(size_t idx = 0; idx < labels.size(); idx++) {
         Mat histavg;
@@ -684,6 +711,7 @@ bool xLBPH::calcHistogramAverages() const {
     return writeHistograms(getHistogramAveragesFile(), averages, false);
 }
 
+// TODO: Replace with modelstorage
 bool xLBPH::loadHistogramAverages(std::map<int, Mat> &histavgs) const {
     
     std::vector<Mat> hists;
@@ -698,6 +726,7 @@ bool xLBPH::loadHistogramAverages(std::map<int, Mat> &histavgs) const {
     return true;
 }
 
+// TODO: Replace with modelstorage
 void xLBPH::mmapHistogramAverages() {
     
     std::cout << "loading histogram averages...\n";
@@ -725,6 +754,7 @@ void xLBPH::mmapHistogramAverages() {
 //------------------------------------------------------------------------------
 // Histogram Memory Mapping
 //------------------------------------------------------------------------------
+// TODO: Replace with modelstorage
 void xLBPH::mmapHistograms() {
 
     //_histograms = std::map<int, std::vector<Mat>>();
@@ -848,6 +878,7 @@ void xLBPH::clusterHistograms() {
 //------------------------------------------------------------------------------
 // Standard Functions and File IO
 //------------------------------------------------------------------------------
+// TODO: Updated for modelstorage 
 void xLBPH::load() {
      
     // load data from the info file
@@ -882,6 +913,7 @@ void xLBPH::load() {
 }
 
 
+// TODO: Updated for modelstorage 
 void xLBPH::load(const String &modelpath) {
     
     // set our model path to the filename
@@ -1114,6 +1146,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 //------------------------------------------------------------------------------
 // Multithreading 
 //------------------------------------------------------------------------------
+// TODO: Can remove all this multithreading stuff 
 template <typename _Tp> static
 void splitVector(const std::vector<_Tp> &src, std::vector<std::vector<_Tp>> &dst, int numParts) {
     int step = (int)src.size() / numParts;
@@ -1236,6 +1269,7 @@ void xLBPH::performMultithreadedComp(const Q &query, const std::vector<S> &src, 
 //------------------------------------------------------------------------------
 // Training Functions
 //------------------------------------------------------------------------------
+//TODO: Don't need anymore
 void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) const {
 
     for(size_t idx = 0; idx < src.size(); idx++) {
@@ -1253,6 +1287,7 @@ void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &d
     }
 }
 
+//TODO: Don't need anymore
 void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat>>> &labelImages, std::vector<std::pair<int, int>> &labelinfo) const {
     
     for(size_t idx = 0; idx < labelImages.size(); idx++) {
@@ -1480,12 +1515,14 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 // Prediction Functions 
 //------------------------------------------------------------------------------
 
+//TODO: Don't need anymore
 void xLBPH::compareHistograms(const Mat &query, const std::vector<Mat> &hists, std::vector<double> &dists) const {
     for(size_t idx = 0; idx < hists.size(); idx++) {
         dists.push_back(compareHist(hists.at((int)idx), query, COMP_ALG));
     } 
 }
 
+//TODO: Don't need anymore
 // compares a given set of labels against the given query, each label is represented as a std::pair<int, std::vector<Mat>>
 // where the int is the label and the std::vector<Mat> is that label's histograms
 // TODO: we don't need to provide the histograms for each label, we can just give the label
@@ -1533,15 +1570,6 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
     Mat query = _query.getMat();
     
     tbb::concurrent_vector<std::pair<double, int>> bestlabels;
-    /*
-    tbb::parallel_for_each(_histavgs.begin(), _histavgs.end(), 
-        [&bestlabels, &query, &labels](std::pair<int, Mat> it) {
-            if(labels.find(it.first) != labels.end()) {
-                bestlabels.push_back(std::pair<double, int>(compareHist(it.second, query, COMP_ALG), it.first));
-            }
-        }
-    );
-    */
 
     tbb::parallel_for_each(labels.begin(), labels.end(),
         [&bestlabels, &query, this](int label) {
@@ -1631,19 +1659,6 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
         } 
     ); 
 
-    /*
-    printf(" - Dists found:\n");
-    for(size_t idx = 0; idx < labeldists.size(); idx++) {
-        int label = labeldists.at((int)idx).first;
-        std::vector<double> dists = labeldists.at((int)idx).second;
-        printf("    - %d: ", label);
-        for(int i = 0 ; i < (int)dists.size(); i++) {
-            printf("%0.3f, ", dists.at(i));
-        }
-        printf("\n");
-    }
-    */
-
     //tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     for(size_t idx = 0; idx < labeldists.size(); idx++) {
         std::vector<double> dists = labeldists.at((int)idx).second;
@@ -1659,15 +1674,6 @@ void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<doub
 
     
     tbb::concurrent_vector<std::pair<double, int>> bestlabels;
-    /*
-    tbb::parallel_for_each(_histavgs.begin(), _histavgs.end(), 
-        [&bestlabels, &query, &labels](std::pair<int, Mat> it) {
-            if(labels.find(it.first) != labels.end()) {
-                bestlabels.push_back(std::pair<double, int>(compareHist(it.second, query, COMP_ALG), it.first));
-            }
-        }
-    );
-    */
     
     printf("Finding bestlabels...\n");
     tbb::parallel_for_each(labels.begin(), labels.end(),
@@ -1711,30 +1717,6 @@ void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<doub
 //void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const {
 void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const {
     Mat query = _query.getMat();
-
-    //minDist = DBL_MAX;
-    //minClass = -1;
-    /*
-    tbb::parallel_for_each(_histograms.begin(), _histograms.end(),
-        [&bestpreds, &query, &labels](std::pair<int, std::vector<Mat>> it) {
-            if(labels.find(it.first) != labels.end()) {
-                std::vector<Mat> hists = it.second;
-                
-                tbb::concurrent_vector<double> dists;
-                tbb::parallel_for_each(hists.begin(), hists.end(), 
-                    [&dists, &query](Mat hist) {
-                        dists.push_back(compareHist(hist, query, COMP_ALG));
-                    } 
-                );
-
-                std::sort(dists.begin(), dists.end());
-                
-                bestpreds.push_back(std::pair<double, int>(dists.at(0), it.first));
-            }
-        }
-    );
-    std::sort(bestpreds.begin(), bestpreds.end());
-    */    
 
     tbb::parallel_for_each(labels.begin(), labels.end(),
         [&bestpreds, &query, this](int label) {

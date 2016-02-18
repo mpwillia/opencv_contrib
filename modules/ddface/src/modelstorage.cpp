@@ -6,6 +6,8 @@
 #include <dirent.h>
 #include <string.h>
 
+#define SIZEOF_CV_32FC1 4
+
 namespace cv { namespace face {
 
 //------------------------------------------------------------------------------
@@ -540,6 +542,55 @@ bool ModelStorage::writeHistograms(const String &filename, const std::vector<Mat
     fclose(fp);
     return true;
 }
+
+//------------------------------------------------------------------------------
+// Memory Mapping Histograms 
+//------------------------------------------------------------------------------
+
+void ModelStorage::mmapLabelHistograms(const std::map<int,int> &labelinfo, std::map<int, std::vector<Mat>> &histograms) const {
+    
+    std::cout << "loading histograms...\n";
+    histograms.clear();
+    for(std::map<int, int>::const_iterator it = labelinfo.begin(); it != labelinfo.end(); ++it) {
+        // map histogram
+        String filename = getLabelHistogramFile(it->first);
+        int fd = open(filename.c_str(), O_RDONLY);
+        if(fd < 0)
+            CV_Error(Error::StsError, "Cannot open histogram file '"+filename+"'");
+
+        unsigned char* mapPtr = (unsigned char*)mmap(NULL, getHistogramSize() * it->second * SIZEOF_CV_32FC1, PROT_READ, MAP_PRIVATE, fd, 0);
+        if(mapPtr == MAP_FAILED)
+            CV_Error(Error::StsError, "Cannot mem map file '"+filename+"'");
+
+        // make matricies
+        for(int i = 0; i < it->second; i++) {
+            Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * SIZEOF_CV_32FC1 * i));
+            histograms[it->first].push_back(mat);
+        }
+    }
+
+} 
+
+void ModelStorage::mmapLabelAverages(const std::map<int,int> &labelinfo, std::map<int, Mat> &histavgs) const {
+    
+    std::cout << "loading histogram averages...\n";
+    histavgs.clear();
+    String filename = getLabelAveragesFile();
+    int fd = open(filename.c_str(), O_RDONLY);
+    if(fd < 0)
+        CV_Error(Error::StsError, "Cannot open histogram file '"+filename+"'");
+
+    unsigned char* mapPtr = (unsigned char*)mmap(NULL, getHistogramSize() * (int)labelinfo.size() * SIZEOF_CV_32FC1, PROT_READ, MAP_PRIVATE, fd, 0);
+    if(mapPtr == MAP_FAILED)
+        CV_Error(Error::StsError, "Cannot mem map file '"+filename+"'");
+    
+    int idx = 0;
+    for(std::map<int, int>::const_iterator it = labelinfo.begin(); it != labelinfo.end(); ++it) {
+        Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * SIZEOF_CV_32FC1 * idx));
+        histavgs[it->first] = mat;
+        idx++;
+    }
+} 
 
 
 //------------------------------------------------------------------------------
