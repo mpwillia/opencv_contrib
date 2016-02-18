@@ -127,7 +127,7 @@ namespace cv { namespace cluster {
                 interpret_clusters(mclmat, idxClusters);
                 clusterRatio = (int)idxClusters.size() / (double)optimalClusters;
 
-                printf(" - %3d: Testing r of %6.3f and got clusterRatio of %6.3f\n", i, r_used, clusterRatio);
+                //printf(" - %3d: Testing r of %6.3f and got clusterRatio of %6.3f\n", i, r_used, clusterRatio);
 
                 if(clusterRatio > 1) {
                     interpret_clusters(prevmat, idxClusters);
@@ -141,7 +141,7 @@ namespace cv { namespace cluster {
                 }
             } 
 
-            printf(" - Finally using r of %6.3f to get %3d clusters from %3d hists for a clusterRatio of %6.3f\n", r_used, (int)idxClusters.size(), dists.rows, clusterRatio);
+            //printf(" - Finally using r of %6.3f to get %3d clusters from %3d hists for a clusterRatio of %6.3f\n", r_used, (int)idxClusters.size(), dists.rows, clusterRatio);
         } 
         else if(clusterRatio > 1) {
             // want fewer clusters - smaller r 
@@ -156,14 +156,14 @@ namespace cv { namespace cluster {
                 interpret_clusters(mclmat, idxClusters);
                 clusterRatio = (int)idxClusters.size() / (double)optimalClusters;
 
-                printf(" - %3d: Testing r of %6.3f and got clusterRatio of %6.3f\n", i, r_used, clusterRatio);
+                //printf(" - %3d: Testing r of %6.3f and got clusterRatio of %6.3f\n", i, r_used, clusterRatio);
 
                 if(clusterRatio <= 1.0) {
                     break; 
                 } 
             } 
 
-            printf(" - Using r of %6.3f to get %3d clusters from %3d hists for a clusterRatio of %6.3f\n", r_used, (int)idxClusters.size(), dists.rows, clusterRatio);
+            //printf(" - Using r of %6.3f to get %3d clusters from %3d hists for a clusterRatio of %6.3f\n", r_used, (int)idxClusters.size(), dists.rows, clusterRatio);
         } 
         
         /*
