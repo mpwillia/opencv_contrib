@@ -804,9 +804,11 @@ void xLBPH::clusterHistograms() {
 
     int count = 0;
     bool fail = false;
+    /*
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(), 
         [&](std::pair<int, std::vector<Mat>> it) {
-        
+    */
+    for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end()) {
         std::cout << "Clustering histograms " << count++ << " / " << (int)_histograms.size() << "                                      \r" << std::flush;
 
         cluster::cluster_vars vars = {cluster_tierStep, 
@@ -818,22 +820,22 @@ void xLBPH::clusterHistograms() {
                                     mcl_prune_min};
 
         std::vector<cluster::cluster_t> labelClusters;
-        cluster::clusterHistograms(_histograms[it.first], labelClusters, vars);
+        cluster::clusterHistograms(_histograms[it->first], labelClusters, vars);
 
         if((int)labelClusters.size() <= 0) {
-            printf("Found %3d clusters for label %5d from %5d histograms !!!\n", labelClusters.size(), it.first, (int)it.second.size());
+            printf("Found %3d clusters for label %5d from %5d histograms !!!\n", labelClusters.size(), it->first, (int)it->second.size());
             fail = true;
         }
         else {
-            printf("Found %3d clusters for label %5d from %5d histograms\n", labelClusters.size(), it.first, (int)it.second.size());
+            printf("Found %3d clusters for label %5d from %5d histograms\n", labelClusters.size(), it->first, (int)it->second.size());
         } 
 
         //push all of the label clusters to the main clusters
         for(size_t i = 0; i < labelClusters.size(); i++) {
-            _clusters[it.first].push_back(labelClusters.at((int)i));
+            _clusters[it->first].push_back(labelClusters.at((int)i));
         }
-
-    });
+    }
+    //});
     
     if(fail) {
         CV_Error(Error::StsError, "Error clustering histograms!!!"); 
