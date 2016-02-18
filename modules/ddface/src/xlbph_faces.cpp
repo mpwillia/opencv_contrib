@@ -127,7 +127,7 @@ private:
     double labelsToCheckRatio = 0.05;
 
     int minClustersToCheck = 3;
-    double clustersToCheckRatio = 0.15;
+    double clustersToCheckRatio = 0.10;
 
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
 
@@ -1560,49 +1560,6 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
         numLabelsToCheck = (int)bestlabels.size();
 
 
-    // find best cluster for each best label
-    /*
-    std::vector<std::pair<int, std::vector<Mat>>> labelhists;
-    for(size_t idx = 0; idx < bestlabels.size() && (int)idx < numLabelsToCheck; idx++) {
-        int label = bestlabels.at(idx).second;
-        //printf("Finding best cluster for PID %d\n", label);
-        
-        std::vector<std::pair<Mat, std::vector<Mat>>> labelClusters = _clusters.at(label);
-        std::vector<Mat> clusterAvgs;
-        for(size_t clusterIdx = 0; clusterIdx < labelClusters.size(); clusterIdx++) {
-            clusterAvgs.push_back(labelClusters.at(clusterIdx).first);
-        }
-        
-        //printf(" - Has %d clusters, dispatching comparison threads...\n", (int)clusterAvgs.size());
-        std::vector<double> clusterAvgsDists;
-        performMultithreadedComp<Mat, Mat, double>(query, clusterAvgs, clusterAvgsDists, getHistThreads(), &xLBPH::compareHistograms);
-      
-        //printf(" - Finding best cluster...");
-        std::vector<std::pair<double, int>> bestClusters; 
-        for(size_t clusterIdx = 0; clusterIdx < clusterAvgsDists.size(); clusterIdx++) {
-            bestClusters.push_back(std::pair<double, int>(clusterAvgsDists.at((int)clusterIdx), (int)clusterIdx));
-        }
-        std::sort(bestClusters.begin(), bestClusters.end());
-        
-
-        // figure out how many clusters to check per label
-        // TODO: calculate this on a per label basis
-        int numClustersToCheck = 2;
-       
-        //printf(" - Using top %d best clusters...\n", numClustersToCheck);
-        std::vector<Mat> combinedClusters;
-        for(size_t bestIdx = 0; bestIdx < bestClusters.size() && (int)bestIdx < numClustersToCheck; bestIdx++) {
-            std::vector<Mat> cluster = labelClusters.at(bestClusters.at((int)bestIdx).second).second; 
-            for(size_t clusterIdx = 0; clusterIdx < cluster.size(); clusterIdx++) {
-               combinedClusters.push_back(cluster.at((int)clusterIdx));
-            }
-        }
-
-        //printf(" - Pushing combined clusters to labelhists...\n");
-        labelhists.push_back(std::pair<int, std::vector<Mat>>(label, combinedClusters));
-    }
-    */
-
     //tbb::concurrent_vector<std::pair<int, std::vector<Mat>>> labelhists;
     tbb::concurrent_vector<std::pair<int, cluster::idx_cluster_t>> labelhists;
     tbb::parallel_for(0, numLabelsToCheck, 1, 
@@ -1659,7 +1616,7 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
                 hists.push_back(allHists.at(cluster.at(i)));
             }
             
-            printf("For label %d looking at %d histograms out of %d total\n", it.first, (int)hists.size(), (int)allHists.size());
+            //printf("For label %d looking at %d histograms out of %d total\n", it.first, (int)hists.size(), (int)allHists.size());
 
             //std::vector<Mat> hists = it.second;
             tbb::concurrent_vector<double> dists;
@@ -1686,9 +1643,6 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
         printf("\n");
     }
     */
-
-    //printf(" - Grabbing best predictions for each PID...\n");
-    //std::vector<std::pair<double, int>> bestpreds;
 
     //tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     for(size_t idx = 0; idx < labeldists.size(); idx++) {
