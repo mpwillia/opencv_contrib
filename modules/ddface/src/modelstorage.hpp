@@ -4,6 +4,8 @@
 
 #include "precomp.hpp"
 
+#include "cluster.hpp"
+
 namespace cv { namespace face {
 
 typedef struct AlgSettings {

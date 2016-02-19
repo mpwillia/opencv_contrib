@@ -1,6 +1,8 @@
 
 #include "modelstorage.hpp"
 
+#include "cluster.hpp"
+
 #include <cstring>
 #include <sys/stat.h>
 #include <dirent.h>
