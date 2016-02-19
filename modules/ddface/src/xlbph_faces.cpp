@@ -1504,7 +1504,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     infofile.release();
     */
 
-    
+    // Load histograms 
+    _model.mmapLabelHistograms(_labelinfo, _histograms);
 
     std::cout << "Calculating label averages...\n";
     std::vector<Mat> histavgs;
@@ -1514,9 +1515,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     if(!_model.saveLabelAverages(histavgs)) {
         CV_Error(Error::StsError, "Failed to write label averages!");
     } 
-    
-    std::cout << "Memory mapping all histograms...\n";
-    _model.mmapLabelHistograms(_labelinfo, _histograms);
+   
+    // Load label averages
     _model.mmapLabelAverages(_labelinfo, _histavgs);
 
     //mmapHistograms();
