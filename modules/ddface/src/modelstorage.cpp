@@ -495,17 +495,29 @@ String ModelStorage::getLabelClustersFile(int label) const {
 
 // Wrapper functions for load/save/updating histograms for specific labels
 bool ModelStorage::loadLabelHistograms(int label, std::vector<Mat> &histograms) const {
-    return readHistograms(getLabelHistogramsFile(label), histograms);
+   return readHistograms(getLabelHistogramsFile(label), histograms);
 }
 
 bool ModelStorage::saveLabelHistograms(int label, const std::vector<Mat> &histograms) const {
-    return writeHistograms(getLabelHistogramsFile(label), histograms, false);
+   return writeHistograms(getLabelHistogramsFile(label), histograms, false);
 }
 
 bool ModelStorage::updateLabelHistograms(int label, const std::vector<Mat> &histograms) const {
-    return writeHistograms(getLabelHistogramsFile(label), histograms, true);
+   return writeHistograms(getLabelHistogramsFile(label), histograms, true);
 }
 
+// Wraper functions for load/save/updating histogram averages
+bool ModelStorage::loadLabelAverages(std::vector<Mat> &histograms) const {
+   return readHistograms(getLabelAveragesFile(), histograms);
+}
+
+bool ModelStorage::saveLabelAverages(const std::vector<Mat> &histograms) const {
+   return writeHistograms(getLabelAveragesFile(), histograms, false);
+} 
+
+bool ModelStorage::updateLabelAverages(const std::vector<Mat> &histograms) const {
+   return writeHistograms(getLabelAveragesFile(), histograms, true);
+} 
 
 // Main read/write functions for histograms
 bool ModelStorage::readHistograms(const String &filename, std::vector<Mat> &histograms) const {

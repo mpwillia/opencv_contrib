@@ -103,6 +103,11 @@ public:
    bool loadLabelHistograms(int label, std::vector<Mat> &histograms) const;
    bool saveLabelHistograms(int label, const std::vector<Mat> &histograms) const;
    bool updateLabelHistograms(int label, const std::vector<Mat> &histograms) const;
+
+   bool loadLabelAverages(std::vector<Mat> &histograms) const;
+   bool saveLabelAverages(const std::vector<Mat> &histograms) const;
+   bool updateLabelAverages(const std::vector<Mat> &histograms) const;
+
    bool readHistograms(const String &filename, std::vector<Mat> &histograms) const;
    bool writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const;
 

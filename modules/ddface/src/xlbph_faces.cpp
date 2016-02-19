@@ -152,8 +152,8 @@ private:
     // Data Management Strategy/Technique Functions
     //--------------------------------------------------------------------------
     // Histogram Averages
-    bool calcHistogramAverages() const;
-    void calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) const;
+    bool calcHistogramAverages(std::vector<Mat> &histavgs) const;
+    //void calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) const;
     bool loadHistogramAverages(std::map<int, Mat> &histavgs) const;
     void mmapHistogramAverages();
 
@@ -335,24 +335,24 @@ void xLBPH::setClustersToCheck(int min, double ratio) {
 } 
 
 
-// TODO: Remove
+// REMOVE
 int xLBPH::getMaxThreads() const {
     return _numThreads; 
 }
 
-// TODO: Remove
+// REMOVE
 int xLBPH::getLabelThreads() const {
     int threads = (int)floor(sqrt(_numThreads));
     return threads <= 0 ? 1 : threads;
 }
 
-// TODO: Remove
+// REMOVE
 int xLBPH::getHistThreads() const {
     int threads = (int)ceil(sqrt(_numThreads));
     return threads <= 0 ? 1 : threads;
 }
 
-// TODO: Remove
+// REMOVE
 void xLBPH::setNumThreads(int numThreads) {
     _numThreads = numThreads; 
 }
@@ -662,7 +662,7 @@ void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const
     histavg.convertTo(histavg, CV_32FC1);
 }
 
-// TODO: Replace with modelstorage
+// REMOVE: Don't need since we started using TBB
 void xLBPH::calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) const {
     for(size_t idx = 0; idx < labels.size(); idx++) {
         Mat histavg;
@@ -671,19 +671,8 @@ void xLBPH::calcHistogramAverages_thread(const std::vector<int> &labels, std::ve
     } 
 }
 
-bool xLBPH::calcHistogramAverages() const {
+bool xLBPH::calcHistogramAverages(std::vector<Mat> &histavgs) const {
         
-    /*
-    std::vector<Mat> averages;
-    std::vector<int> labels; 
-    for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
-        labels.push_back(it->first);
-    
-    performMultithreadedCalc<int, Mat>(labels, averages, getMaxThreads(), &xLBPH::calcHistogramAverages_thread);
-
-    return writeHistograms(getHistogramAveragesFile(), averages, false);
-    */
-
     tbb::concurrent_vector<std::pair<int, Mat>> concurrent_averages;
 
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(),
@@ -819,6 +808,8 @@ void xLBPH::printMat(const Mat &mat, int label) const {
 //------------------------------------------------------------------------------
 // Histogram Clustering (Using Markov Clustering) 
 //------------------------------------------------------------------------------
+
+// Top level clustering function for training
 void xLBPH::clusterHistograms() {
     /* What is Histogram Clustering?
      * The idea is to group like histograms together
@@ -961,6 +952,8 @@ void xLBPH::update(InputArrayOfArrays _in_src, InputArray _in_labels) {
 //------------------------------------------------------------------------------
 // xLBPH
 //------------------------------------------------------------------------------
+
+// TODO: Can we move this math shit into it's own file for organization sake?
 
 template <typename _Tp> static
 void olbp_(InputArray _src, OutputArray _dst) {
@@ -1146,7 +1139,7 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 //------------------------------------------------------------------------------
 // Multithreading 
 //------------------------------------------------------------------------------
-// TODO: Can remove all this multithreading stuff 
+// REMOVE: Replaced by TBB
 template <typename _Tp> static
 void splitVector(const std::vector<_Tp> &src, std::vector<std::vector<_Tp>> &dst, int numParts) {
     int step = (int)src.size() / numParts;
@@ -1190,6 +1183,7 @@ void splitVector(const std::vector<_Tp> &src, std::vector<std::vector<_Tp>> &dst
  * If numThreads is greater than the <src> size it will be capped to the size of
  * <src>, will not try to dispatch more threads than tasks available
  */
+// REMOVE: Replaced by TBB
 template <typename S, typename D>
 void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const {
     if(numThreads > (int)src.size())
@@ -1228,7 +1222,7 @@ void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &
     }
 }
 
-
+// REMOVE: Repalced by TBB
 template <typename Q, typename S, typename D>
 void xLBPH::performMultithreadedComp(const Q &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const Q &query, const std::vector<S> &src, std::vector<D> &dst) const) const {
     if(numThreads <= 0)
@@ -1269,7 +1263,7 @@ void xLBPH::performMultithreadedComp(const Q &query, const std::vector<S> &src, 
 //------------------------------------------------------------------------------
 // Training Functions
 //------------------------------------------------------------------------------
-//TODO: Don't need anymore
+// REMOVE: No longer needed since we began using TBB
 void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) const {
 
     for(size_t idx = 0; idx < src.size(); idx++) {
@@ -1287,7 +1281,7 @@ void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &d
     }
 }
 
-//TODO: Don't need anymore
+// REMOVE: No longer needed since we began using TBB
 void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat>>> &labelImages, std::vector<std::pair<int, int>> &labelinfo) const {
     
     for(size_t idx = 0; idx < labelImages.size(); idx++) {
@@ -1306,6 +1300,7 @@ void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat>>> 
 }
 
 
+// Main training function
 void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preserveData) {
 
     if(_in_src.kind() != _InputArray::STD_VECTOR_MAT && _in_src.kind() != _InputArray::STD_VECTOR_VECTOR) {
@@ -1344,7 +1339,9 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         labelImages[allLabels.at((int)matIdx)].push_back(src.at((int)matIdx));
     }
     std::cout << "Organized images for " << labelImages.size() << " labels.\n";
-   
+    
+    
+    /*
     if(!preserveData)
     {
         // create model directory
@@ -1366,13 +1363,21 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
         system(("mkdir " + getModelPath()).c_str()); 
         system(("mkdir " + getHistogramsDir()).c_str());
     }
-    
+    */
+
     std::vector<int> uniqueLabels;
     std::vector<int> numhists;
 
     // start training
     if(preserveData)
     {
+        // not overwriting, updating
+        
+        // make sure our current model is valid, don't want to update an invalid model
+        if(!_model.isValidModel()) {
+            CV_Error(Error::StsError, "Model is malformed, won't update a bad model!");
+        } 
+
         int count = 0;
         tbb::parallel_for_each(labelImages.begin(), labelImages.end(), 
             [&](std::pair<int, std::vector<Mat>> it) {
@@ -1405,28 +1410,15 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                 hists.clear();
             }
         );
-        /*
-        for(std::map<int, std::vector<Mat>>::const_iterator it = labelImages.begin(); it != labelImages.end(); ++it) {
-            std::cout << "Calculating histograms for label " << labelcount << " / " << labelImages.size() << " [" << it->first << "]\r" << std::flush;
-
-            //label = it->first;
-            std::vector<Mat> imgs = it->second;
-            std::vector<Mat> hists;
-          
-            
-            performMultithreadedCalc<Mat, Mat>(imgs, hists, getMaxThreads(), &xLBPH::calculateHistograms);
-
-            uniqueLabels.push_back(it->first);
-            numhists.push_back((int)imgs.size());
-            writeHistograms(getHistogramFile(it->first), hists, preserveData);
-            
-            hists.clear();
-
-            labelcount++;
-        }
-        */
     }
     else {
+        // overwriting
+        
+        // attempt to create the new model
+        if(!_model.create(true)) {
+            CV_Error(Error::StsError, "Failed to create new model!");
+        } 
+
         std::cout << "Multithreaded label calcs\n";
         std::vector<std::pair<int, std::vector<Mat>>> labelImagesVec(labelImages.begin(), labelImages.end());
         tbb::concurrent_vector<std::pair<int, int>> concurrent_labelInfoVec;
@@ -1474,7 +1466,20 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     
     std::cout << "Finished calculating histograms for " << labelImages.size() << " labels.                                      \n";
 
-    std::cout << "Writing infofile\n";
+    // set _labelinfo
+    _labelinfo = std::map<int, int>(); // if _labelinfo was set then clear it
+    for(size_t labelIdx = 0; labelIdx < uniqueLabels.size(); labelIdx++) {
+        _labelinfo[uniqueLabels.at((int)labelIdx)] = numhists.at((int)labelIdx);
+    }
+    
+    // write metadata
+    std::cout << "Writing model metadata...\n";
+    AlgSettings alg = {_radius, _neighbors, _grid_x, _grid_y};
+    if(!_model.writeMetadata(alg, _labelinfo)) {
+        CV_Error(Error::StsError, "Failed to write model metadata!");
+    } 
+
+    /*
     String infofilepath(_modelpath + "/" + getModelName() + ".yml");
     FileStorage infofile(infofilepath, FileStorage::WRITE);
     if (!infofile.isOpened())
@@ -1491,17 +1496,26 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     infofile << "numhists" << numhists;
     infofile << "}";
     infofile.release();
+    */
 
-    // lastly we need to set _labelinfo
-    _labelinfo = std::map<int, int>(); // if _labelinfo was set then clear it
-    for(size_t labelIdx = 0; labelIdx < uniqueLabels.size(); labelIdx++) {
-        _labelinfo[uniqueLabels.at((int)labelIdx)] = numhists.at((int)labelIdx);
-    }
-    mmapHistograms();
+    
 
-    std::cout << "Calculating histogram averages...\n";
-    calcHistogramAverages();
-    mmapHistogramAverages();    
+    std::cout << "Calculating label averages...\n";
+    std::vector<Mat> histavgs;
+    calcHistogramAverages(histavgs);
+
+    std::cout << "Writing label averages...\n";
+    if(!_model.saveLabelAverages(histavgs)) {
+        CV_Error(Error::StsError, "Failed to write label averages!");
+    } 
+    
+    std::cout << "Memory mapping all histograms...\n";
+    _model.mmapLabelHistograms(_labelinfo, _histograms);
+    _model.mmapLabelAverages(_labelinfo, _histavgs);
+
+    //mmapHistograms();
+    //mmapHistogramAverages();    
+
 
     if(_useClusters)
         clusterHistograms();
@@ -1515,14 +1529,14 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 // Prediction Functions 
 //------------------------------------------------------------------------------
 
-//TODO: Don't need anymore
+//REMOVE: Don't need anymore since we began using TBB
 void xLBPH::compareHistograms(const Mat &query, const std::vector<Mat> &hists, std::vector<double> &dists) const {
     for(size_t idx = 0; idx < hists.size(); idx++) {
         dists.push_back(compareHist(hists.at((int)idx), query, COMP_ALG));
     } 
 }
 
-//TODO: Don't need anymore
+// REMOVE: Don't need anymore since we began using TBB
 // compares a given set of labels against the given query, each label is represented as a std::pair<int, std::vector<Mat>>
 // where the int is the label and the std::vector<Mat> is that label's histograms
 // TODO: we don't need to provide the histograms for each label, we can just give the label
@@ -1541,22 +1555,6 @@ void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair
     }
 }
 
-// compares a given set of labels against the given query
-// each label is given as just it's integer value, histograms are gathered from _histograms member
-// each label gets a vector of distances as doubles, in the same order as the histograms are in _histograms
-// these distance vectors are compiled into one vector of vectors
-/*
-void xLBPH::compareLabelWithQuery(const Mat &query, const std::vector<int> &labels, std::vector<std::vector<double>> &labeldists) const {
-    
-    //std::map<int, std::vector<Mat>> _histograms;
-    for(size_t idx = 0; idx < labels.size(); idx++) {
-        std::vector<double> dists;
-        performMultithreadedComp<Mat, Mat, double>(query, _hitograms.at((int)idx), dists, getHistThreads(), &xLBPH::compareHistograms);
-        std::sort(dists.begin(), dists.end());
-        labeldists.push_back(dists);
-    }
-}
-*/
 
 //void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const {
 void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const {
