@@ -852,7 +852,7 @@ void xLBPH::clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &cl
 
         //push all of the label clusters to the main clusters
         for(size_t i = 0; i < labelClusters.size(); i++) {
-            _clusters[it.first].push_back(labelClusters.at((int)i));
+            clusters[it.first].push_back(labelClusters.at((int)i));
         }
     //}
     });
