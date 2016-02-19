@@ -153,7 +153,7 @@ private:
     //--------------------------------------------------------------------------
     // Histogram Averages
     bool calcHistogramAverages(std::vector<Mat> &histavgs) const;
-    //void calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) const;
+    void calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) const;
     bool loadHistogramAverages(std::map<int, Mat> &histavgs) const;
     void mmapHistogramAverages();
 
