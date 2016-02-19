@@ -1406,7 +1406,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                 uniqueLabels.push_back(it.first);
                 numhists.push_back((int)imgs.size());
                 std::vector<Mat> hists(concurrent_hists.begin(), concurrent_hists.end());
-                if(!_model.updateLabelHistograms(label), hists)) {
+                if(!_model.updateLabelHistograms(label, hists)) {
                     CV_Error(Error::StsError, "Failed to update label histograms!");
                 } 
                 //writeHistograms(getHistogramFile(it.first), hists, true);
@@ -1456,7 +1456,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                 );
                 
                 std::vector<Mat> hists(concurrent_hists.begin(), concurrent_hists.end());
-                if(!_model.saveLabelHistograms(label), hists)) {
+                if(!_model.saveLabelHistograms(label, hists)) {
                     CV_Error(Error::StsError, "Failed to save label histograms!");
                 } 
                 //writeHistograms(getHistogramFile(label), hists, false);
