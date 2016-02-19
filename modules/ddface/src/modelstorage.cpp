@@ -380,7 +380,7 @@ void ModelStorage::loadMetadata(AlgSettings &alg, std::map<int,int> &labelinfo) 
 // Model Information Function
 //------------------------------------------------------------------------------
 bool ModelStorage::checkModel(const String &name, const String &path) const {
-   printf("Checking model directory at \"%s\"...\n", path.c_str());
+   //printf("Checking model directory at \"%s\"...\n", path.c_str());
    std::vector<String> contents = listdir(path);
    bool check = true;
    for(String file : contents) {
