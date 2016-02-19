@@ -696,7 +696,7 @@ void ModelStorage::mmapLabelClusters(int label, std::vector<cluster::cluster_t> 
    FileNode clusters_node = clusters_metadata["clusters"];
    for(FileNodeIterator it = clusters_node.begin(); it != clusters_node.end(); it++) {
       cluster::idx_cluster_t members;
-      it >> members;
+      *it >> members;
       clusterMembers.push_back(members);
    } 
 
