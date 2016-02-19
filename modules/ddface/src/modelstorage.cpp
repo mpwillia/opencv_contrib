@@ -623,15 +623,6 @@ void ModelStorage::mmapLabelAverages(const std::map<int,int> &labelinfo, std::ma
 // Cluster Read/Write 
 //------------------------------------------------------------------------------
 
-bool ModelStorage::saveClusters(const std::map<int, std::vector<cluster::cluster_t>> &clusters) const {
-   for(std::map<int, std::vector<cluster::cluster_t>>::const_iterator it = clusters.begin(); it != clusters.end(); it++) {
-      if(!writeLabelClusters(it->first, it->second)) {
-         return false; 
-      } 
-   } 
-   return true;
-} 
-
 bool ModelStorage::writeLabelClusters(int label, const std::vector<cluster::cluster_t> &clusters) const {
    
    // if the given file's parent doesn't exist, then make it
@@ -670,6 +661,14 @@ bool ModelStorage::writeLabelClusters(int label, const std::vector<cluster::clus
    return writeHistograms(getLabelClusterAveragesFile(label), clusterAverages, false);
 } 
 
+bool ModelStorage::saveClusters(const std::map<int, std::vector<cluster::cluster_t>> &clusters) const {
+   for(std::map<int, std::vector<cluster::cluster_t>>::const_iterator it = clusters.begin(); it != clusters.end(); it++) {
+      if(!writeLabelClusters(it->first, it->second)) {
+         return false; 
+      } 
+   } 
+   return true;
+} 
 
 //------------------------------------------------------------------------------
 // Memory Mapping Clusters
