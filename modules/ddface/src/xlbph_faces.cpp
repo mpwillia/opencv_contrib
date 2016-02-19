@@ -1480,7 +1480,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     }
     
     // write metadata
-    std::cout << "Writing model metadata...\n";
+    //std::cout << "Writing model metadata...\n";
     AlgSettings alg = {_radius, _neighbors, _grid_x, _grid_y};
     if(!_model.writeMetadata(alg, _labelinfo)) {
         CV_Error(Error::StsError, "Failed to write model metadata!");
@@ -1512,7 +1512,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     std::vector<Mat> histavgs;
     calcHistogramAverages(histavgs);
 
-    std::cout << "Writing label averages...\n";
+    //std::cout << "Writing label averages...\n";
     if(!_model.saveLabelAverages(histavgs)) {
         CV_Error(Error::StsError, "Failed to write label averages!");
     } 
