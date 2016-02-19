@@ -224,7 +224,7 @@ namespace cv { namespace cluster {
         histavg.convertTo(histavg, CV_32FC1);
     }
 
-    void clusterHistograms(const std::vector<Mat> &hists, std::vector<cluster_t> &clusters, const cluster_vars &vars) {
+    void clusterHistograms(const std::vector<Mat> &hists, std::vector<cluster_t> &clusters, const cluster_vars &vars) const {
 
         // calculate hist distances
         Mat dists = Mat::zeros((int)hists.size(), (int)hists.size(), CV_64FC1);
