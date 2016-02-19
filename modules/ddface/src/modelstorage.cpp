@@ -173,12 +173,6 @@ bool ModelStorage::rmr(const String &filepath) const {
 } 
 
 
-bool ModelStorage::parentExists(const String &filepath) const {
-   return fileExists(getFileParent(filepath));
-} 
-
-
-
 
 //------------------------------------------------------------------------------
 // Model Creation/Manipulation Functions 
