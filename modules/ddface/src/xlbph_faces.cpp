@@ -152,7 +152,7 @@ private:
     // Data Management Strategy/Technique Functions
     //--------------------------------------------------------------------------
     // Histogram Averages
-    bool calcHistogramAverages(std::vector<Mat> &histavgs) const;
+    void calcHistogramAverages(std::vector<Mat> &histavgs) const;
     void calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) const;
     bool loadHistogramAverages(std::map<int, Mat> &histavgs) const;
     void mmapHistogramAverages();
@@ -671,7 +671,7 @@ void xLBPH::calcHistogramAverages_thread(const std::vector<int> &labels, std::ve
     } 
 }
 
-bool xLBPH::calcHistogramAverages(std::vector<Mat> &histavgs) const {
+void xLBPH::calcHistogramAverages(std::vector<Mat> &histavgs) const {
         
     tbb::concurrent_vector<std::pair<int, Mat>> concurrent_averages;
 
@@ -684,20 +684,20 @@ bool xLBPH::calcHistogramAverages(std::vector<Mat> &histavgs) const {
         } 
     );
 
-    std::vector<Mat> averages;
+    //std::vector<Mat> averages;
     for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++) {
         int label = it->first; 
 
         //find it in concurrent_averages
         for(tbb::concurrent_vector<std::pair<int, Mat>>::const_iterator avg = concurrent_averages.begin(); avg != concurrent_averages.end(); avg++) {
             if(avg->first == label) {
-                averages.push_back(avg->second);
+                histavgs.push_back(avg->second);
                 break;
             }
         }
     }
-
-    return writeHistograms(getHistogramAveragesFile(), averages, false);
+        
+    //return writeHistograms(getHistogramAveragesFile(), averages, false);
 }
 
 // TODO: Replace with modelstorage
