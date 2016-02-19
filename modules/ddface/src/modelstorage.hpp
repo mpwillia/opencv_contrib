@@ -29,7 +29,8 @@ private:
    String getFileParent(const String &filepath) const;
    std::vector<String> listdir(const String &dirpath) const;
    bool mkdirs(const String &dirpath) const;
-   bool rmr(const String &dirpath) const;
+   bool rmr(const String &filepath) const;
+   bool parentExists(const String &filepath) const;
 
    // Model Creation/Manipulation
    void setModelPath(String path);

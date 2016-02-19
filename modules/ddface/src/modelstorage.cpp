@@ -173,6 +173,10 @@ bool ModelStorage::rmr(const String &filepath) const {
 } 
 
 
+bool ModelStorage::parentExists(const String &filepath) const {
+   return fileExists(getFileParent(filepath));
+} 
+
 
 
 
@@ -539,22 +543,30 @@ bool ModelStorage::readHistograms(const String &filename, std::vector<Mat> &hist
 
 
 bool ModelStorage::writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const {
-    FILE *fp = fopen(filename.c_str(), (appendhists == true ? "a" : "w"));
-    if(fp == NULL) {
-        //std::cout << "cannot open file at '" << filename << "'\n";
-        return false;
-    }
+   
+   // if the given file's parent doesn't exist, then make it
+   if(!fileExists(getFileParent(filename))) {
+      if(!mkdirs(getFileParent(filename))) {
+         return false; 
+      } 
+   } 
 
-    float* buffer = new float[getHistogramSize() * (int)histograms.size()];
-    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
-        float* writeptr = buffer + ((int)sampleIdx * getHistogramSize());
-        memcpy(writeptr, histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
-    }
-    fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
-    delete buffer;
+   FILE *fp = fopen(filename.c_str(), (appendhists == true ? "a" : "w"));
+      if(fp == NULL) {
+      //std::cout << "cannot open file at '" << filename << "'\n";
+      return false;
+   }
 
-    fclose(fp);
-    return true;
+   float* buffer = new float[getHistogramSize() * (int)histograms.size()];
+   for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
+      float* writeptr = buffer + ((int)sampleIdx * getHistogramSize());
+      memcpy(writeptr, histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
+   }
+   fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
+   delete buffer;
+
+   fclose(fp);
+   return true;
 }
 
 //------------------------------------------------------------------------------
