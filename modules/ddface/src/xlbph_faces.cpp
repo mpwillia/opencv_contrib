@@ -160,7 +160,7 @@ private:
     //--------------------------------------------------------------------------
     // Histogram Clustering and Markov Clustering
     //--------------------------------------------------------------------------
-    void clusterHistograms();
+    void clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &clusters) const;
     void cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int numTiers);
     void cluster_dists(Mat &dists, Mat &mclmat, double r);
     void cluster_interpret(Mat &mclmat, std::vector<std::set<int>> &clusters);
@@ -810,7 +810,7 @@ void xLBPH::printMat(const Mat &mat, int label) const {
 //------------------------------------------------------------------------------
 
 // Top level clustering function for training
-void xLBPH::clusterHistograms() {
+void xLBPH::clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &clusters) const {
     /* What is Histogram Clustering?
      * The idea is to group like histograms together
      * Every label has a set of clusters
@@ -1524,8 +1524,16 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     //mmapHistogramAverages();    
 
 
-    if(_useClusters)
-        clusterHistograms();
+    if(_useClusters) {
+        std::map<int, std::vector<cluster::cluster_t>> clusters;
+        clusterHistograms(clusters);
+        
+        if(!_model.saveClusters(clusters)) {
+            CV_Error(Error::StsError, "Failed to write clusters!");
+        } 
+
+        _model.mmapClusters(_labelinfo, _clusters);
+    }
 
     //load();
 

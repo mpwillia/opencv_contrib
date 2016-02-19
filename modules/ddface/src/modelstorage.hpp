@@ -106,18 +106,25 @@ public:
 
    bool loadLabelAverages(std::vector<Mat> &histograms) const;
    bool saveLabelAverages(const std::vector<Mat> &histograms) const;
-   bool updateLabelAverages(const std::vector<Mat> &histograms) const;
+   //bool updateLabelAverages(const std::vector<Mat> &histograms) const;
 
    bool readHistograms(const String &filename, std::vector<Mat> &histograms) const;
    bool writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const;
 
-   // Memory Mapping / Loading
-
+   // Memory Mapping Histograms
    void mmapLabelHistograms(const std::map<int,int> &labelinfo, std::map<int, std::vector<Mat>> &histograms) const;
    void mmapLabelAverages(const std::map<int,int> &labelinfo, std::map<int, Mat> &histavgs) const;
 
-   // TODO
-   // void mmapLabelClusters(const std::map<int,int> &labelinfo, std::map<int, std::vector<cluster::cluster_t>> &clusters) const;
+
+
+   // Reading/Writing Clusters
+   //bool loadLabelClusters(int label, std::vector<cluster::cluster_t> &clusters) const;
+   //bool saveLabelClusters(int label, const std::vector<cluster::cluster_t> &clusters) const;
+   bool saveClusters(const std::map<int, std::vector<cluster::cluster_t>> &clusters) const;
+   bool writeLabelClusters(int label, const std::map<int, std::vector<cluster::cluster_t>>)
+   // Memory Mapping Clusters
+   void mmapLabelClusters(int label, std::vector<cluster::cluster_t> &clusters) const;
+   void mmapClusters(const std::map<int,int> &labelinfo, std::map<int, std::vector<cluster::cluster_t>> &clusters) const;
 
 };
 

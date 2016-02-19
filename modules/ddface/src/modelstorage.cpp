@@ -513,9 +513,11 @@ bool ModelStorage::saveLabelAverages(const std::vector<Mat> &histograms) const {
    return writeHistograms(getLabelAveragesFile(), histograms, false);
 } 
 
+/*
 bool ModelStorage::updateLabelAverages(const std::vector<Mat> &histograms) const {
    return writeHistograms(getLabelAveragesFile(), histograms, true);
 } 
+*/
 
 // Main read/write functions for histograms
 bool ModelStorage::readHistograms(const String &filename, std::vector<Mat> &histograms) const {
@@ -562,6 +564,7 @@ bool ModelStorage::writeHistograms(const String &filename, const std::vector<Mat
    fclose(fp);
    return true;
 }
+
 
 //------------------------------------------------------------------------------
 // Memory Mapping Histograms 
@@ -612,6 +615,128 @@ void ModelStorage::mmapLabelAverages(const std::map<int,int> &labelinfo, std::ma
     }
 } 
 
+
+
+//------------------------------------------------------------------------------
+// Cluster Read/Write 
+//------------------------------------------------------------------------------
+
+bool saveClusters(const std::map<int, std::vector<cluster::cluster_t>> &clusters) const {
+   for(std::map<int, std::vector<cluster::cluster_t>>::const_iterator it = clusters.begin(); it != clusters.end(); i++) {
+      if(!writeLabelClusters(it->first, it->second)) {
+         return false; 
+      } 
+   } 
+   return true;
+} 
+
+bool writeLabelClusters(int label, const std::vector<cluster::cluster_t> &clusters) const {
+   
+   // if the given file's parent doesn't exist, then make it
+   if(!fileExists(getLabelDir(label))) {
+      if(!mkdirs(getLabelDir(label))) {
+         return false; 
+      } 
+   } 
+
+   // first lets break clusters into cluster averages and idx_cluster_t
+   std::vector<Mat> clusterAverages;
+   std::vector<cluster::idx_cluster_t> clusterMembers;
+
+   for(size_t i = 0; i < clusters.size(); i++) {
+      clusterAverages.push_back(clusters.at(i).first);
+      clusterMembers.push_back(clusters.at(i).second);
+   } 
+   
+   // next lets write the .yml portion
+   FileStorage clusters_metadata(getLabelClustersFile(label), FileStorage::WRITE);
+   if(!clusters_metadata.isOpened()) {
+      CV_Error(Error::StsError, "File '"+getLabelClustersFile(label)+"' can't be opened for writing!");
+      return false;
+   }
+
+   // alg settings
+   clusters_metadata << "num_clusters" << (int)clusterMembers.size();
+   clusters_metadata << "clusters" << "[";
+   for(size_t i = 0; i < clusterMembers.size(); i++) {
+      clusters_metadata << clusterMembers.at(i);       
+   }  
+   clusters_metadata << "]";
+   clusters_metadata.release();
+
+   // finally lets write the cluster averages to the .bin
+   return writeHistograms(getLabelClusterAveragesFile(label), clusterAverages, false);
+} 
+
+
+//------------------------------------------------------------------------------
+// Memory Mapping Clusters
+//------------------------------------------------------------------------------
+
+void mmapLabelClusters(int label, std::vector<cluster::cluster_t> &clusters) const {
+   
+   clusters.clear();
+
+   // first thing we should do is read the metadata file
+   if(!fileExists(getLabelClustersFile(label))) {
+      CV_Error(Error::StsError, "File '"+getLabelClustersFile(label)+"' doesn't exist; malformed model!");
+   } 
+
+   FileStorage clusters_metadata(getLabelClustersFile(label), FileStorage::READ);
+   if(!clusters_metadata.isOpened()) {
+      CV_Error(Error::StsError, "File '"+getLabelClustersFile(label)+"' can't be opened for reading!");
+   }
+   
+   int num_clusters = 0;
+   std::vector<cluster::idx_cluster_t> clusterMembers;
+
+   clusters_metadata["num_clusters"] >> num_clusters;
+   
+   FileNode clusters_node = clusters_metadata["clusters"];
+   for(FileNodeIterator it = clusters_node.begin(); it != clusters_node.end(); it++) {
+      cluster::idx_cluster_t members;
+      it >> members;
+      clusterMembers.push_back(members);
+   } 
+
+   clusters_metadata.release();
+
+   // finally mmap cluster averages 
+   std::vector<Mat> clusterAverages;
+
+   // open cluster averages file
+   String filename = getLabelClusterAveragesFile(label);
+   int fd = open(filename.c_str(), O_RDONLY);
+   if(fd < 0)
+      CV_Error(Error::StsError, "Cannot open histogram file '"+filename+"'");
+   
+   // get mapped pointer to start of file
+   unsigned char* mapPtr = (unsigned char*)mmap(NULL, getHistogramSize() * num_clusters * SIZEOF_CV_32FC1, PROT_READ, MAP_PRIVATE, fd, 0);
+   if(mapPtr == MAP_FAILED)
+      CV_Error(Error::StsError, "Cannot mem map file '"+filename+"'");
+   
+   // map each cluster and add to our vector
+   for(int i = 0; i < num_clusters; i++) {
+      Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * SIZEOF_CV_32FC1 * i));
+      clusterAverages.push_back(mat);
+   } 
+
+   CV_Assert((int)clusterMembers.size() == (int)clusterAverages.size());
+
+   for(size_t i = 0; i < clusterMembers.size(); i++) {
+      clusters.push_back(cluster::cluster_t(clusterAverages.at(i), clusterMembers.at(i)));
+   } 
+   
+} 
+
+void mmapClusters(const std::map<int,int> &labelinfo, std::map<int, std::vector<cluster::cluster_t>> &clusters) const {
+   clusters.clear();
+   for(std::map<int, int>::const_iterator it = labelinfo.begin(); it != labelinfo.end(); ++it) {
+      std::vector<cluster::cluster_t> labelClusters;
+      mmapLabelClusters(it->first, labelClusters);
+      clusters[it->first] = labelClusters;
+   }
+} 
 
 //------------------------------------------------------------------------------
 // ModelStorage Test Function
