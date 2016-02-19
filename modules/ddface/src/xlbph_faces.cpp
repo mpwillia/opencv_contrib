@@ -672,15 +672,18 @@ void xLBPH::calcHistogramAverages_thread(const std::vector<int> &labels, std::ve
 }
 
 void xLBPH::calcHistogramAverages(std::vector<Mat> &histavgs) const {
-        
+    
+    int histsize = getHistogramSize();
+
     tbb::concurrent_vector<std::pair<int, Mat>> concurrent_averages;
 
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(),
-        [&concurrent_averages](std::pair<int, std::vector<Mat>> it) {
+        [&concurrent_averages, histsize](std::pair<int, std::vector<Mat>> it) {
             //Mat histavg;
             //this->averageHistograms(it.second, histavg);
-
-            Mat histavg = Mat::zeros(1, getHistogramSize(), CV_64FC1);
+            
+            std::vector<Mat> hists = it.second;
+            Mat histavg = Mat::zeros(1, histsize, CV_64FC1);
 
             for(size_t idx = 0; idx < hists.size(); idx++) {
                 Mat dst;
