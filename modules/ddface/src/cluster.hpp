@@ -27,7 +27,7 @@ namespace cv { namespace cluster {
         double mcl_prune_min;
     };
 
-    void clusterHistograms(const std::vector<Mat> &hists, std::vector<cluster_t> &clusters, const cluster_vars &vars) const;
+    void clusterHistograms(const std::vector<Mat> &hists, std::vector<cluster_t> &clusters, const cluster_vars &vars);
     
 }}
 

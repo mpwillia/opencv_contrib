@@ -839,7 +839,7 @@ void xLBPH::clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &cl
                                     mcl_prune_min};
 
         std::vector<cluster::cluster_t> labelClusters;
-        cluster::clusterHistograms(_histograms[it.first], labelClusters, vars);
+        cluster::clusterHistograms(_histograms.at(it.first), labelClusters, vars);
         
 
         if((int)labelClusters.size() <= 0) {
