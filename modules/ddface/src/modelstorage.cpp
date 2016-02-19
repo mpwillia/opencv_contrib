@@ -623,8 +623,8 @@ void ModelStorage::mmapLabelAverages(const std::map<int,int> &labelinfo, std::ma
 // Cluster Read/Write 
 //------------------------------------------------------------------------------
 
-bool saveClusters(const std::map<int, std::vector<cluster::cluster_t>> &clusters) const {
-   for(std::map<int, std::vector<cluster::cluster_t>>::const_iterator it = clusters.begin(); it != clusters.end(); i++) {
+bool ModelStorage::saveClusters(const std::map<int, std::vector<cluster::cluster_t>> &clusters) const {
+   for(std::map<int, std::vector<cluster::cluster_t>>::const_iterator it = clusters.begin(); it != clusters.end(); it++) {
       if(!writeLabelClusters(it->first, it->second)) {
          return false; 
       } 
@@ -632,7 +632,7 @@ bool saveClusters(const std::map<int, std::vector<cluster::cluster_t>> &clusters
    return true;
 } 
 
-bool writeLabelClusters(int label, const std::vector<cluster::cluster_t> &clusters) const {
+bool ModelStorage::writeLabelClusters(int label, const std::vector<cluster::cluster_t> &clusters) const {
    
    // if the given file's parent doesn't exist, then make it
    if(!fileExists(getLabelDir(label))) {
@@ -675,7 +675,7 @@ bool writeLabelClusters(int label, const std::vector<cluster::cluster_t> &cluste
 // Memory Mapping Clusters
 //------------------------------------------------------------------------------
 
-void mmapLabelClusters(int label, std::vector<cluster::cluster_t> &clusters) const {
+void ModelStorage::mmapLabelClusters(int label, std::vector<cluster::cluster_t> &clusters) const {
    
    clusters.clear();
 
@@ -731,7 +731,7 @@ void mmapLabelClusters(int label, std::vector<cluster::cluster_t> &clusters) con
    
 } 
 
-void mmapClusters(const std::map<int,int> &labelinfo, std::map<int, std::vector<cluster::cluster_t>> &clusters) const {
+void ModelStorage::mmapClusters(const std::map<int,int> &labelinfo, std::map<int, std::vector<cluster::cluster_t>> &clusters) const {
    clusters.clear();
    for(std::map<int, int>::const_iterator it = labelinfo.begin(); it != labelinfo.end(); ++it) {
       std::vector<cluster::cluster_t> labelClusters;

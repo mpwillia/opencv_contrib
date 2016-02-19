@@ -123,7 +123,7 @@ public:
    //bool loadLabelClusters(int label, std::vector<cluster::cluster_t> &clusters) const;
    //bool saveLabelClusters(int label, const std::vector<cluster::cluster_t> &clusters) const;
    bool saveClusters(const std::map<int, std::vector<cluster::cluster_t>> &clusters) const;
-   bool writeLabelClusters(int label, const std::map<int, std::vector<cluster::cluster_t>>)
+   bool writeLabelClusters(int label, const std::map<int, std::vector<cluster::cluster_t>>);
    // Memory Mapping Clusters
    void mmapLabelClusters(int label, std::vector<cluster::cluster_t> &clusters) const;
    void mmapClusters(const std::map<int,int> &labelinfo, std::map<int, std::vector<cluster::cluster_t>> &clusters) const;
