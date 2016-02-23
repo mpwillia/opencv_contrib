@@ -1881,7 +1881,6 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
     _preds.create(numPreds, 2, CV_64FC1);
     Mat preds = _preds.getMat();
 
-
     //std::cout << "\nBest Prediction by PID:\n";
     int i = 0;
     for(tbb::concurrent_vector<std::pair<double, int>>::const_iterator it = bestpreds.begin(); it != bestpreds.end(); ++it) {
@@ -1893,7 +1892,7 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
             i++;
         }
     }
-
+    
 }
 
 void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) const {
@@ -1901,7 +1900,41 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) cons
     for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
         labels.push_back(it->first);
 
-    predictMulti(_src, _preds, numPreds, labels);
+    if(_src.isMatVector()) {
+        // extract each image in _src
+        std::vector<Mat> srcImages;
+        _src.getMatVector(srcImages);
+        
+
+        // setup for concurrency
+        tbb::concurrent_vector<Mat> images;
+        for(std::vector<Mat>::const_iterator it = srcImages.begin(); it != srcImages.end(); it++) {
+            images.push_back(*it);
+        }
+        
+        // begin prediction
+        tbb::concurrent_vector<Mat> allPreds;
+        tbb::parallel_for_each(images.begin(), images.end(),
+            [&allPreds, &labels, &numPreds, this](Mat image) {
+
+                Mat pred;
+                predictMulti(image, pred, numPreds, labels);
+                allPreds.push_back(pred);
+
+            }
+        );
+
+        // set output array
+        std::vector<Mat> preds;
+        for(tbb::concurrent_vector<Mat>::const_iterator it = preds.begin(); it != preds.end(); ++it) {
+            preds.push_back(*it);
+        }
+
+        _preds.setTo(preds);
+
+    }
+    else
+        predictMulti(_src, _preds, numPreds, labels);
 }
 
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
