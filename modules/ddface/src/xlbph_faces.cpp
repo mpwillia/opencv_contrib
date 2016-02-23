@@ -1926,7 +1926,7 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) cons
 
         // set output array
         std::vector<Mat> preds;
-        for(tbb::concurrent_vector<Mat>::const_iterator it = preds.begin(); it != preds.end(); ++it) {
+        for(tbb::concurrent_vector<Mat>::const_iterator it = allPreds.begin(); it != allPreds.end(); ++it) {
             preds.push_back(*it);
         }
 
