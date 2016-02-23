@@ -952,13 +952,13 @@ void xLBPH::load() {
     _model.loadMetadata(alg, _labelinfo);
     
     _radius = alg.radius;
-    _neighbors = alg.enighbors;
+    _neighbors = alg.neighbors;
     _grid_x = alg.grid_x;
     _grid_y = alg.grid_y;
 
     _model.mmapLabelHistograms(_labelinfo, _histograms);
     _model.mmapLabelAverages(_labelinfo, _histavgs);
-    _model.mmapClusters(labelinfo, _clusters);
+    _model.mmapClusters(_labelinfo, _clusters);
 
     /*
     // load data from the info file
