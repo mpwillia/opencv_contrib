@@ -333,7 +333,7 @@ void xLBPH::getLabelInfo(OutputArray output) const {
     for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++) {
         outmat.at<int>(i, 0) = it->first;
         outmat.at<int>(i, 1) = it->second;
-        i++
+        i++;
     } 
         
 } 
