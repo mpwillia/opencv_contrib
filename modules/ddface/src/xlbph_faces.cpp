@@ -947,7 +947,20 @@ void xLBPH::clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &cl
 //------------------------------------------------------------------------------
 // TODO: Updated for modelstorage 
 void xLBPH::load() {
-     
+
+    AlgSettings alg;
+    _model.loadMetadata(alg, _labelinfo);
+    
+    _radius = alg.radius;
+    _neighbors = alg.enighbors;
+    _grid_x = alg.grid_x;
+    _grid_y = alg.grid_y;
+
+    _model.mmapLabelHistograms(_labelinfo, _histograms);
+    _model.mmapLabelAverages(_labelinfo, _histavgs);
+    _model.mmapClusters(labelinfo, _clusters);
+
+    /*
     // load data from the info file
     std::cout << "loading info file...\n";
     FileStorage infofile(getInfoFile(), FileStorage::READ);
@@ -977,6 +990,7 @@ void xLBPH::load() {
     // mem map histograms
     mmapHistograms();
     mmapHistogramAverages();
+    */
 }
 
 
