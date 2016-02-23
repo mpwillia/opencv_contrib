@@ -310,7 +310,7 @@ public:
 
     // Long awaited getters
     // Broad Information Getters
-    std::map<int,int> getLabelInfo() const;
+    void getLabelInfo(OutputArray labelinfo) const;
     int getNumLabels() const;
     int getTotalHists() const;
 
@@ -324,8 +324,18 @@ public:
 };
 
 // Broad Info Getters
-std::map<int,int> xLBPH::getLabelInfo() const {
-    return _labelinfo;
+void xLBPH::getLabelInfo(OutputArray output) const {
+    
+    output.create((int)_labelinfo.size(), 2, CV_32SC1);
+    Mat outmat = output.getMat();
+    
+    int i = 0;
+    for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++) {
+        outmat.at<int>(i, 0) = it->first;
+        outmat.at<int>(i, 1) = it->second;
+        i++
+    } 
+        
 } 
 
 int xLBPH::getNumLabels() const {
@@ -1832,13 +1842,13 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
             _grid_y, /* grid size y */
             true /* normed histograms */);
     
-    printf("Extracting labels...\n");
+    printf("Extracting labels to consider...\n");
     // Gets the list of labels to check
     Mat labelsMat = _labels.getMat();
     std::vector<int> labels;
     for(size_t labelIdx = 0; labelIdx < labelsMat.total(); labelIdx++)
         labels.push_back(labelsMat.at<int>((int)labelIdx));
-    printf("Found %d labels...\n", (int)labels.size());
+    printf("Considering %d labels out of %d labels total...\n", (int)labels.size(), (int)_labelinfo.size());
 
 
     printf("Calling prediction algorithm...\n");

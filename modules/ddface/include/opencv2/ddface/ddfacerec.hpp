@@ -58,7 +58,8 @@ public:
     CV_WRAP virtual void setClusterSettings(double tierStep, int numTiers, int maxIters) = 0;
     
     // Broad Information Getters
-    CV_WRAP virtual std::map<int,int> getLabelInfo() const = 0;
+    CV_WRAP virtual void getLabelInfo(OutputArray labelinfo) const = 0;
+    //CV_WRAP virtual std::map<int,int> getLabelInfo() const = 0;
     CV_WRAP virtual int getNumLabels() const = 0;
     CV_WRAP virtual int getTotalHists() const = 0;
 
