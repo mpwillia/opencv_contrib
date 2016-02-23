@@ -290,7 +290,7 @@ public:
     String getHistogramFile(int label) const;
     String getHistogramAveragesFile() const;
 
-    void setAlgToUse(int alg);
+    // REMOVE: no longer needed since we use TBB
     void setNumThreads(int numThreads);
 
     //--------------------------------------------------------------------------
@@ -298,16 +298,68 @@ public:
     // NOTE: Remember to add header to opencv2/face/facerec.hpp
     //--------------------------------------------------------------------------
     
+    //Prediction Algorithm Settings
+    void setAlgToUse(int alg);
     void setLabelsToCheck(int min, double ratio);
     void setClustersToCheck(int min, double ratio);
     void setMCLSettings(int numIters, int e, double r);
     void setClusterSettings(double tierStep, int numTiers, int maxIters);
 
+    // ???: do we need this anymore?
     void setUseClusters(bool flag);
+
+    // Long awaited getters
+    // Broad Information Getters
+    std::map<int,int> getLabelInfo() const;
+    int getNumLabels() const;
+    int getTotalHists() const;
+
+    // Label Specific Information Getters
+    bool isTrainedFor(int label) const;
+    int getNumHists(int label) const;
+    int getNumClusters(int label) const;
+
     void test();
 
 };
 
+// Broad Info Getters
+std::map<int,int> xLBPH::getLabelInfo() const {
+    return _labelinfo;
+} 
+
+int xLBPH::getNumLabels() const {
+    return (int)_labelinfo.size();
+} 
+
+int xLBPH::getTotalHists() const {
+    int sum = 0;
+    for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
+        sum += it->second; 
+    return sum;
+} 
+
+// Label Specific Info Getters
+bool xLBPH::isTrainedFor(int label) const {
+    return _labelinfo.find(label) != _labelinfo.end();
+} 
+
+int xLBPH::getNumHists(int label) const {
+    if(isTrainedFor(label))
+        return _labelinfo.at(label);
+    else
+        return -1;
+} 
+
+int xLBPH::getNumClusters(int label) const {
+    if(isTrainedFor(label))
+        return (int)_clusters.at(label).size();
+    else
+        return -1;
+} 
+
+
+// Prediction Algorithm Settings
 void xLBPH::setUseClusters(bool flag) {
     _useClusters = flag;
 }

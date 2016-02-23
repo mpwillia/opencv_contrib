@@ -47,14 +47,28 @@ public:
     CV_WRAP virtual String getHistogramFile(int label) const = 0;
     CV_WRAP virtual String getHistogramAveragesFile() const = 0;
     
-    CV_WRAP virtual void setAlgToUse(int alg) = 0;
+    // REMOVE: no longer needed since we use TBB
     CV_WRAP virtual void setNumThreads(int numThreads) = 0;
-
+    
+    // Prediction Algorithm Settings
+    CV_WRAP virtual void setAlgToUse(int alg) = 0;
     CV_WRAP virtual void setLabelsToCheck(int min, double ratio) = 0;
     CV_WRAP virtual void setClustersToCheck(int min, double ratio) = 0;
     CV_WRAP virtual void setMCLSettings(int numIters, int e, double r) = 0;
     CV_WRAP virtual void setClusterSettings(double tierStep, int numTiers, int maxIters) = 0;
+    
+    // Broad Information Getters
+    CV_WRAP virtual std::map<int,int> getLabelInfo() const = 0;
+    CV_WRAP virtual int getNumLabels() const = 0;
+    CV_WRAP virtual int getTotalHists() const = 0;
 
+    // Label Specific Information Getters
+    CV_WRAP virtual bool isTrainedFor(int label) const = 0;
+    CV_WRAP virtual int getNumHists(int label) const = 0;
+    CV_WRAP virtual int getNumClusters(int label) const = 0;
+
+
+    // ???: do we need this anymore?
     CV_WRAP virtual void setUseClusters(bool flag) = 0;
 
     CV_WRAP virtual void load() = 0;
