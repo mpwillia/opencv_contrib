@@ -1900,17 +1900,17 @@ void xLBPH::predictMulti(std::vector<Mat> _src, std::vector<Mat> _preds, int num
 
     // setup for concurrency
     tbb::concurrent_vector<Mat> images;
-    for(std::vector<Mat>::const_iterator it = srcImages.begin(); it != srcImages.end(); it++) {
+    for(std::vector<Mat>::const_iterator it = _src.begin(); it != _src.end(); it++) {
         images.push_back(*it);
     }
     
     // begin prediction
     tbb::concurrent_vector<Mat> allPreds;
     tbb::parallel_for_each(images.begin(), images.end(),
-        [&allPreds, &labels, &numPreds, this](Mat image) {
+        [&allPreds, &_labels, &numPreds, this](Mat image) {
 
             Mat pred;
-            predictMulti(image, pred, numPreds, labels);
+            predictMulti(image, pred, numPreds, _labels);
             allPreds.push_back(pred);
 
         }
