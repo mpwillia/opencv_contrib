@@ -1895,46 +1895,40 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
     
 }
 
+void xLBPH::predictMulti(std::vector<Mat> _src, std::vector<Mat> _preds, int numPreds, InputArray _labels) const {
+
+    // setup for concurrency
+    tbb::concurrent_vector<Mat> images;
+    for(std::vector<Mat>::const_iterator it = srcImages.begin(); it != srcImages.end(); it++) {
+        images.push_back(*it);
+    }
+    
+    // begin prediction
+    tbb::concurrent_vector<Mat> allPreds;
+    tbb::parallel_for_each(images.begin(), images.end(),
+        [&allPreds, &labels, &numPreds, this](Mat image) {
+
+            Mat pred;
+            predictMulti(image, pred, numPreds, labels);
+            allPreds.push_back(pred);
+
+        }
+    );
+
+    // set output array
+    for(tbb::concurrent_vector<Mat>::const_iterator it = allPreds.begin(); it != allPreds.end(); ++it) {
+        _preds.push_back(*it);
+    }
+
+}
+
+
 void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds) const {
     std::vector<int> labels;
     for(std::map<int,int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
         labels.push_back(it->first);
 
-    if(_src.isMatVector()) {
-        // extract each image in _src
-        std::vector<Mat> srcImages;
-        _src.getMatVector(srcImages);
-        
-
-        // setup for concurrency
-        tbb::concurrent_vector<Mat> images;
-        for(std::vector<Mat>::const_iterator it = srcImages.begin(); it != srcImages.end(); it++) {
-            images.push_back(*it);
-        }
-        
-        // begin prediction
-        tbb::concurrent_vector<Mat> allPreds;
-        tbb::parallel_for_each(images.begin(), images.end(),
-            [&allPreds, &labels, &numPreds, this](Mat image) {
-
-                Mat pred;
-                predictMulti(image, pred, numPreds, labels);
-                allPreds.push_back(pred);
-
-            }
-        );
-
-        // set output array
-        std::vector<Mat> preds;
-        for(tbb::concurrent_vector<Mat>::const_iterator it = allPreds.begin(); it != allPreds.end(); ++it) {
-            preds.push_back(*it);
-        }
-
-        _preds.setTo(preds);
-
-    }
-    else
-        predictMulti(_src, _preds, numPreds, labels);
+    predictMulti(_src, _preds, numPreds, labels);
 }
 
 void xLBPH::predict(InputArray _src, int &minClass, double &minDist) const {
