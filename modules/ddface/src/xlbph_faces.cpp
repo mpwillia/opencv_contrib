@@ -266,7 +266,7 @@ public:
     // predictMulti
     void predictMulti(InputArray _src, OutputArray _preds, int numPreds) const;
     void predictMulti(InputArray _src, OutputArray _preds, int numPreds, InputArray _labels) const;
-    void predictMulti(std::vector<Mat> _src, std::vector<Mat> _preds, int numPreds, InputArray _labels) const;
+    void predictAll(std::vector<Mat> _src, std::vector<Mat> _preds, int numPreds, InputArray _labels) const;
 
     // See FaceRecognizer::load.
     void load(const FileStorage& fs);
@@ -1896,7 +1896,7 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
     
 }
 
-void xLBPH::predictMulti(std::vector<Mat> _src, std::vector<Mat> _preds, int numPreds, InputArray _labels) const {
+void xLBPH::predictAll(std::vector<Mat> _src, std::vector<Mat> _preds, int numPreds, InputArray _labels) const {
 
     // setup for concurrency
     tbb::concurrent_vector<Mat> images;
