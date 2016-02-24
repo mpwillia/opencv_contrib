@@ -76,7 +76,7 @@ public:
     
     CV_WRAP virtual void predictMulti(InputArray _src, OutputArray _preds, int numPreds) const = 0;
     CV_WRAP virtual void predictMulti(InputArray _src, OutputArray _preds, int numPreds, InputArray _labels) const = 0;
-    CV_WRAP virtual void predictAll(std::vector<Mat> _src, std::vector<Mat> _preds, int numPreds, InputArray _labels) const = 0;
+    CV_WRAP virtual void predictAll(std::vector<Mat> &_src, std::vector<Mat> &_preds, int numPreds, InputArray _labels) const = 0;
 
 };
 CV_EXPORTS_W Ptr<xLBPHFaceRecognizer> createxLBPHFaceRecognizer(int radius=1, int neighbors=8, int grid_x=8, int grid_y=8, double threshold = DBL_MAX, String modelpath="");
