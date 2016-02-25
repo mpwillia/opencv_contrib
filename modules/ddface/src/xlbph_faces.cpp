@@ -1921,7 +1921,16 @@ void xLBPH::predictAll(std::vector<Mat> &_src, std::vector<Mat> &_preds, int num
         _preds.push_back(*it);
     }
 
-    
+
+    printf("Predictions\n");
+    for(int i = 0; i < (int)_preds.size(); i++) {
+        printf(" - %d\n", i);
+        Mat pred = _preds.at(i);
+        for(int j = 0; j < pred.rows; j++) {
+            printf("[%5d, %5.3f]\n", (int)pred.at<double>(j, 1), pred.at<double>(j, 0));
+        } 
+    } 
+    printf("\n");
 
 }
 
