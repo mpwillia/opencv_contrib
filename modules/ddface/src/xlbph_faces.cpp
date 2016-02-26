@@ -127,7 +127,7 @@ private:
     double labelsToCheckRatio = 0.05;
 
     int minClustersToCheck = 3;
-    double clustersToCheckRatio = 0.10;
+    double clustersToCheckRatio = 0.20;
 
     //void predict_cluster(InputArray _src, int &label, double &dist) const;
 
