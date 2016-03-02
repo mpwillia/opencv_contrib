@@ -904,7 +904,8 @@ void xLBPH::clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &cl
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(), 
         [&](std::pair<int, std::vector<Mat>> it) {
     //for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
-        std::cout << "Clustering histograms " << count++ << " / " << (int)_histograms.size() << "                                      \r" << std::flush;
+        printf("\rClustering histograms %d / %d %20s", count++, (int)_histograms.size(), " ");
+        std::cout << std::flush;
 
         cluster::cluster_vars vars = {cluster_tierStep, 
                                     cluster_numTiers, 
@@ -937,7 +938,7 @@ void xLBPH::clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &cl
         CV_Error(Error::StsError, "Error clustering histograms!!!"); 
     } 
 
-    printf("Finished clustering histograms for %d labels                                                       \n", (int)_histograms.size());
+    printf("Finished clustering histograms for %d %30s\n", (int)_histograms.size(), " ");
 
 }
 
@@ -1376,7 +1377,7 @@ void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &d
 void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat>>> &labelImages, std::vector<std::pair<int, int>> &labelinfo) const {
     
     for(size_t idx = 0; idx < labelImages.size(); idx++) {
-        std::cout << "Calculating histograms " << (int)idx << " / " << (int)labelImages.size() << "          \r" << std::flush;
+        std::cout << "\rCalculating histograms " << (int)idx << " / " << (int)labelImages.size() << "          " << std::flush;
         int label = labelImages.at((int)idx).first;
         std::vector<Mat> imgs = labelImages.at((int)idx).second;
         
