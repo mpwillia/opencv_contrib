@@ -458,7 +458,7 @@ void xLBPH::setAlgToUse(int alg) {
     _algToUse = alg; 
 }
 
-int getAlgUsed() const {
+int xLBPH::getAlgUsed() const {
     return _algToUse;
 } 
 
