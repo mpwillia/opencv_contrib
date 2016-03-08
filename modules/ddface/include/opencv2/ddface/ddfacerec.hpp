@@ -50,18 +50,31 @@ public:
     // REMOVE: no longer needed since we use TBB
     CV_WRAP virtual void setNumThreads(int numThreads) = 0;
     
-    // Prediction Algorithm Settings
+    // Prediction Algorithm Setters
     CV_WRAP virtual void setAlgToUse(int alg) = 0;
     CV_WRAP virtual void setLabelsToCheck(int min, double ratio) = 0;
     CV_WRAP virtual void setClustersToCheck(int min, double ratio) = 0;
     CV_WRAP virtual void setMCLSettings(int numIters, int e, double r) = 0;
     CV_WRAP virtual void setClusterSettings(double tierStep, int numTiers, int maxIters) = 0;
-    
+
+    // Prediction Algorithm Getters
+    CV_WRAP virtual int getAlgUsed() const = 0;
+    CV_WRAP virtual int getLabelsToCheckMin() const = 0;
+    CV_WRAP virtual double getLabelsToCheckRatio() const = 0;
+    CV_WRAP virtual int getClustersToCheckMin() const = 0;
+    CV_WRAP virtual double getClustersToCheckRatio() const = 0;
+    CV_WRAP virtual int getMCLIters() const = 0;
+    CV_WRAP virtual int getMCLExpansionPower() const = 0;
+    CV_WRAP virtual double getMCLInflationPower() const = 0;
+    CV_WRAP virtual double getClusterTierStep() const = 0;
+    CV_WRAP virtual int getClusterNumTiers() const = 0;
+    CV_WRAP virtual int getClusterMaxIters() const = 0;
+
     // Broad Information Getters
     CV_WRAP virtual void getLabelInfo(OutputArray labelinfo) const = 0;
-    //CV_WRAP virtual std::map<int,int> getLabelInfo() const = 0;
     CV_WRAP virtual int getNumLabels() const = 0;
     CV_WRAP virtual int getTotalHists() const = 0;
+
 
     // Label Specific Information Getters
     CV_WRAP virtual bool isTrainedFor(int label) const = 0;
@@ -73,7 +86,9 @@ public:
     CV_WRAP virtual void setUseClusters(bool flag) = 0;
 
     CV_WRAP virtual void load() = 0;
-    
+
+
+    // Core Prediction Algorithms
     CV_WRAP virtual void predictMulti(InputArray _src, OutputArray _preds, int numPreds) const = 0;
     CV_WRAP virtual void predictMulti(InputArray _src, OutputArray _preds, int numPreds, InputArray _labels) const = 0;
     CV_WRAP virtual void predictAll(std::vector<Mat> &_src, std::vector<Mat> &_preds, int numPreds, InputArray _labels) const = 0;

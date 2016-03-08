@@ -98,41 +98,29 @@ private:
 
     void calculateLabels(const std::vector<std::pair<int, std::vector<Mat>>> &labelImages, std::vector<std::pair<int, int>> &labelinfo) const;
     void calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) const;
-    //void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst, bool makeThreads = false);
-    //void calculateHistograms_multithreaded(const std::vector<Mat> &images, std::vector<Mat> &histsdst);
-    //void trainLabel_multithreaded(std::vector<Mat> &images, std::vector<Mat> &histsdst);
 
     //--------------------------------------------------------------------------
     // Prediction Functions
     //--------------------------------------------------------------------------
-    /*
-    void predict_std(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const;
-    void predict_avg(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const;
-    void predict_avg_clustering(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const;
-    */ 
-
     void predict_std(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const;
     void predict_avg(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const;
     void predict_avg_clustering(InputArray _src, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const;
-    /*
-    void predict_avg(InputArray _src, int &label, double &dist) const;
-    void predict_avg_clustering(InputArray _query, int &minClass, double &minDist) const;
-    */
 
     void compareLabelHistograms(const Mat &query, const std::vector<std::pair<int, std::vector<Mat>>> &labelhists, std::vector<std::pair<int, std::vector<double>>> &labeldists) const;
-    //void compareLabelWithQuery(const Mat &query, const std::vector<int> &labels, std::vector<std::vector<double>> &labeldists) const;
     void compareHistograms(const Mat &query, const std::vector<Mat> &hists, std::vector<double> &dists) const;
-    
+
+
     int minLabelsToCheck = 10;
     double labelsToCheckRatio = 0.05;
 
     int minClustersToCheck = 3;
     double clustersToCheckRatio = 0.20;
 
-    //void predict_cluster(InputArray _src, int &label, double &dist) const;
 
     //--------------------------------------------------------------------------
     // Managing Histogram Binary Files 
+    // REMOVE: None of this sshould really be needed anymore 
+    //         it should all be abstracted away with ModelStorage
     //--------------------------------------------------------------------------
     // Reading/Writing Histogram Files
     bool readHistograms(const String &filename, std::vector<Mat> &histograms) const;
@@ -153,12 +141,21 @@ private:
     //--------------------------------------------------------------------------
     // Histogram Averages
     void calcHistogramAverages(std::vector<Mat> &histavgs) const;
+
+    // REMOVE: Multithreading handled by TBB now
     void calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) const;
+
+    // REMOVE: mmaping and loading should now be handled by ModelStorage
     bool loadHistogramAverages(std::map<int, Mat> &histavgs) const;
     void mmapHistogramAverages();
 
     //--------------------------------------------------------------------------
     // Histogram Clustering and Markov Clustering
+    // REMOVE: All of the clustering should now be in cluster.hpp and mcl.hpp
+    //         where cluster.hpp is the main entry/exit point for clustering
+    //         and mcl.hpp is the core MCL clustering algorithm. 
+    //         cluster.hpp wraps mcl.hpp and hsould in theory be able to support
+    //         aditional clustering algorithms without changing the entry/exit headers.
     //--------------------------------------------------------------------------
     void clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &clusters) const;
     void cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int numTiers);
@@ -171,9 +168,12 @@ private:
     //void cluster_label(int label, std::vector<std::set<int>> &clusters);
 
     //void cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>>> &clusters);
-
+        
+    // NOTE: This could still be useful
     void printMat(const Mat &mat, int label) const;
     
+    // NOTE: Both the clustering ahd MCL settings are still used
+    // IDEA: Perhaps we can abstract these both away in cluster.hpp and mcl.hpp?
     // Histogram Clustering - Settings
     double cluster_tierStep = 0.01; // Sets how large a tier is, default is 0.01 or 1%
     int cluster_numTiers = 10; // Sets how many tiers to keep, default is 10, or 10% max tier
@@ -190,6 +190,7 @@ private:
 
     //--------------------------------------------------------------------------
     // Misc 
+    // ???: How much of this is still needed?
     //--------------------------------------------------------------------------
     bool exists(const String &filename) const;
     int getHistogramSize() const;
@@ -249,6 +250,8 @@ public:
 
     ~xLBPH() { }
 
+    //TODO: Clean all of this up and add more subheadings to make it easier to read
+
     // Computes a xLBPH model with images in src and
     // corresponding labels in labels.
     void train(InputArrayOfArrays src, InputArray labels);
@@ -283,6 +286,8 @@ public:
     CV_IMPL_PROPERTY(double, Threshold, _threshold)
    
     // path getters/setters
+    // REMOVE: All of these should be abstracted away by ModelStorage and there
+    //         is no reason an external class should be dipping into the model
     void setModelPath(String modelpath);
     String getModelPath() const;
     String getModelName() const;
@@ -299,12 +304,25 @@ public:
     // NOTE: Remember to add header to opencv2/face/facerec.hpp
     //--------------------------------------------------------------------------
     
-    //Prediction Algorithm Settings
+    //Prediction Algorithm Setters
     void setAlgToUse(int alg);
     void setLabelsToCheck(int min, double ratio);
     void setClustersToCheck(int min, double ratio);
     void setMCLSettings(int numIters, int e, double r);
     void setClusterSettings(double tierStep, int numTiers, int maxIters);
+    
+    //Prediction Algorithm Getters
+    int getAlgUsed() const;
+    int getLabelsToCheckMin() const;
+    double getLabelsToCheckRatio() const;
+    int getClustersToCheckMin() const;
+    double getClustersToCheckRatio() const;
+    int getMCLIters() const;
+    int getMCLExpansionPower() const;
+    double getMCLInflationPower() const;
+    double getClusterTierStep() const;
+    int getClusterNumTiers() const;
+    int getClusterMaxIters() const;
 
     // ???: do we need this anymore?
     void setUseClusters(bool flag);
@@ -320,9 +338,12 @@ public:
     int getNumHists(int label) const;
     int getNumClusters(int label) const;
 
+
+
     void test();
 
 };
+
 
 // Broad Info Getters
 void xLBPH::getLabelInfo(OutputArray output) const {
@@ -369,8 +390,11 @@ int xLBPH::getNumClusters(int label) const {
         return -1;
 } 
 
+// predicion Algorithm Getters
 
-// Prediction Algorithm Settings
+
+
+// Prediction Algorithm Setters/Getters
 void xLBPH::setUseClusters(bool flag) {
     _useClusters = flag;
 }
@@ -380,23 +404,32 @@ void xLBPH::setClusterSettings(double tierStep, int numTiers, int maxIters) {
     cluster_numTiers = numTiers;
     cluster_max_iterations = maxIters;
 } 
+double xLBPH::getClusterTierStep() const {return cluster_tierStep;}
+int xLBPH::getClusterNumTiers() const {return cluster_numTiers;}
+int xLBPH::getClusterMaxIters() const {return cluster_max_iterations;}
 
 void xLBPH::setMCLSettings(int numIters, int e, double r) {
     mcl_iterations = numIters;
     mcl_expansion_power = e;
     mcl_inflation_power = r;
 }
+int xLBPH::getMCLIters() const {return mcl_iterations;}
+int xLBPH::getMCLExpansionPower() const {return mcl_expansion_power;}
+double xLBPH::getMCLInflationPower() const {return mcl_inflation_power;}
 
 void xLBPH::setLabelsToCheck(int min, double ratio) {
     minLabelsToCheck = min;
     labelsToCheckRatio = ratio;
 } 
+int xLBPH::getLabelsToCheckMin() const {return minLabelsToCheck;} 
+double xLBPH::getLabelsToCheckRatio() const {return labelsToCheckRatio;} 
 
 void xLBPH::setClustersToCheck(int min, double ratio) {
     minClustersToCheck = min;
     clustersToCheckRatio = ratio;
 } 
-
+int xLBPH::getClustersToCheckMin() const {return minClustersToCheck;} 
+double xLBPH::getClustersToCheckRatio() const {return clustersToCheckRatio;} 
 
 // REMOVE
 int xLBPH::getMaxThreads() const {
@@ -425,6 +458,9 @@ void xLBPH::setAlgToUse(int alg) {
     _algToUse = alg; 
 }
 
+int getAlgUsed() const {
+    return _algToUse;
+} 
 
 //------------------------------------------------------------------------------
 // Model Path and Model File Getters/Setters 
