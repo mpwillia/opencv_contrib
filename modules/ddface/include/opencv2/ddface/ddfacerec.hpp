@@ -85,7 +85,7 @@ public:
     // ???: do we need this anymore?
     CV_WRAP virtual void setUseClusters(bool flag) = 0;
 
-    CV_WRAP virtual void load() = 0;
+    CV_WRAP virtual bool load() = 0;
 
 
     // Core Prediction Algorithms

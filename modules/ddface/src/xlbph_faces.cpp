@@ -274,7 +274,7 @@ public:
     // See FaceRecognizer::load.
     void load(const FileStorage& fs);
     void load(const String &filename);
-    void load();
+    bool load();
 
     // See FaceRecognizer::save.
     void save(FileStorage& fs) const;
@@ -284,7 +284,7 @@ public:
     CV_IMPL_PROPERTY(int, Radius, _radius)
     CV_IMPL_PROPERTY(int, Neighbors, _neighbors)
     CV_IMPL_PROPERTY(double, Threshold, _threshold)
-   
+        
     // path getters/setters
     // REMOVE: All of these should be abstracted away by ModelStorage and there
     //         is no reason an external class should be dipping into the model
@@ -988,7 +988,11 @@ void xLBPH::clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &cl
 // Standard Functions and File IO
 //------------------------------------------------------------------------------
 // TODO: Updated for modelstorage 
-void xLBPH::load() {
+bool xLBPH::load() {
+    
+    if(!_model.isValidModel()) {
+        return false; 
+    } 
 
     AlgSettings alg;
     _model.loadMetadata(alg, _labelinfo);
@@ -1001,6 +1005,8 @@ void xLBPH::load() {
     _model.mmapLabelHistograms(_labelinfo, _histograms);
     _model.mmapLabelAverages(_labelinfo, _histavgs);
     _model.mmapClusters(_labelinfo, _clusters);
+
+    return true;
 
     /*
     // load data from the info file
