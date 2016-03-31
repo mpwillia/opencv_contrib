@@ -88,11 +88,6 @@ private:
     // still useful for setting max TBB threads
     int _maxThreads;
     
-    // REMOVE: don't need
-    int getMaxThreads() const;
-    int getLabelThreads() const; // threads that iterate through labels
-    int getHistThreads() const; // threads that iterate through histograms
-
     //--------------------------------------------------------------------------
     // Model Training Function
     //--------------------------------------------------------------------------
@@ -223,7 +218,6 @@ public:
                 _threshold(threshold),
                 _model(modelpath, radius_, neighbors_, gridx, gridy) {
 
-        _numThreads = 16;
         _algToUse = 0;
         _useClusters = true;
         _maxThreads = tbb::task_scheduler_init::automatic;
@@ -247,7 +241,6 @@ public:
                 _neighbors(neighbors_),
                 _threshold(threshold),
                 _model(modelpath, radius_, neighbors_, gridx, gridy) {
-        _numThreads = 16;
         _algToUse = 0;
         _useClusters = true;
         _maxThreads = tbb::task_scheduler_init::automatic;
@@ -449,28 +442,6 @@ void xLBPH::setClustersToCheck(int min, double ratio) {
 } 
 int xLBPH::getClustersToCheckMin() const {return minClustersToCheck;} 
 double xLBPH::getClustersToCheckRatio() const {return clustersToCheckRatio;} 
-
-// REMOVE
-int xLBPH::getMaxThreads() const {
-    return _numThreads; 
-}
-
-// REMOVE
-int xLBPH::getLabelThreads() const {
-    int threads = (int)floor(sqrt(_numThreads));
-    return threads <= 0 ? 1 : threads;
-}
-
-// REMOVE
-int xLBPH::getHistThreads() const {
-    int threads = (int)ceil(sqrt(_numThreads));
-    return threads <= 0 ? 1 : threads;
-}
-
-// REMOVE
-void xLBPH::setNumThreads(int numThreads) {
-    _numThreads = numThreads; 
-}
 
 
 void xLBPH::setAlgToUse(int alg) {
