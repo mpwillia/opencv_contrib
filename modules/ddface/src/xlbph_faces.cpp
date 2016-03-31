@@ -634,7 +634,7 @@ void xLBPH::test() {
                         long sum = 0;
                         while(twiceVal > 0) {
                             sum += twiceVal;
-                            twiceVal--;
+                            twiceVal = (int)((twiceVal / 4) - 1);
                         } 
                         threadSum += sum;
                     } 
