@@ -74,6 +74,8 @@ private:
     int _algToUse;
     
     bool _useClusters;
+    
+    int _maxThreads;
 
     //--------------------------------------------------------------------------
     // Multithreading
@@ -86,8 +88,8 @@ private:
     void performMultithreadedComp(const Q &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const Q &query, const std::vector<S> &src, std::vector<D> &dst) const) const;
     
     // still useful for setting max TBB threads
-    int _maxThreads;
     
+
     //--------------------------------------------------------------------------
     // Model Training Function
     //--------------------------------------------------------------------------
@@ -241,6 +243,7 @@ public:
                 _neighbors(neighbors_),
                 _threshold(threshold),
                 _model(modelpath, radius_, neighbors_, gridx, gridy) {
+
         _algToUse = 0;
         _useClusters = true;
         _maxThreads = tbb::task_scheduler_init::automatic;
@@ -910,6 +913,7 @@ void xLBPH::clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &cl
 
     int count = 0;
     bool fail = false;
+
     tbb::parallel_for_each(_histograms.begin(), _histograms.end(), 
         [&](std::pair<int, std::vector<Mat>> it) {
     //for(std::map<int, std::vector<Mat>>::const_iterator it = _histograms.begin(); it != _histograms.end(); it++) {
@@ -1445,6 +1449,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
     std::vector<int> uniqueLabels;
     std::vector<int> numhists;
+    tbb::task_scheduler_init init(_maxThreads);
 
     // start training
     if(preserveData)
@@ -1836,6 +1841,7 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
 
     //printf("Calling prediction algorithm...\n");
     tbb::concurrent_vector<std::pair<double, int>> bestpreds;
+    tbb::task_scheduler_init init(_maxThreads);
     switch(_algToUse) {
         case 1: predict_avg(query, bestpreds, labels); break;
         case 2: predict_avg_clustering(query, bestpreds, labels); break;
@@ -1874,6 +1880,7 @@ void xLBPH::predictAll(std::vector<Mat> &_src, std::vector<Mat> &_preds, int num
     
     // begin prediction
     tbb::concurrent_vector<Mat> allPreds;
+    tbb::task_scheduler_init init(_maxThreads);
     tbb::parallel_for_each(images.begin(), images.end(),
         [&allPreds, &_labels, &numPreds, this](Mat image) {
 
