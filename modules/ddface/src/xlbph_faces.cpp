@@ -1464,7 +1464,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
     std::vector<int> uniqueLabels;
     std::vector<int> numhists;
-    task_scheduler_init init(_maxThreads);
+    tbb::task_scheduler_init init(_maxThreads);
 
     // start training
     if(preserveData)
@@ -1849,7 +1849,7 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
 
 
     //printf("Calling prediction algorithm...\n");
-    task_scheduler_init init(_maxThreads);
+    tbb::task_scheduler_init init(_maxThreads);
     tbb::concurrent_vector<std::pair<double, int>> bestpreds;
     switch(_algToUse) {
         case 1: predict_avg(query, bestpreds, labels); break;
