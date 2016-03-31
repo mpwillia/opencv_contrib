@@ -569,106 +569,43 @@ bool checkStr(String expected, String got) {
 void xLBPH::test() {
 
     printf(" -=### Running xLBPH Tests ###=- \n");
-    
-    _model.test();
-    printf("\n\n");
-
-    String goodpath = "/dd-data/models/xlbph-test";
-    ModelStorage goodmodel(goodpath, 1, 8, 12, 12);
-
-    String badpath = "/dd-data/models/xlbph-test-bad-model";
-    ModelStorage badmodel(badpath, 1, 8, 12, 12);
-
-    String badpath2 = "/dd-data/videos/aws-test";
-    ModelStorage badmodel2(badpath2, 1, 8, 12, 12);
-
-    printf(" -==## Testing Model Storage Member Functions ##==- \n");
-    printf("== Testing Model Information Functions == \n");
-    printf(" - getModelPath\n");
-    checkStr(_modelpath, _model.getPath());
-    checkStr(goodpath, goodmodel.getPath());
-    checkStr(badpath, badmodel.getPath());
-    checkStr(badpath2, badmodel2.getPath());
-    printf("\n");
-    
-    printf(" - getModelName\n");
-    checkStr(_modelname, _model.getName());
-    checkStr("xlbph-test", goodmodel.getName());
-    checkStr("xlbph-test-bad-model", badmodel.getName());
-    checkStr("aws-test", badmodel2.getName());
-    printf("\n");
-
-    printf(" - modelExists\n");
-    checkBool(true, _model.exists());
-    checkBool(true, goodmodel.exists());
-    checkBool(false, badmodel.exists());
-    checkBool(true, badmodel2.exists());
-    printf("\n");
-
-    printf(" - isValidModel\n");
-    checkBool(true, _model.isValidModel());
-    checkBool(true, goodmodel.isValidModel());
-    checkBool(false, badmodel.isValidModel());
-    checkBool(false, badmodel2.isValidModel());
-    printf("\n");
-
-    printf("== Testing Model File Getters (new) Functions == \n");
-    printf(" - getLabelHistogramsFile()\n");
-    checkStr(_model.getPath() + "/" + _model.getName() + "-labels/" + _model.getName() + "-label-12/" + _model.getName() + "-label-12-histograms.bin", _model.getLabelHistogramsFile(12));
-    checkStr("/dd-data/models/xlbph-test/xlbph-test-labels/xlbph-test-label-12/xlbph-test-label-12-histograms.bin", goodmodel.getLabelHistogramsFile(12));
-    printf("\n");
-
-    printf("== Testing Model Creation/Manipulation Functions == \n");
-    String testpath = "/dd-data/models/xlbph-model-storage-test";
-    ModelStorage testmodel(testpath, -1, -1, -1, -1);
-
-    printf(" - create\n");
-    testmodel.create();
-
-    AlgSettings testalg = {1, 8, 12, 12};
-
-    std::map<int, int> testlabelinfo;
-    testlabelinfo[1] = 11;
-    testlabelinfo[2] = 22;
-    testlabelinfo[3] = 33;
-    testlabelinfo[4] = 44;
-    testlabelinfo[5] = 55;
-
-    printf(" - getAlgSettings - pre write/load\n");
-    AlgSettings algPreLoad = testmodel.getAlgSettings();
-    printf("algPreLoad.: {%d, %d, %d, %d}\n", algPreLoad.radius, algPreLoad.neighbors, algPreLoad.grid_x, algPreLoad.grid_y);
-    printf("\n");
-
-    printf(" - writeMetadata\n");
-    testmodel.writeMetadata(testalg, testlabelinfo);
-    
-
-    printf(" - loadMetadata\n");
-    AlgSettings algLoad;
-    std::map<int,int> testlabelinfoLoad;
-    testmodel.loadMetadata(algLoad, testlabelinfoLoad);
-    printf("algLoad.: {%d, %d, %d, %d}\n", algLoad.radius, algLoad.neighbors, algLoad.grid_x, algLoad.grid_y);
-    printf("testlabelinfoLoad:\n");
-    for(std::map<int,int>::const_iterator it = testlabelinfoLoad.begin(); it != testlabelinfoLoad.end(); it++) {
-        printf("  [%d] = %d\n", it->first, it->second);
+    printf(" - Testing TBB Max Threads Control\n");
+    const int numValues = 10000;
+    printf(" - Setting up test...\n", numValues);
+    tbb::concurrent_vector<int> values;
+    for(int i = 0; i < numValues; i++) {
+        values.push_back(i);
     }
-    printf("\n");
-
-
-    printf(" - getAlgSettings - post write/load\n");
-    AlgSettings algPostLoad = testmodel.getAlgSettings();
-    printf("algPostLoad.: {%d, %d, %d, %d}\n", algPostLoad.radius, algPostLoad.neighbors, algPostLoad.grid_x, algPostLoad.grid_y);
-    printf("\n");
-
     
-    
+    printf(" - Starting test...\n", numValues);
+    int n = task_scheduler_init::default_num_threads();
+    printf("Default Num Threads: %d\n", n);
 
-    printf("\n");
-    printf(" !! End of Member Functions Tests !!\n");
-    printf("\n");
-    
-    printf("\n");
-    printf("\n");
+    for( int p=1; p<=n; ++p ) {
+        printf("\rTesting with %d threads...", p);
+        // Construct task scheduler with p threads
+        task_scheduler_init init(p);
+        tick_count t0 = tick_count::now();
+        
+        tbb::atomic<long> globalSum;
+        tbb::parallel_for_each(values.begin(), values.end(),
+            [&](int val) {
+                long sum = 0;
+                while(val > 0) {
+                    sum++;
+                    val--;
+                }
+
+                globalSum.fetch_and_add(sum);
+            }
+        );
+
+        tick_count t1 = tick_count::now();
+        double t = (t1-t0).seconds();
+        printf("With %d threads time = %.3f   \n", p, t);
+         // Implicitly destroy task scheduler.
+    }
+
 }
 
 
