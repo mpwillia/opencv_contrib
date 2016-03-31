@@ -578,14 +578,14 @@ void xLBPH::test() {
     }
     
     printf(" - Starting test...\n", numValues);
-    int n = task_scheduler_init::default_num_threads();
+    int n = tbb::task_scheduler_init::default_num_threads();
     printf("Default Num Threads: %d\n", n);
 
     for( int p=1; p<=n; ++p ) {
         printf("\rTesting with %d threads...", p);
         // Construct task scheduler with p threads
-        task_scheduler_init init(p);
-        tick_count t0 = tick_count::now();
+        tbb::task_scheduler_init init(p);
+        tbb::tick_count t0 = tick_count::now();
         
         tbb::atomic<long> globalSum;
         tbb::parallel_for_each(values.begin(), values.end(),
@@ -600,7 +600,7 @@ void xLBPH::test() {
             }
         );
 
-        tick_count t1 = tick_count::now();
+        tick_count t1 = tbb::tick_count::now();
         double t = (t1-t0).seconds();
         printf("With %d threads time = %.3f   \n", p, t);
          // Implicitly destroy task scheduler.
