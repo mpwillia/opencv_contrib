@@ -47,8 +47,6 @@ public:
     CV_WRAP virtual String getHistogramFile(int label) const = 0;
     CV_WRAP virtual String getHistogramAveragesFile() const = 0;
     
-    // REMOVE: no longer needed since we use TBB
-    CV_WRAP virtual void setNumThreads(int numThreads) = 0;
     
     // Prediction Algorithm Setters
     CV_WRAP virtual void setAlgToUse(int alg) = 0;

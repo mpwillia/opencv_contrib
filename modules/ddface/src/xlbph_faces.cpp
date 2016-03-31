@@ -296,8 +296,6 @@ public:
     String getHistogramFile(int label) const;
     String getHistogramAveragesFile() const;
 
-    // REMOVE: no longer needed since we use TBB
-    void setNumThreads(int numThreads);
 
     //--------------------------------------------------------------------------
     // Additional Public Functions 
