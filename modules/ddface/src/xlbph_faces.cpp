@@ -351,6 +351,8 @@ void xLBPH::setMaxThreads(int max) {
         _maxThreads = 1;
     else if(max < 0)
         _maxThreads = tbb::task_scheduler_init::automatic;
+    else if(max > tbb::task_scheduler_init::default_num_threads())
+        _maxThreads = tbb:task_scheduler_init::default_num_threads();
     else
         _maxThreads = max;
 } 
@@ -1399,7 +1401,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     }
     */
 
-    tbb::task_scheduler_init main_init(_maxThreads);
 
     std::vector<int> uniqueLabels;
     std::vector<int> numhists;
@@ -1423,7 +1424,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
               
                 tbb::concurrent_vector<Mat> concurrent_hists;
                 
-                tbb::task_scheduler_init thread_init(_maxThreads);
                 tbb::parallel_for_each(imgs.begin(), imgs.end(),
                     [&](Mat img) {
                            
@@ -1477,7 +1477,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
                 tbb::concurrent_vector<Mat> concurrent_hists;
                 
-                tbb::task_scheduler_init thread_init(_maxThreads);
                 tbb::parallel_for_each(imgs.begin(), imgs.end(),
                     [&](Mat img) {
                            
@@ -1596,7 +1595,6 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
 
     Mat query = _query.getMat();
     
-    tbb::task_scheduler_init main_init(_maxThreads);
     
     tbb::concurrent_vector<std::pair<double, int>> bestlabels;
 
@@ -1627,7 +1625,6 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
             tbb::concurrent_vector<std::pair<double, int>> clusterDists;
             
             // find the best clusters
-            tbb::task_scheduler_init thread_init(_maxThreads);
             tbb::parallel_for(0, (int)labelClusters.size(), 1,
                 [&i, &labelClusters, &clusterDists, &query](int clusterIdx) {
                     clusterDists.push_back(std::pair<double, int>(compareHist(labelClusters.at(clusterIdx).first, query, COMP_ALG), clusterIdx));
@@ -1679,7 +1676,6 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
             //std::vector<Mat> hists = it.second;
             tbb::concurrent_vector<double> dists;
 
-            tbb::task_scheduler_init thread_init(_maxThreads);
             tbb::parallel_for_each(hists.begin(), hists.end(), 
                 [&labeldists, &dists, &query](Mat hist) {
                     dists.push_back(compareHist(hist, query, COMP_ALG));
@@ -1703,7 +1699,6 @@ void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std
 void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const {
     Mat query = _query.getMat();
 
-    tbb::task_scheduler_init main_init(_maxThreads);
     
     tbb::concurrent_vector<std::pair<double, int>> bestlabels;
     
@@ -1734,7 +1729,6 @@ void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<doub
             tbb::concurrent_vector<double> dists;
             std::vector<Mat> hists = _histograms.at(bestlabels.at(i).second);
 
-            tbb::task_scheduler_init thread_init(_maxThreads);
             tbb::parallel_for_each(hists.begin(), hists.end(),
                 [&dists, &query](Mat hist) {
                     dists.push_back(compareHist(hist, query, COMP_ALG));
@@ -1752,7 +1746,6 @@ void xLBPH::predict_avg(InputArray _query, tbb::concurrent_vector<std::pair<doub
 void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::vector<int> &labels) const {
     Mat query = _query.getMat();
 
-    tbb::task_scheduler_init main_init(_maxThreads);
     tbb::parallel_for_each(labels.begin(), labels.end(),
         [&bestpreds, &query, this](int label) {
             if(_histograms.find(label) != _histograms.end()) {
@@ -1760,7 +1753,6 @@ void xLBPH::predict_std(InputArray _query, tbb::concurrent_vector<std::pair<doub
                 
                 tbb::concurrent_vector<double> dists;
 
-                tbb::task_scheduler_init thread_init(_maxThreads);
                 tbb::parallel_for_each(hists.begin(), hists.end(), 
                     [&dists, &query](Mat hist) {
                         dists.push_back(compareHist(hist, query, COMP_ALG));
