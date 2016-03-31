@@ -572,7 +572,7 @@ void xLBPH::test() {
 
     printf(" -=### Running xLBPH Tests ###=- \n");
     printf(" - Testing TBB Max Threads Control\n");
-    const int numValues = 10000;
+    const int numValues = 10000000;
     printf(" - Setting up test...\n", numValues);
     tbb::concurrent_vector<int> values;
     for(int i = 0; i < numValues; i++) {
