@@ -352,7 +352,7 @@ void xLBPH::setMaxThreads(int max) {
     else if(max < 0)
         _maxThreads = tbb::task_scheduler_init::automatic;
     else if(max > tbb::task_scheduler_init::default_num_threads())
-        _maxThreads = tbb:task_scheduler_init::default_num_threads();
+        _maxThreads = tbb::task_scheduler_init::default_num_threads();
     else
         _maxThreads = max;
 } 
