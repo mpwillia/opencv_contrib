@@ -76,6 +76,7 @@ private:
     bool _useClusters;
     
     int _maxThreads;
+    tbb::task_scheduler_init _task_scheduler;
 
     //--------------------------------------------------------------------------
     // Multithreading
@@ -223,6 +224,7 @@ public:
         _algToUse = 0;
         _useClusters = true;
         _maxThreads = tbb::task_scheduler_init::automatic;
+        _task_scheduler = new _task_scheduler(_maxThreads);
         setModelPath(modelpath);
     }
 
@@ -247,6 +249,7 @@ public:
         _algToUse = 0;
         _useClusters = true;
         _maxThreads = tbb::task_scheduler_init::automatic;
+        _task_scheduler = new _task_scheduler(_maxThreads);
         setModelPath(modelpath);
         train(src, labels);
     }
@@ -358,6 +361,13 @@ void xLBPH::setMaxThreads(int max) {
         _maxThreads = tbb::task_scheduler_init::default_num_threads();
     else
         _maxThreads = max;
+
+    _task_scheduler.terminate();
+    if(!_task_scheduler.isActive()) {
+        delete _task_scheduler;
+        printf("created new task scheduler\n");
+        _task_scheduler = new _task_scheduler(_maxThreads);
+    }
 } 
 
 int xLBPH::getMaxThreads() const {
@@ -1841,7 +1851,6 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
 
     //printf("Calling prediction algorithm...\n");
     tbb::concurrent_vector<std::pair<double, int>> bestpreds;
-    tbb::task_scheduler_init init(_maxThreads);
     switch(_algToUse) {
         case 1: predict_avg(query, bestpreds, labels); break;
         case 2: predict_avg_clustering(query, bestpreds, labels); break;
@@ -1880,7 +1889,6 @@ void xLBPH::predictAll(std::vector<Mat> &_src, std::vector<Mat> &_preds, int num
     
     // begin prediction
     tbb::concurrent_vector<Mat> allPreds;
-    tbb::task_scheduler_init init(_maxThreads);
     tbb::parallel_for_each(images.begin(), images.end(),
         [&allPreds, &_labels, &numPreds, this](Mat image) {
 
