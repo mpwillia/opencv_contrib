@@ -82,6 +82,10 @@ public:
     CV_WRAP virtual int getNumClusters(int label) const = 0;
 
 
+    // Threading Setters/Getters
+    CV_WRAP virtual void setMaxThreads(int max) = 0;
+    CV_WRAP virtual int getMaxThreads() const = 0;
+
     // ???: do we need this anymore?
     CV_WRAP virtual void setUseClusters(bool flag) = 0;
 

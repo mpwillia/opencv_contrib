@@ -23,6 +23,7 @@
 #include "modelstorage.hpp"
 
 #include "tbb/tbb.h"
+#include "tbb/task_scheduler_init.h"
 
 #include <cmath>
 #include <cstdio>
@@ -76,14 +77,18 @@ private:
 
     //--------------------------------------------------------------------------
     // Multithreading
+    // REMOVE: we're usig TBB now don't need most of this
     //--------------------------------------------------------------------------
+    // REMOVE: dont need custom dispatchers
     template <typename S, typename D>
     void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const;
     template <typename Q, typename S, typename D>
     void performMultithreadedComp(const Q &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const Q &query, const std::vector<S> &src, std::vector<D> &dst) const) const;
     
-    int _numThreads;
-
+    // still useful for setting max TBB threads
+    int _maxThreads;
+    
+    // REMOVE: don't need
     int getMaxThreads() const;
     int getLabelThreads() const; // threads that iterate through labels
     int getHistThreads() const; // threads that iterate through histograms
@@ -221,6 +226,7 @@ public:
         _numThreads = 16;
         _algToUse = 0;
         _useClusters = true;
+        _maxThreads = tbb::task_scheduler_init::automatic;
         setModelPath(modelpath);
     }
 
@@ -244,6 +250,7 @@ public:
         _numThreads = 16;
         _algToUse = 0;
         _useClusters = true;
+        _maxThreads = tbb::task_scheduler_init::automatic;
         setModelPath(modelpath);
         train(src, labels);
     }
@@ -337,12 +344,24 @@ public:
     bool isTrainedFor(int label) const;
     int getNumHists(int label) const;
     int getNumClusters(int label) const;
-
+        
+    // Threading Setters/Getters
+    void setMaxThreads(int max);
+    int getMaxThreads() const;
 
 
     void test();
 
 };
+
+// Threading Setters/Geters
+void xLBPH::setMaxThreads(int max) {
+    _maxThreads = max;
+} 
+
+int xLBPH::getMaxThreads() const {
+    return _maxThreads; 
+} 
 
 
 // Broad Info Getters
