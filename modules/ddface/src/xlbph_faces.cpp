@@ -625,7 +625,7 @@ void xLBPH::test() {
                 tbb::concurrent_vector<long> twiceValues;
                 while(val > 0) {
                     twiceValues.push_back(val + val);
-                    val = (int)((val / 2) - 1);
+                    val = (int)((val / 4) - 10);
                 }
                 
                 long threadSum = 0;
@@ -634,7 +634,7 @@ void xLBPH::test() {
                         long sum = 0;
                         while(twiceVal > 0) {
                             sum += twiceVal;
-                            twiceVal = (int)((twiceVal / 4) - 1);
+                            twiceVal = (int)((twiceVal / 8) - 5);
                         } 
                         threadSum += sum;
                     } 
