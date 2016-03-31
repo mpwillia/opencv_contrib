@@ -1391,41 +1391,7 @@ void xLBPH::performMultithreadedComp(const Q &query, const std::vector<S> &src, 
 //------------------------------------------------------------------------------
 // Training Functions
 //------------------------------------------------------------------------------
-// REMOVE: No longer needed since we began using TBB
-void xLBPH::calculateHistograms(const std::vector<Mat> &src, std::vector<Mat> &dst) const {
 
-    for(size_t idx = 0; idx < src.size(); idx++) {
-        Mat lbp_image = elbp(src.at(idx), _radius, _neighbors);
-
-        // get spatial histogram from this lbp image
-        Mat p = spatial_histogram(
-                lbp_image, // lbp_image
-                static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), // number of possible patterns
-                _grid_x, // grid size x
-                _grid_y, // grid size y
-                true);
-        
-        dst.push_back(p);
-    }
-}
-
-// REMOVE: No longer needed since we began using TBB
-void xLBPH::calculateLabels(const std::vector<std::pair<int, std::vector<Mat>>> &labelImages, std::vector<std::pair<int, int>> &labelinfo) const {
-    
-    for(size_t idx = 0; idx < labelImages.size(); idx++) {
-        std::cout << "\rCalculating histograms " << (int)idx << " / " << (int)labelImages.size() << "          " << std::flush;
-        int label = labelImages.at((int)idx).first;
-        std::vector<Mat> imgs = labelImages.at((int)idx).second;
-        
-        std::vector<Mat> hists;
-        performMultithreadedCalc<Mat, Mat>(imgs, hists, getHistThreads(), &xLBPH::calculateHistograms);
-
-        labelinfo.push_back(std::pair<int, int>(label, (int)hists.size()));
-        
-        writeHistograms(getHistogramFile(label), hists, false);
-    }
-    std::cout << "\nOne thread done\n";
-}
 
 
 // Main training function
@@ -1671,31 +1637,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 // Prediction Functions 
 //------------------------------------------------------------------------------
 
-//REMOVE: Don't need anymore since we began using TBB
-void xLBPH::compareHistograms(const Mat &query, const std::vector<Mat> &hists, std::vector<double> &dists) const {
-    for(size_t idx = 0; idx < hists.size(); idx++) {
-        dists.push_back(compareHist(hists.at((int)idx), query, COMP_ALG));
-    } 
-}
-
-// REMOVE: Don't need anymore since we began using TBB
-// compares a given set of labels against the given query, each label is represented as a std::pair<int, std::vector<Mat>>
-// where the int is the label and the std::vector<Mat> is that label's histograms
-// TODO: we don't need to provide the histograms for each label, we can just give the label
-// and get the histograms from our _histograms member
-// See new compareLabelWithQuery below this func
-void xLBPH::compareLabelHistograms(const Mat &query, const std::vector<std::pair<int, std::vector<Mat>>> &labelhists, std::vector<std::pair<int, std::vector<double>>> &labeldists) const {
-
-    for(size_t idx = 0; idx < labelhists.size(); idx++) {
-        int label = labelhists.at((int)idx).first;
-        std::vector<Mat> hists = labelhists.at((int)idx).second;
-        std::vector<double> dists;
-        performMultithreadedComp<Mat, Mat, double>(query, hists, dists, getHistThreads(), &xLBPH::compareHistograms);
-        std::sort(dists.begin(), dists.end());
-
-        labeldists.push_back(std::pair<int, std::vector<double>>(label, dists));
-    }
-}
 
 
 //void xLBPH::predict_avg_clustering(InputArray _query, tbb::concurrent_vector<std::pair<double, int>> &bestpreds, const std::set<int> &labels) const {
