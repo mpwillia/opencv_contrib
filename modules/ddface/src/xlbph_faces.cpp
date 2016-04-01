@@ -315,6 +315,7 @@ public:
 
 // Threading Setters/Geters
 void xLBPH::setMaxThreads(int max) {
+    /*
     if(max == 0)
         _maxThreads = 1;
     else if(max < 0)
@@ -323,13 +324,43 @@ void xLBPH::setMaxThreads(int max) {
         _maxThreads = tbb::task_scheduler_init::default_num_threads();
     else
         _maxThreads = max;
+    */ 
+    
+    // ensure max is valid 
+    if(max == 0)
+        max = 1;
+    else if(max < 0)
+        max = tbb::task_scheduler_init::automatic;
+    else if(max > tbb::task_scheduler_init::default_num_threads())
+        max = tbb::task_scheduler_init::default_num_threads();
 
+    // attempt to overwrite the old task_scheduler_init
+    if(_task_scheduler->is_active()) {
+        // if we have an active task_scheduler_init then terminate it
+        _task_scheduler->terminate();
+    }
+
+    if(!_task_scheduler->is_active()) {
+        // if the task_scheduler isn't active then we successfully stopped it
+        delete _task_scheduler;  
+        // only change max threads if we actually changed the scheduler
+        _maxThreads = max;
+        _task_scheduler = new tbb::task_scheduler_init(_maxThreads);
+        printf("Succesfully created new task scheduler with max threads of %d\n", _maxThreads);
+    } 
+    else {
+        // if the task scheduler is still active then we have a problem
+        CV_Error(Error::StsError, "Error setting new max threads, unable to terminate old task_scheduler!!!"); 
+    } 
+
+    /*
     _task_scheduler->terminate();
     if(!_task_scheduler->is_active()) {
         delete _task_scheduler;
         printf("created new task scheduler\n");
         _task_scheduler = new tbb::task_scheduler_init(_maxThreads);
     }
+    */
 } 
 
 int xLBPH::getMaxThreads() const {
