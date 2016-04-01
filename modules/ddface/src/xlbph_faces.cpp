@@ -48,40 +48,50 @@ namespace cv { namespace face {
 class xLBPH : public xLBPHFaceRecognizer
 {
 private:
-    // alg settings
+    //--------------------------------------------------------------------------
+    // Settings 
+    //--------------------------------------------------------------------------
+    // lbph alg settings
     int _grid_x;
     int _grid_y;
     int _radius;
     int _neighbors;
     double _threshold;
-    
-    // model path info
-    String _modelpath;
-    String _modelname;
-
-    ModelStorage _model;            
-
-    // label info
-    std::map<int, int> _labelinfo;
-
-    // histograms
-    std::map<int, std::vector<Mat>> _histograms;
-    std::map<int, Mat> _histavgs;
-    std::map<int, Mat> _distmats;    
-    std::map<int, std::vector<cluster::cluster_t>> _clusters;
-
+     
     // defines what prediction algorithm to use
+    // 0 - Standard
+    // 1 - Averages
+    // 2 - Averages w/ Clustering
     int _algToUse;
-    
     bool _useClusters;
     
-    int _maxThreads;
-    tbb::task_scheduler_init* _task_scheduler;
+    //--------------------------------------------------------------------------
+    // Model Data 
+    //--------------------------------------------------------------------------
+    // model path info
+    // REMOVE: _modelpath and _modelname shouldn't be needed anymore
+    String _modelpath;
+    String _modelname;
+    ModelStorage _model;            
+
+    // label info (label -> numHists)
+    std::map<int, int> _labelinfo;
+
+    // histograms (label -> list of histograms)
+    std::map<int, std::vector<Mat>> _histograms;
+    // histogram averages (label -> hist average)
+    std::map<int, Mat> _histavgs;
+    // distance matrices (label -> distance matrix for this labels hists)
+    std::map<int, Mat> _distmats;    
+    // clusters (label -> list of clusters)
+    std::map<int, std::vector<cluster::cluster_t>> _clusters;
+    
 
     //--------------------------------------------------------------------------
     // Multithreading
     //--------------------------------------------------------------------------
-    
+    int _maxThreads;
+    tbb::task_scheduler_init* _task_scheduler;
 
     //--------------------------------------------------------------------------
     // Model Training Function
@@ -122,7 +132,8 @@ private:
     //--------------------------------------------------------------------------
     // Histogram Clustering and Markov Clustering
     //--------------------------------------------------------------------------
-        
+    void clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &clusters) const;
+
     // NOTE: Both the clustering ahd MCL settings are still used
     // IDEA: Perhaps we can abstract these both away in cluster.hpp and mcl.hpp?
     // Histogram Clustering - Settings
