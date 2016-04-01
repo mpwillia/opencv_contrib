@@ -648,7 +648,7 @@ void xLBPH::test() {
         setMaxThreads(p);
         //tbb::task_scheduler_init init(p);
         tbb::tick_count t0 = tbb::tick_count::now();
-        test2();
+        test2(values);
         tbb::tick_count t1 = tbb::tick_count::now();
         double t = (t1-t0).seconds();
         printf(" -> With %d threads time = %.3f   \n", p, t);
