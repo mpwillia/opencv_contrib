@@ -200,6 +200,7 @@ private:
     bool matsEqual(const Mat &a, const Mat &b) const;
     void averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const;
 
+    void test2();
 
 public:
     using FaceRecognizer::save;
@@ -581,6 +582,22 @@ bool checkStr(String expected, String got) {
     return result;
 } 
 
+
+void xLBPH::test2(const tbb::concurrent_vector<int> values&) {
+    tbb::atomic<long> globalSum;
+    tbb::parallel_for_each(values.begin(), values.end(),
+        [&](int val) {
+            long sum = 0;
+            while(val > 0) {
+                sum++;
+                val--;
+            }
+
+            globalSum.fetch_and_add(sum);
+        }
+    );
+}
+
 void xLBPH::test() {
 
     printf(" -=### Running xLBPH Tests ###=- \n");
@@ -623,12 +640,29 @@ void xLBPH::test() {
     }
     printf("\n");
 
+
+    printf("=== Testing TBB Max Threads Control - Calling Another Multithreaded Function\n");
+    for(int p=1; p<=n; ++p ) {
+        printf("Testing with %d threads...", p);
+        // Construct task scheduler with p threads
+        setMaxThreads(p);
+        //tbb::task_scheduler_init init(p);
+        tbb::tick_count t0 = tbb::tick_count::now();
+        test2();
+        tbb::tick_count t1 = tbb::tick_count::now();
+        double t = (t1-t0).seconds();
+        printf(" -> With %d threads time = %.3f   \n", p, t);
+         // Implicitly destroy task scheduler.
+    }
+    printf("\n");
+
+
     printf("=== Testing TBB Nested Max Threads Control\n");
     printf(" - Starting test...\n", numValues);
     printf("Default Num Threads: %d\n", n);
 
     for(int p=1; p<=n; ++p ) {
-        printf("\rTesting with %d threads...", p);
+        printf("Testing with %d threads...", p);
         // Construct task scheduler with p threads
         //tbb::task_scheduler_init init(p);
         setMaxThreads(p);
