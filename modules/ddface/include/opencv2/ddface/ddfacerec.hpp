@@ -42,11 +42,13 @@ public:
     CV_WRAP virtual void setModelPath(String modelpath) = 0;
     CV_WRAP virtual String getModelPath() const = 0; 
     CV_WRAP virtual String getModelName() const = 0;
+    /*
     CV_WRAP virtual String getInfoFile() const = 0; 
     CV_WRAP virtual String getHistogramsDir() const = 0;
     CV_WRAP virtual String getHistogramFile(int label) const = 0;
     CV_WRAP virtual String getHistogramAveragesFile() const = 0;
-    
+    */
+
     
     // Prediction Algorithm Setters
     CV_WRAP virtual void setAlgToUse(int alg) = 0;

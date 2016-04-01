@@ -80,15 +80,7 @@ private:
 
     //--------------------------------------------------------------------------
     // Multithreading
-    // REMOVE: we're usig TBB now don't need most of this
     //--------------------------------------------------------------------------
-    // REMOVE: dont need custom dispatchers
-    template <typename S, typename D>
-    void performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const;
-    template <typename Q, typename S, typename D>
-    void performMultithreadedComp(const Q &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const Q &query, const std::vector<S> &src, std::vector<D> &dst) const) const;
-    
-    // still useful for setting max TBB threads
     
 
     //--------------------------------------------------------------------------
@@ -120,24 +112,6 @@ private:
     double clustersToCheckRatio = 0.20;
 
 
-    //--------------------------------------------------------------------------
-    // Managing Histogram Binary Files 
-    // REMOVE: None of this sshould really be needed anymore 
-    //         it should all be abstracted away with ModelStorage
-    //--------------------------------------------------------------------------
-    // Reading/Writing Histogram Files
-    bool readHistograms(const String &filename, std::vector<Mat> &histograms) const;
-    bool writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const;
-    
-    // Saving/Loading/Updating Histogram File by Label
-    bool saveHistograms(int label, const std::vector<Mat> &histograms) const;
-    bool updateHistograms(int label, const std::vector<Mat> &histrograms) const;
-    bool loadHistograms(int label, std::vector<Mat> &histograms) const;
-   
-    // Memory mapping histograms
-    void mmapHistograms();
-    void munmapHistograms();
-
     
     //--------------------------------------------------------------------------
     // Data Management Strategy/Technique Functions
@@ -145,36 +119,10 @@ private:
     // Histogram Averages
     void calcHistogramAverages(std::vector<Mat> &histavgs) const;
 
-    // REMOVE: Multithreading handled by TBB now
-    void calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) const;
-
-    // REMOVE: mmaping and loading should now be handled by ModelStorage
-    bool loadHistogramAverages(std::map<int, Mat> &histavgs) const;
-    void mmapHistogramAverages();
-
     //--------------------------------------------------------------------------
     // Histogram Clustering and Markov Clustering
-    // REMOVE: All of the clustering should now be in cluster.hpp and mcl.hpp
-    //         where cluster.hpp is the main entry/exit point for clustering
-    //         and mcl.hpp is the core MCL clustering algorithm. 
-    //         cluster.hpp wraps mcl.hpp and hsould in theory be able to support
-    //         aditional clustering algorithms without changing the entry/exit headers.
     //--------------------------------------------------------------------------
-    void clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &clusters) const;
-    void cluster_calc_weights(Mat &dists, Mat &weights, double tierStep, int numTiers);
-    void cluster_dists(Mat &dists, Mat &mclmat, double r);
-    void cluster_interpret(Mat &mclmat, std::vector<std::set<int>> &clusters);
-    double cluster_ratio(std::vector<std::set<int>> &clusters);
-    void cluster_find_optimal(Mat &dists, std::vector<std::set<int>> &clusters);
-    
-    void cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>>> &matClusters);
-    //void cluster_label(int label, std::vector<std::set<int>> &clusters);
-
-    //void cluster_label(int label, std::vector<std::pair<Mat, std::vector<Mat>>> &clusters);
         
-    // NOTE: This could still be useful
-    void printMat(const Mat &mat, int label) const;
-    
     // NOTE: Both the clustering ahd MCL settings are still used
     // IDEA: Perhaps we can abstract these both away in cluster.hpp and mcl.hpp?
     // Histogram Clustering - Settings
@@ -199,6 +147,7 @@ private:
     int getHistogramSize() const;
     bool matsEqual(const Mat &a, const Mat &b) const;
     void averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const;
+    void printMat(const Mat &mat, int label) const;
 
     void test2(const tbb::concurrent_vector<int> &values);
 
@@ -298,11 +247,12 @@ public:
     void setModelPath(String modelpath);
     String getModelPath() const;
     String getModelName() const;
+    /*
     String getInfoFile() const;
     String getHistogramsDir() const;
     String getHistogramFile(int label) const;
     String getHistogramAveragesFile() const;
-
+    */
 
     //--------------------------------------------------------------------------
     // Additional Public Functions 
@@ -421,8 +371,6 @@ int xLBPH::getNumClusters(int label) const {
         return -1;
 } 
 
-// predicion Algorithm Getters
-
 
 
 // Prediction Algorithm Setters/Getters
@@ -513,6 +461,7 @@ String xLBPH::getModelName() const {
     return _modelname;
 } 
 
+/*
 // TODO: Replace with modelstorage
 String xLBPH::getInfoFile() const {
     return getModelPath() + "/" + getModelName() + ".yml";
@@ -534,6 +483,7 @@ String xLBPH::getHistogramFile(int label) const {
 String xLBPH::getHistogramAveragesFile() const {
     return getHistogramsDir() + "/" + getModelName() + "-averages.bin";
 }
+*/
 
 //------------------------------------------------------------------------------
 // Additional Functions and File IO
@@ -709,68 +659,6 @@ int xLBPH::getHistogramSize() const {
     return (int)(std::pow(2.0, static_cast<double>(_neighbors)) * _grid_x * _grid_y);
 }
 
-// TODO: Replace with modelstorage
-bool xLBPH::exists(const String &filepath) const {
-    struct stat buffer;   
-    return (stat (filepath.c_str(), &buffer) == 0);   
-}
-
-
-// TODO: Replace with modelstorage
-// Wrapper functions for load/save/updating histograms for specific labels
-bool xLBPH::loadHistograms(int label, std::vector<Mat> &histograms) const {
-    return readHistograms(getHistogramFile(label), histograms);
-}
-
-bool xLBPH::saveHistograms(int label, const std::vector<Mat> &histograms) const {
-    return writeHistograms(getHistogramFile(label), histograms, false);
-}
-
-bool xLBPH::updateHistograms(int label, const std::vector<Mat> &histograms) const {
-    return writeHistograms(getHistogramFile(label), histograms, true);
-}
-
-
-// TODO: Replace with modelstorage
-// Main read/write functions for histograms
-bool xLBPH::readHistograms(const String &filename, std::vector<Mat> &histograms) const {
-    FILE *fp = fopen(filename.c_str(), "r");
-    if(fp == NULL) {
-        //std::cout << "cannot open file at '" << filename << "'\n";
-        return false;
-    }
-    
-    float buffer[getHistogramSize()];
-    while(fread(buffer, sizeof(float), getHistogramSize(), fp) > 0) {
-        Mat hist = Mat::zeros(1, getHistogramSize(), CV_32FC1);
-        memcpy(hist.ptr<float>(), buffer, getHistogramSize() * sizeof(float));
-        histograms.push_back(hist);
-    }
-    fclose(fp);
-    return true;
-}
-
-
-// TODO: Replace with modelstorage
-bool xLBPH::writeHistograms(const String &filename, const std::vector<Mat> &histograms, bool appendhists) const {
-    FILE *fp = fopen(filename.c_str(), (appendhists == true ? "a" : "w"));
-    if(fp == NULL) {
-        //std::cout << "cannot open file at '" << filename << "'\n";
-        return false;
-    }
-
-    float* buffer = new float[getHistogramSize() * (int)histograms.size()];
-    for(size_t sampleIdx = 0; sampleIdx < histograms.size(); sampleIdx++) {
-        float* writeptr = buffer + ((int)sampleIdx * getHistogramSize());
-        memcpy(writeptr, histograms.at((int)sampleIdx).ptr<float>(), getHistogramSize() * sizeof(float));
-    }
-    fwrite(buffer, sizeof(float), getHistogramSize() * (int)histograms.size(), fp);
-    delete buffer;
-
-    fclose(fp);
-    return true;
-}
-
 void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const {
     histavg = Mat::zeros(1, getHistogramSize(), CV_64FC1);
 
@@ -783,14 +671,6 @@ void xLBPH::averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const
     histavg.convertTo(histavg, CV_32FC1);
 }
 
-// REMOVE: Don't need since we started using TBB
-void xLBPH::calcHistogramAverages_thread(const std::vector<int> &labels, std::vector<Mat> &avgsdst) const {
-    for(size_t idx = 0; idx < labels.size(); idx++) {
-        Mat histavg;
-        averageHistograms(_histograms.at(labels.at(idx)), histavg);
-        avgsdst.push_back(histavg);
-    } 
-}
 
 void xLBPH::calcHistogramAverages(std::vector<Mat> &histavgs) const {
     
@@ -834,79 +714,6 @@ void xLBPH::calcHistogramAverages(std::vector<Mat> &histavgs) const {
     //return writeHistograms(getHistogramAveragesFile(), averages, false);
 }
 
-// TODO: Replace with modelstorage
-bool xLBPH::loadHistogramAverages(std::map<int, Mat> &histavgs) const {
-    
-    std::vector<Mat> hists;
-    if(readHistograms(getHistogramAveragesFile(), hists) != true)
-        return false;
-    
-    int histIdx = 0;
-    for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
-        histavgs[it->first] = hists.at(histIdx++);
-    }
-
-    return true;
-}
-
-// TODO: Replace with modelstorage
-void xLBPH::mmapHistogramAverages() {
-    
-    std::cout << "loading histogram averages...\n";
-    _histavgs.clear();
-    String filename = getHistogramAveragesFile();
-    int fd = open(filename.c_str(), O_RDONLY);
-    if(fd < 0)
-        CV_Error(Error::StsError, "Cannot open histogram file '"+filename+"'");
-
-    unsigned char* mapPtr = (unsigned char*)mmap(NULL, getHistogramSize() * (int)_labelinfo.size() * SIZEOF_CV_32FC1, PROT_READ, MAP_PRIVATE, fd, 0);
-    if(mapPtr == MAP_FAILED)
-        CV_Error(Error::StsError, "Cannot mem map file '"+filename+"'");
-    
-    int idx = 0;
-    for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
-        Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * SIZEOF_CV_32FC1 * idx));
-        _histavgs[it->first] = mat;
-        idx++;
-    }
-
-    //std::cout << "test: " << matToHex(_histograms.at(2).at(0)) << "\n";
-} 
-
-
-//------------------------------------------------------------------------------
-// Histogram Memory Mapping
-//------------------------------------------------------------------------------
-// TODO: Replace with modelstorage
-void xLBPH::mmapHistograms() {
-
-    //_histograms = std::map<int, std::vector<Mat>>();
-    std::cout << "loading histograms...\n";
-    _histograms.clear();
-    for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); ++it) {
-        // map histogram
-        String filename = getHistogramFile(it->first);
-        int fd = open(filename.c_str(), O_RDONLY);
-        if(fd < 0)
-            CV_Error(Error::StsError, "Cannot open histogram file '"+filename+"'");
-
-        unsigned char* mapPtr = (unsigned char*)mmap(NULL, getHistogramSize() * it->second * SIZEOF_CV_32FC1, PROT_READ, MAP_PRIVATE, fd, 0);
-        if(mapPtr == MAP_FAILED)
-            CV_Error(Error::StsError, "Cannot mem map file '"+filename+"'");
-
-        // make matricies
-        for(int i = 0; i < it->second; i++) {
-            Mat mat(1, getHistogramSize(), CV_32FC1, mapPtr + (getHistogramSize() * SIZEOF_CV_32FC1 * i));
-            _histograms[it->first].push_back(mat);
-        }
-
-    }
-
-}
-
-void xLBPH::munmapHistograms() {
-     
-}
 
 //------------------------------------------------------------------------------
 // Clustering Functions
@@ -1010,7 +817,6 @@ void xLBPH::clusterHistograms(std::map<int, std::vector<cluster::cluster_t>> &cl
 //------------------------------------------------------------------------------
 // Standard Functions and File IO
 //------------------------------------------------------------------------------
-// TODO: Updated for modelstorage 
 bool xLBPH::load() {
     
     if(!_model.isValidModel()) {
@@ -1031,41 +837,9 @@ bool xLBPH::load() {
 
     return true;
 
-    /*
-    // load data from the info file
-    std::cout << "loading info file...\n";
-    FileStorage infofile(getInfoFile(), FileStorage::READ);
-    if (!infofile.isOpened())
-        CV_Error(Error::StsError, "File '"+getInfoFile()+"' can't be opened for reading!");
-    
-    // alg settings
-    infofile["radius"] >> _radius;
-    infofile["neighbors"] >> _neighbors;
-    infofile["grid_x"] >> _grid_x;
-    infofile["grid_y"] >> _grid_y;
-    
-    // label_info
-    std::vector<int> labels;
-    std::vector<int> numhists;
-    FileNode label_info = infofile["label_info"];
-    label_info["labels"] >> labels;
-    label_info["numhists"] >> numhists;
-  
-    CV_Assert(labels.size() == numhists.size());
-    _labelinfo = std::map<int, int>(); 
-    for(size_t idx = 0; idx < labels.size(); idx++) {
-        _labelinfo[labels.at((int)idx)] = numhists.at((int)idx);
-    }
-    infofile.release();
-
-    // mem map histograms
-    mmapHistograms();
-    mmapHistogramAverages();
-    */
 }
 
 
-// TODO: Updated for modelstorage 
 void xLBPH::load(const String &modelpath) {
     
     // set our model path to the filename
@@ -1298,133 +1072,8 @@ static Mat elbp(InputArray src, int radius, int neighbors) {
 
 
 //------------------------------------------------------------------------------
-// Multithreading 
-//------------------------------------------------------------------------------
-// REMOVE: Replaced by TBB
-template <typename _Tp> static
-void splitVector(const std::vector<_Tp> &src, std::vector<std::vector<_Tp>> &dst, int numParts) {
-    int step = (int)src.size() / numParts;
-    typename std::vector<_Tp>::const_iterator start = src.begin();
-    for(int i = 0; i < numParts; i++) {
-        typename std::vector<_Tp>::const_iterator end;
-        if(i < numParts - 1) {
-            end = start + step;
-            if(end > src.end())
-                end = src.end();
-        }
-        else {
-            end = src.end(); 
-        }
-        dst.push_back(std::vector<_Tp>(start, end));
-        start += step;
-    }
-}
-
-/* performs a multithreaded calculation on the given <src> vector, putting the
- * results into the given <dst> vector. Attempts to use <numThreads> to split
- * up the <src> vector. Calls <calcFunc> to do the calculation.
- * TODO:
- * If numThreads is:
- * - (== 1 or == -1) then will simply call <calcFunc> without making a new 
- *      thread or splitting up the <src> vector 
- *      -> does not dispatch new threads
- * - (> 1) then will attempt to use <numThreads> up to _numThreads threads to 
- *      split up the <src> vector 
- *      -> will dispatch new threads unless _numThreads is set to <= 1
- * - (== 0) then will attempt to figure out an "optimal" number of threads to 
- *      use based on the size of src up to _numThreads 
- *       -> might dispatch threads, depends on input size and _numThreads, will
- *          either behave as (== 1 or == -1) or as (> 1)
- * - (< -1) then will attempt to figure out an "optimal" number of threads to
- *      use based on the size of src up to either the absolute value of 
- *      <numThreads> or up to _numThreads. For example if <numThreads> is -4 then
- *      will only use up to 4 threads.
- *       -> will dispatch new threads unless _numThreads is set to <= 1
- * 
- * If numThreads is greater than the <src> size it will be capped to the size of
- * <src>, will not try to dispatch more threads than tasks available
- */
-// REMOVE: Replaced by TBB
-template <typename S, typename D>
-void xLBPH::performMultithreadedCalc(const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*calcFunc)(const std::vector<S> &src, std::vector<D> &dst) const) const {
-    if(numThreads > (int)src.size())
-        numThreads = (int)src.size();
-
-    if(numThreads <= 0)
-        CV_Error(Error::StsBadArg, "numThreads must greater than 0!");
-    else if(numThreads == 1)
-        (this->*calcFunc)(src, dst);
-    else
-    {
-        //split src
-        std::vector<std::vector<S>> splitSrc;
-        splitVector<S>(src, splitSrc, numThreads);
-
-        //dispatch threads
-        std::vector<std::vector<D>> splitDst(numThreads, std::vector<D>(0));
-        std::vector<std::thread> threads;
-        for(int i = 0; i < numThreads; i++) {
-            threads.push_back(std::thread(calcFunc, this, std::ref(splitSrc.at(i)), std::ref(splitDst.at(i))));
-        }
-        
-        //wait for threads
-        for(size_t idx = 0; idx < threads.size(); idx++) {
-            threads.at((int)idx).join();
-        }
-        
-        //recombine splitDst 
-        for(size_t idx = 0; idx < splitDst.size(); idx++) {
-            std::vector<D> threadDst = splitDst.at((int)idx);
-            for(size_t threadidx = 0; threadidx < threadDst.size(); threadidx++) {
-                dst.push_back(threadDst.at((int)threadidx));
-            } 
-        }
-
-    }
-}
-
-// REMOVE: Repalced by TBB
-template <typename Q, typename S, typename D>
-void xLBPH::performMultithreadedComp(const Q &query, const std::vector<S> &src, std::vector<D> &dst, int numThreads, void (xLBPH::*compFunc)(const Q &query, const std::vector<S> &src, std::vector<D> &dst) const) const {
-    if(numThreads <= 0)
-        CV_Error(Error::StsBadArg, "numThreads must greater than 0!");
-    else if(numThreads == 1)
-        (this->*compFunc)(query, src, dst);
-    else
-    {
-        //split src
-        std::vector<std::vector<S>> splitSrc;
-        splitVector<S>(src, splitSrc, numThreads);
-
-        //dispatch threads
-        std::vector<std::vector<D>> splitDst(numThreads, std::vector<D>(0));
-        std::vector<std::thread> threads;
-        for(int i = 0; i < numThreads; i++) {
-            threads.push_back(std::thread(compFunc, this, std::ref(query), std::ref(splitSrc.at(i)), std::ref(splitDst.at(i))));
-        }
-        
-        //wait for threads
-        for(size_t idx = 0; idx < threads.size(); idx++) {
-            threads.at((int)idx).join();
-        }
-    
-        //recombine splitDst 
-        for(size_t idx = 0; idx < splitDst.size(); idx++) {
-            std::vector<D> threadDst = splitDst.at((int)idx);
-            for(size_t threadidx = 0; threadidx < threadDst.size(); threadidx++) {
-                dst.push_back(threadDst.at((int)threadidx));
-            } 
-        }
-
-    }
-}
-
-
-
-//------------------------------------------------------------------------------
 // Training Functions
 //------------------------------------------------------------------------------
-
 
 
 // Main training function
@@ -1467,31 +1116,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     }
     std::cout << "Organized images for " << labelImages.size() << " labels.\n";
     
-    
-    /*
-    if(!preserveData)
-    {
-        // create model directory
-        // check if the model directory already exists
-        if(exists(getModelPath())) {
-            // model directory exists
-            // check if the directory is actually a model
-            if(exists(getInfoFile()) && exists(getHistogramsDir())) {
-                // is a model dir so overwrite  
-                system(("rm -r " + getModelPath()).c_str());     
-            }
-            else {
-                // is not a model dir so error
-                CV_Error(Error::StsError, "Given model path at '" + getModelPath() +"' already exists and doesn't look like an xLBPH model directory; refusing to overwrite for data safety.");
-            }
-        }
-        
-        // create the model directories
-        system(("mkdir " + getModelPath()).c_str()); 
-        system(("mkdir " + getHistogramsDir()).c_str());
-    }
-    */
-
 
     std::vector<int> uniqueLabels;
     std::vector<int> numhists;
@@ -1539,7 +1163,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                 if(!_model.updateLabelHistograms(it.first, hists)) {
                     CV_Error(Error::StsError, "Failed to update label histograms!");
                 } 
-                //writeHistograms(getHistogramFile(it.first), hists, true);
                 hists.clear();
             }
         );
@@ -1590,7 +1213,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                 if(!_model.saveLabelHistograms(label, hists)) {
                     CV_Error(Error::StsError, "Failed to save label histograms!");
                 } 
-                //writeHistograms(getHistogramFile(label), hists, false);
             }
         );
 
@@ -1600,8 +1222,8 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
             numhists.push_back(labelInfoVec.at((int)idx).second);
         }
     }
-    
-    std::cout << "Finished calculating histograms for " << labelImages.size() << " labels.                                      \n";
+
+    printf("Finished calculating histograms for %d labels. %20s\n", labelImages.size(), " ");
 
     // set _labelinfo
     _labelinfo = std::map<int, int>(); // if _labelinfo was set then clear it
@@ -1615,25 +1237,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     if(!_model.writeMetadata(alg, _labelinfo)) {
         CV_Error(Error::StsError, "Failed to write model metadata!");
     } 
-
-    /*
-    String infofilepath(_modelpath + "/" + getModelName() + ".yml");
-    FileStorage infofile(infofilepath, FileStorage::WRITE);
-    if (!infofile.isOpened())
-        CV_Error(Error::StsError, "File can't be opened for writing!");
-
-    infofile << "radius" << _radius;
-    infofile << "neighbors" << _neighbors;
-    infofile << "grid_x" << _grid_x;
-    infofile << "grid_y" << _grid_y;
-    infofile << "numlabels" << (int)labelImages.size();
-    //infofile << "labels" << unique_labels;
-    infofile << "label_info" << "{";
-    infofile << "labels" << uniqueLabels;
-    infofile << "numhists" << numhists;
-    infofile << "}";
-    infofile.release();
-    */
 
     // Load histograms 
     _model.mmapLabelHistograms(_labelinfo, _histograms);
@@ -1650,10 +1253,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
     // Load label averages
     _model.mmapLabelAverages(_labelinfo, _histavgs);
 
-    //mmapHistograms();
-    //mmapHistogramAverages();    
-
-
     if(_useClusters) {
         std::map<int, std::vector<cluster::cluster_t>> clusters;
         clusterHistograms(clusters);
@@ -1664,8 +1263,6 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
         _model.mmapClusters(_labelinfo, _clusters);
     }
-
-    //load();
 
     std::cout << "Training complete\n";
 }
