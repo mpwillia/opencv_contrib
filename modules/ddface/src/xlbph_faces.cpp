@@ -200,7 +200,7 @@ private:
     bool matsEqual(const Mat &a, const Mat &b) const;
     void averageHistograms(const std::vector<Mat> &hists, Mat &histavg) const;
 
-    void test2(const tbb::concurrent_vector<int> values&);
+    void test2(const tbb::concurrent_vector<int> &values);
 
 public:
     using FaceRecognizer::save;
