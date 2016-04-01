@@ -583,7 +583,7 @@ bool checkStr(String expected, String got) {
 } 
 
 
-void xLBPH::test2(const tbb::concurrent_vector<int> values&) {
+void xLBPH::test2(const tbb::concurrent_vector<int> &values) {
     tbb::atomic<long> globalSum;
     tbb::parallel_for_each(values.begin(), values.end(),
         [&](int val) {
