@@ -186,6 +186,7 @@ public:
         _useClusters = true;
         _maxThreads = tbb::task_scheduler_init::automatic;
         _task_scheduler = new tbb::task_scheduler_init(_maxThreads);
+        _task_scheduler->initialize(_maxThreads);
         setModelPath(modelpath);
     }
 
@@ -211,6 +212,7 @@ public:
         _useClusters = true;
         _maxThreads = tbb::task_scheduler_init::automatic;
         _task_scheduler = new tbb::task_scheduler_init(_maxThreads);
+        _task_scheduler->initialize(_maxThreads);
         setModelPath(modelpath);
         train(src, labels);
     }
@@ -338,6 +340,7 @@ void xLBPH::setMaxThreads(int max) {
     if(_task_scheduler->is_active()) {
         // if we have an active task_scheduler_init then terminate it
         _task_scheduler->terminate();
+        printf("had to terminated active scheduler\n");
     }
 
     if(!_task_scheduler->is_active()) {
@@ -346,6 +349,7 @@ void xLBPH::setMaxThreads(int max) {
         // only change max threads if we actually changed the scheduler
         _maxThreads = max;
         _task_scheduler = new tbb::task_scheduler_init(_maxThreads);
+        _task_scheduler->initialize(_maxThreads);
         printf("Succesfully created new task scheduler with max threads of %d\n", _maxThreads);
     } 
     else {
