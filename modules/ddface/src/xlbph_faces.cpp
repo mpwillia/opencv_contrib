@@ -76,7 +76,7 @@ private:
     bool _useClusters;
     
     int _maxThreads;
-    tbb::task_scheduler_init _task_scheduler;
+    tbb::task_scheduler_init* _task_scheduler;
 
     //--------------------------------------------------------------------------
     // Multithreading
@@ -362,8 +362,8 @@ void xLBPH::setMaxThreads(int max) {
     else
         _maxThreads = max;
 
-    _task_scheduler.terminate();
-    if(!_task_scheduler.isActive()) {
+    _task_scheduler->terminate();
+    if(!_task_scheduler->isActive()) {
         delete _task_scheduler;
         printf("created new task scheduler\n");
         _task_scheduler = new _task_scheduler(_maxThreads);
