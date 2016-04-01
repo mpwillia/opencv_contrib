@@ -599,7 +599,8 @@ void xLBPH::test() {
     for(int p=1; p<=n; ++p ) {
         printf("Testing with %d threads...", p);
         // Construct task scheduler with p threads
-        tbb::task_scheduler_init init(p);
+        setMaxThreads(p);
+        //tbb::task_scheduler_init init(p);
         tbb::tick_count t0 = tbb::tick_count::now();
         
         tbb::atomic<long> globalSum;
@@ -629,7 +630,8 @@ void xLBPH::test() {
     for(int p=1; p<=n; ++p ) {
         printf("\rTesting with %d threads...", p);
         // Construct task scheduler with p threads
-        tbb::task_scheduler_init init(p);
+        //tbb::task_scheduler_init init(p);
+        setMaxThreads(p);
         tbb::tick_count t0 = tbb::tick_count::now();
         
         tbb::atomic<long> globalSum;
@@ -638,7 +640,7 @@ void xLBPH::test() {
                 tbb::concurrent_vector<long> twiceValues;
                 while(val > 0) {
                     twiceValues.push_back(val + val);
-                    val = (int)((val / 4) - 10);
+                    val = (int)((val / 16) - 10);
                 }
                 
                 long threadSum = 0;
