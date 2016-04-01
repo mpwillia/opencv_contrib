@@ -224,7 +224,7 @@ public:
         _algToUse = 0;
         _useClusters = true;
         _maxThreads = tbb::task_scheduler_init::automatic;
-        _task_scheduler = new _task_scheduler(_maxThreads);
+        _task_scheduler = new tbb::task_scheduler_init(_maxThreads);
         setModelPath(modelpath);
     }
 
@@ -249,7 +249,7 @@ public:
         _algToUse = 0;
         _useClusters = true;
         _maxThreads = tbb::task_scheduler_init::automatic;
-        _task_scheduler = new _task_scheduler(_maxThreads);
+        _task_scheduler = new tbb::task_scheduler_init(_maxThreads);
         setModelPath(modelpath);
         train(src, labels);
     }
@@ -363,10 +363,10 @@ void xLBPH::setMaxThreads(int max) {
         _maxThreads = max;
 
     _task_scheduler->terminate();
-    if(!_task_scheduler->isActive()) {
+    if(!_task_scheduler->is_active()) {
         delete _task_scheduler;
         printf("created new task scheduler\n");
-        _task_scheduler = new _task_scheduler(_maxThreads);
+        _task_scheduler = new tbb::task_scheduler_init(_maxThreads);
     }
 } 
 
