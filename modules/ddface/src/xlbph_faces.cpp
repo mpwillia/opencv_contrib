@@ -613,6 +613,7 @@ void xLBPH::test() {
         printf("Testing with %d threads...", p);
         // Construct task scheduler with p threads
         setMaxThreads(p);
+        _task_scheduler->initialize(_maxThreads);
         //tbb::task_scheduler_init init(p);
         tbb::tick_count t0 = tbb::tick_count::now();
         
