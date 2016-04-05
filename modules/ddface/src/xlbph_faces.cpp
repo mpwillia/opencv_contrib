@@ -597,7 +597,7 @@ void xLBPH::test() {
 
     printf(" -=### Running xLBPH Tests ###=- \n");
     printf("=== Testing TBB Max Threads Control\n");
-    const int numValues = 10000000;
+    const int numValues = 50000000;
     printf(" - Setting up test...\n", numValues);
     tbb::concurrent_vector<int> values;
     for(int i = 0; i < numValues; i++) {
@@ -632,6 +632,7 @@ void xLBPH::test() {
         // if the task scheduler is still active then we have a problem
         CV_Error(Error::StsError, "Error setting new max threads, unable to terminate old task_scheduler!!!"); 
     } 
+    printf("\n");
 
     printf(" - Starting up setMaxThreads(2) Logic Test \n");
     tbb::tick_count t0 = tbb::tick_count::now();
