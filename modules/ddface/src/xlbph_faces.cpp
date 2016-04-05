@@ -349,7 +349,6 @@ void xLBPH::setMaxThreads(int max) {
         // only change max threads if we actually changed the scheduler
         _maxThreads = max;
         _task_scheduler = new tbb::task_scheduler_init(_maxThreads);
-        _task_scheduler->initialize(_maxThreads);
         printf("Succesfully created new task scheduler with max threads of %d\n", _maxThreads);
     } 
     else {
@@ -604,7 +603,55 @@ void xLBPH::test() {
     for(int i = 0; i < numValues; i++) {
         values.push_back(i);
     }
-    
+
+    printf(" - Setting up setMaxThreads(2) Logic Test \n");
+    int max = 2;
+    if(max == 0)
+        max = 1;
+    else if(max < 0)
+        max = tbb::task_scheduler_init::automatic;
+    else if(max > tbb::task_scheduler_init::default_num_threads())
+        max = tbb::task_scheduler_init::default_num_threads();
+
+    // attempt to overwrite the old task_scheduler_init
+    if(_task_scheduler->is_active()) {
+        // if we have an active task_scheduler_init then terminate it
+        _task_scheduler->terminate();
+        printf("had to terminated active scheduler\n");
+    }
+
+    if(!_task_scheduler->is_active()) {
+        // if the task_scheduler isn't active then we successfully stopped it
+        delete _task_scheduler;  
+        // only change max threads if we actually changed the scheduler
+        _maxThreads = max;
+        _task_scheduler = new tbb::task_scheduler_init(_maxThreads);
+        printf("Succesfully created new task scheduler with max threads of %d\n", _maxThreads);
+    } 
+    else {
+        // if the task scheduler is still active then we have a problem
+        CV_Error(Error::StsError, "Error setting new max threads, unable to terminate old task_scheduler!!!"); 
+    } 
+
+    printf(" - Starting up setMaxThreads(2) Logic Test \n");
+    tbb::tick_count t0 = tbb::tick_count::now();
+    tbb::atomic<long> globalSum;
+    tbb::parallel_for_each(values.begin(), values.end(),
+        [&](int val) {
+            long sum = 0;
+            while(val > 0) {
+                sum++;
+                val--;
+            }
+
+            globalSum.fetch_and_add(sum);
+        }
+    );
+    tbb::tick_count t1 = tbb::tick_count::now();
+    double duration = (t1-t0).seconds();
+    printf(" -> With %d threads time = %.3f   \n", _maxThreads, duration);
+
+
     printf(" - Starting test...\n", numValues);
     int n = tbb::task_scheduler_init::default_num_threads();
     printf("Default Num Threads: %d\n", n);
@@ -613,7 +660,6 @@ void xLBPH::test() {
         printf("Testing with %d threads...", p);
         // Construct task scheduler with p threads
         setMaxThreads(p);
-        _task_scheduler->initialize(_maxThreads);
         //tbb::task_scheduler_init init(p);
         tbb::tick_count t0 = tbb::tick_count::now();
         
