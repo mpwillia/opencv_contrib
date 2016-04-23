@@ -550,7 +550,7 @@ bool ModelStorage::writeHistograms(const String &filename, const std::vector<Mat
    } 
 
    FILE *fp = fopen(filename.c_str(), (appendhists == true ? "a" : "w"));
-      if(fp == NULL) {
+   if(fp == NULL) {
       //std::cout << "cannot open file at '" << filename << "'\n";
       return false;
    }

@@ -1286,6 +1286,7 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
 
                 tbb::concurrent_vector<Mat> concurrent_hists;
                 
+                /*
                 tbb::parallel_for_each(imgs.begin(), imgs.end(),
                     [&](Mat img) {
                            
@@ -1302,7 +1303,23 @@ void xLBPH::train(InputArrayOfArrays _in_src, InputArray _in_labels, bool preser
                         concurrent_hists.push_back(p);
                     } 
                 );
-                
+                */
+
+                for(size_t idx = 0; idx < imgs.size(); idx++) {
+                    Mat lbp_image = elbp(imgs.at((int)idx), _radius, _neighbors);
+
+                    // get spatial histogram from this lbp image
+                    Mat p = spatial_histogram(
+                            lbp_image, // lbp_image
+                            static_cast<int>(std::pow(2.0, static_cast<double>(_neighbors))), // number of possible patterns
+                            _grid_x, // grid size x
+                            _grid_y, // grid size y
+                            true);
+                    
+                    concurrent_hists.push_back(p);
+
+                }
+
                 std::vector<Mat> hists(concurrent_hists.begin(), concurrent_hists.end());
                 if(!_model.saveLabelHistograms(label, hists)) {
                     CV_Error(Error::StsError, "Failed to save label histograms!");
