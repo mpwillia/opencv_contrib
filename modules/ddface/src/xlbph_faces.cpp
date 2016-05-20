@@ -1588,8 +1588,18 @@ void xLBPH::predictMulti(InputArray _src, OutputArray _preds, int numPreds, Inpu
     // Gets the list of labels to check
     Mat labelsMat = _labels.getMat();
     std::vector<int> labels;
-    for(size_t labelIdx = 0; labelIdx < labelsMat.total(); labelIdx++)
-        labels.push_back(labelsMat.at<int>((int)labelIdx));
+    if(labelsMat.total() > 0) { 
+        // we were given labels
+        for(size_t labelIdx = 0; labelIdx < labelsMat.total(); labelIdx++)
+            labels.push_back(labelsMat.at<int>((int)labelIdx));
+    }
+    else {
+        // we were not given any labels, assume everyone
+        for(std::map<int, int>::const_iterator it = _labelinfo.begin(); it != _labelinfo.end(); it++)
+            labels.push_back(it->first);
+    }
+
+
     //printf("Considering %d labels out of %d labels total...\n", (int)labels.size(), (int)_labelinfo.size());
 
 
